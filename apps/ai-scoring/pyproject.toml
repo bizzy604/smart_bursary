@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smart-bursary-ai-scoring"
+version = "0.0.0"
+description = "AI scoring service for the Smart Bursary platform"
+requires-python = ">=3.11"
+
+[tool.setuptools]
+py-modules = []

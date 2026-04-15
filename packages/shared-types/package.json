@@ -1,0 +1,16 @@
+{
+  "name": "@smart-bursary/shared-types",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsup index.ts --dts --format esm,cjs --clean",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.8.3"
+  }
+}
