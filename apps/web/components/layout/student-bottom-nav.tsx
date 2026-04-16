@@ -2,15 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { Route } from "next";
+import { studentNavigationItems } from "@/lib/student-navigation";
 import { cn } from "@/lib/utils";
-
-const navigationItems: Array<{ href: Route; label: string }> = [
-	{ href: "/dashboard", label: "Home" },
-	{ href: "/programs", label: "Programs" },
-	{ href: "/applications", label: "Applications" },
-	{ href: "/profile", label: "Profile" },
-];
 
 export function StudentBottomNav() {
 	const pathname = usePathname();
@@ -18,7 +11,7 @@ export function StudentBottomNav() {
 	return (
 		<nav className="fixed inset-x-0 bottom-0 z-40 border-t border-brand-100 bg-white/95 backdrop-blur-sm md:hidden">
 			<ul className="mx-auto grid max-w-2xl grid-cols-4">
-				{navigationItems.map((item) => {
+				{studentNavigationItems.map((item) => {
 					const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
 					return (

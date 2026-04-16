@@ -8,8 +8,8 @@ export function StudentHeader() {
 	const { county } = useCounty();
 
 	return (
-		<header className="border-b border-brand-100 bg-white/90 backdrop-blur-sm">
-			<div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+		<header className="sticky top-0 z-40 border-b border-brand-100 bg-white/95 backdrop-blur-sm">
+			<div className="flex w-full items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
 				<Link href="/dashboard" className="flex items-center gap-3">
 					<CountyLogo label={county.logoText} />
 					<div>
