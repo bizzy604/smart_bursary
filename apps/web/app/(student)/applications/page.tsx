@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { ApplicationCard } from "@/components/application/application-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
-import { applications } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 
 export default function ApplicationsPage() {
+  const { applications } = useApplication();
+
   return (
     <main className="space-y-5">
       <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">

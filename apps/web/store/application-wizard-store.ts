@@ -20,7 +20,7 @@ const defaultCompletion = (): Record<SectionSlug, boolean> => ({
 	"section-f": false,
 });
 
-type SectionDataMap = Record<SectionSlug, Record<string, unknown>>;
+type SectionDataMap = Record<SectionSlug, unknown>;
 
 interface ProgramWizardState {
 	sectionData: SectionDataMap;
@@ -31,8 +31,8 @@ interface ProgramWizardState {
 interface ApplicationWizardState {
 	programs: Record<string, ProgramWizardState>;
 	hydrateProgram: (programId: string) => void;
-	setSectionData: (programId: string, section: SectionSlug, data: Record<string, unknown>) => void;
-	getSectionData: (programId: string, section: SectionSlug) => Record<string, unknown>;
+	setSectionData: (programId: string, section: SectionSlug, data: unknown) => void;
+	getSectionData: (programId: string, section: SectionSlug) => unknown;
 	setSectionComplete: (programId: string, section: SectionSlug, complete: boolean) => void;
 	getCompletedSections: (programId: string) => SectionSlug[];
 	isSectionUnlocked: (programId: string, section: SectionSlug) => boolean;

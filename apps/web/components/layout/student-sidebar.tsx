@@ -11,12 +11,12 @@ export function StudentSidebar() {
   const { county } = useCounty();
 
   return (
-    <aside className="hidden md:block">
-      <div className="sticky top-[76px] rounded-b-2xl border border-t-0 border-brand-100 bg-white/90 p-4 shadow-xs backdrop-blur-sm">
+    <aside className="hidden md:sticky md:top-[76px] md:block md:h-[calc(100dvh-76px)] md:self-start">
+      <div className="flex h-full flex-col rounded-b-2xl border border-t-0 border-brand-100 bg-white/90 p-4 shadow-xs backdrop-blur-sm">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-county-primary">Student Navigation</p>
         <h2 className="mt-1 font-display text-lg font-semibold text-brand-900">{county.fundName}</h2>
 
-        <nav className="mt-4">
+        <nav className="mt-4 flex-1 overflow-y-auto pr-1">
           <ul className="space-y-1">
             {studentNavigationItems.map((item) => {
               const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);

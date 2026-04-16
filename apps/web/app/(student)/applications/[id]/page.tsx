@@ -7,10 +7,11 @@ import { Timeline } from "@/components/application/timeline";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
-import { getApplicationById, getTimelineForApplication } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 
 export default function ApplicationDetailPage() {
   const params = useParams<{ id: string }>();
+  const { getApplicationById, getTimelineForApplication, getProgramById } = useApplication();
   const application = getApplicationById(params.id);
 
   if (!application) {
@@ -28,6 +29,7 @@ export default function ApplicationDetailPage() {
   }
 
   const timeline = getTimelineForApplication(application.id);
+  const program = getProgramById(application.programId);
 
   return (
     <main className="space-y-6">
@@ -56,7 +58,12 @@ export default function ApplicationDetailPage() {
         </dl>
 
         <div className="mt-5 flex flex-wrap gap-2">
-          <Link href={`/applications/${application.id}/pdf`}>
+          {application.status === "DRAFT" ? (
+            <Link href={`/apply/${application.programId}`}>
+              <Button size="sm">Continue Draft</Button>
+            </Link>
+          ) : null}
+          <Link href={`/applications/${application.id}/pdf?download=true`}>
             <Button size="sm">Download PDF</Button>
           </Link>
           <Link href="/applications">
@@ -64,6 +71,23 @@ export default function ApplicationDetailPage() {
               Back to list
             </Button>
           </Link>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-info-100 bg-info-50 p-5">
+        <h2 className="font-display text-lg font-semibold text-info-700">Current Status</h2>
+        <p className="mt-2 text-sm text-info-700">
+          {application.status === "SUBMITTED"
+            ? "Your application was submitted successfully and is awaiting workflow progression. You will receive an SMS update once review starts."
+            : "Your application is currently moving through committee review. You will receive an SMS when a decision is made."}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href={`/applications/${application.id}/pdf?download=true`}>
+            <Button variant="outline" size="sm">Download application PDF</Button>
+          </Link>
+          <a href="tel:+254700000000">
+            <Button variant="ghost" size="sm">Contact ward office {program?.ward ? `(${program.ward})` : ""}</Button>
+          </a>
         </div>
       </section>
 

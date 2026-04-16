@@ -1,12 +1,15 @@
+"use client";
+
 import Link from "next/link";
 import { ApplicationCard } from "@/components/application/application-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatPercent, formatShortDate } from "@/lib/format";
-import { applications, programs } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 
 export default function DashboardPage() {
+  const { programs, applications } = useApplication();
   const activePrograms = programs.length;
   const submittedApplications = applications.filter((application) => application.status !== "DRAFT").length;
   const inReview = applications.filter((application) => application.status.includes("REVIEW")).length;

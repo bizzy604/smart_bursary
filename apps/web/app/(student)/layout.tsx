@@ -10,7 +10,7 @@ export default function StudentLayout({ children }: { children: ReactNode }) {
       <div className="page-shell bg-transparent pb-20 md:pb-8">
         <StudentHeader />
         <div className="w-full px-4 pb-6 pt-0 sm:px-6 lg:px-8">
-          <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
+          <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)] md:items-start">
             <StudentSidebar />
             <div className="min-w-0">{children}</div>
           </div>

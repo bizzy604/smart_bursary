@@ -23,12 +23,17 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
 			<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
 				<p className="text-xs text-gray-500">Updated {formatShortDate(application.updatedAt)}</p>
 				<div className="flex gap-2">
+					{application.status === "DRAFT" ? (
+						<Link href={`/apply/${application.programId}`}>
+							<Button size="sm">Continue Draft</Button>
+						</Link>
+					) : null}
 					<Link href={`/applications/${application.id}`}>
 						<Button variant="outline" size="sm">
 							View details
 						</Button>
 					</Link>
-					<Link href={`/applications/${application.id}/pdf`}>
+					<Link href={`/applications/${application.id}/pdf?download=true`}>
 						<Button variant="ghost" size="sm">
 							PDF
 						</Button>

@@ -24,8 +24,8 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 |---|---|---|---|---|---|
 | W0 | Foundation and Auth Surface | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W1 | Student Portal Core Slice | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
-| W2 | Application Wizard (Sections A-F) | Not Started | TBD | - | - |
-| W3 | Student Preview and Submission UX | Not Started | TBD | - | - |
+| W2 | Application Wizard (Sections A-F) | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
+| W3 | Student Preview and Submission UX | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W4 | Ward and County Admin Portals | Not Started | TBD | - | - |
 | W5 | Reporting and Operational Screens | Not Started | TBD | - | - |
 | W6 | Frontend Testing and Hardening | Not Started | TBD | - | - |
@@ -36,7 +36,7 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: None (W1 completed)
+Current active phase: None (W3 completed)
 
 ---
 
@@ -85,6 +85,138 @@ Scope Window: 2026-04-16
 - Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
 - Build: `pnpm run build` in `apps/web` passed with successful route generation.
 - Notes: `typedRoutes` warning was resolved by moving config from `experimental.typedRoutes` to top-level `typedRoutes`.
+
+### Blockers and Gaps
+
+- None.
+
+### Completion Gate
+
+- [x] All deliverables done.
+- [x] All validation checks done.
+- [x] No unresolved blocker.
+- [x] Phase status set to Completed.
+
+---
+
+## W2 - Application Wizard (Sections A-F)
+
+Status: Completed
+Owner: GitHub Copilot
+Scope Window: 2026-04-16
+
+### In Scope
+
+- End-to-end activation of the student application wizard routes for Sections A-F.
+- Wizard state persistence and auto-save wiring for each section.
+- Section gating and sequential navigation from A to F.
+- W1-to-W2 continuation actions for draft applications.
+- Student desktop sidebar UX update to span full viewport height under sticky header.
+
+### Out of Scope
+
+- Final preview/submission business logic beyond handoff to existing preview route.
+- Backend/API persistence integration for wizard payloads.
+- Ward/county/admin workflow updates.
+
+### Deliverables
+
+- [x] Wizard route shell implemented:
+	- `apps/web/app/(student)/apply/[programId]/layout.tsx`
+	- `apps/web/app/(student)/apply/[programId]/page.tsx`
+- [x] Functional wizard section pages implemented:
+	- `apps/web/app/(student)/apply/[programId]/section-a/page.tsx`
+	- `apps/web/app/(student)/apply/[programId]/section-b/page.tsx`
+	- `apps/web/app/(student)/apply/[programId]/section-c/page.tsx`
+	- `apps/web/app/(student)/apply/[programId]/section-d/page.tsx`
+	- `apps/web/app/(student)/apply/[programId]/section-e/page.tsx`
+	- `apps/web/app/(student)/apply/[programId]/section-f/page.tsx`
+- [x] Wizard data infra wired and stabilized:
+	- `apps/web/store/application-wizard-store.ts`
+	- `apps/web/hooks/use-auto-save.ts`
+	- `apps/web/lib/wizard.ts`
+- [x] W1 draft continuation connected to W2:
+	- `apps/web/components/application/application-card.tsx`
+	- `apps/web/app/(student)/applications/[id]/page.tsx`
+- [x] Desktop sidebar viewport span behavior implemented:
+	- `apps/web/components/layout/student-sidebar.tsx`
+
+### Validation Checklist
+
+- [x] Typecheck passes for `apps/web`.
+- [x] Build passes for `apps/web`.
+- [x] No VS Code Problems for `apps/web` after W2 changes.
+- [x] Wizard runtime loop issue resolved (unstable Zustand selector removed in wizard layout).
+
+### Evidence
+
+- Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
+- Build: `pnpm --filter @smart-bursary/web run build` passed and generated all wizard routes.
+- Diagnostics: `get_errors` reported no errors for `apps/web`.
+
+### Blockers and Gaps
+
+- None.
+
+### Completion Gate
+
+- [x] All deliverables done.
+- [x] All validation checks done.
+- [x] No unresolved blocker.
+- [x] Phase status set to Completed.
+
+---
+
+## W3 - Student Preview and Submission UX
+
+Status: Completed
+Owner: GitHub Copilot
+Scope Window: 2026-04-16
+
+### In Scope
+
+- Step 7 preview experience for student applications with declaration-gated submission.
+- Submission handoff UX from preview to applications detail view.
+- Local submission state overlay so dashboard/list/detail reflect newly submitted drafts.
+- Printable/downloadable application output via student and API PDF route handlers.
+- Status communication enhancements in application detail (timeline and action prompts).
+
+### Out of Scope
+
+- Backend persistence and workflow API integration for final submission writes.
+- Ward/county/admin workflow implementation.
+- Reporting and analytics screens.
+
+### Deliverables
+
+- [x] Step 7 preview route implemented and connected:
+	- `apps/web/app/(student)/apply/[programId]/preview/page.tsx`
+- [x] Local submission state store created and wired:
+	- `apps/web/store/student-application-store.ts`
+	- `apps/web/hooks/use-application.ts`
+- [x] Student dashboard and applications views updated to consume merged submission state:
+	- `apps/web/app/(student)/dashboard/page.tsx`
+	- `apps/web/app/(student)/applications/page.tsx`
+	- `apps/web/app/(student)/applications/[id]/page.tsx`
+- [x] Printable preview template utility implemented:
+	- `apps/web/lib/application-preview.ts`
+- [x] PDF route handlers implemented (placeholder 501 removed):
+	- `apps/web/app/(student)/applications/[id]/pdf/route.ts`
+	- `apps/web/app/api/applications/[id]/pdf/route.ts`
+- [x] Application card/detail download actions connected to functional PDF route:
+	- `apps/web/components/application/application-card.tsx`
+	- `apps/web/app/(student)/applications/[id]/page.tsx`
+
+### Validation Checklist
+
+- [x] Typecheck passes for `apps/web`.
+- [x] Build passes for `apps/web`.
+- [x] Dynamic route type validation passes for both PDF endpoints.
+
+### Evidence
+
+- Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
+- Build: `pnpm --filter @smart-bursary/web run build` passed and generated both `/applications/[id]/pdf` and `/api/applications/[id]/pdf` routes.
 
 ### Blockers and Gaps
 
