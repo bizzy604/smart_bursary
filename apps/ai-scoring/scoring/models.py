@@ -16,7 +16,7 @@ DEFAULT_WEIGHTS = {
 
 MAX_RAW_SCORES = {
 	"family_status": 25.0,
-	"family_income": 20.0,
+	"family_income": 25.0,
 	"education_burden": 20.0,
 	"academic_standing": 15.0,
 	"document_quality": 10.0,

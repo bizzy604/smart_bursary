@@ -1,36 +1,53 @@
-# Smart Bursary API (Modular Monolith)
+# Smart Bursary API
 
-This package hosts the NestJS backend modular monolith for Smart Bursary.
+NestJS modular monolith backend for Smart Bursary.
 
-## Structure
+## Prerequisites
 
-- app bootstrap: main.ts and app.module.ts
-- configuration: config/
-- shared infrastructure: database/, common/
-- feature modules: modules/
-- queue/redis adapters: queue/, redis/
-- tests: test/unit, test/integration
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL (and Redis if running queue-backed flows)
 
-## Commands
+## Install Dependencies
 
-- build: pnpm --filter @smart-bursary/api run build
-- dev: pnpm --filter @smart-bursary/api run dev
-- typecheck: pnpm --filter @smart-bursary/api run typecheck
-- test (targeted): pnpm --filter @smart-bursary/api exec jest test/integration/application.e2e-spec.ts --config jest.config.ts
-- migrate: pnpm --filter @smart-bursary/api run prisma:migrate --name <migration_name>
-- seed: pnpm --filter @smart-bursary/api run prisma:seed
-- db container: docker compose up -d postgres
-- queue container: docker compose up -d redis
+From repo root:
 
-## Infrastructure Notes
+```bash
+pnpm install
+```
 
-- Document virus-scan jobs use Redis-backed queue infrastructure when `REDIS_URL` is available.
-- Local development can use the `redis` service from the root `docker-compose.yml`.
-- If Redis is unavailable in tests, the queue adapter falls back to a lightweight in-process async path.
+## Start API (Development)
 
-## Guardrails
+From repo root:
 
-- Work phase-by-phase using IMPLEMENTATION_TRACKER.md
-- Keep controller logic thin and delegate to collaborators
-- Keep each source file under 200 lines
-- Add required header comments to each new or modified source file
+```bash
+pnpm --filter @smart-bursary/api run dev
+```
+
+From app folder:
+
+```bash
+cd apps/api
+pnpm dev
+```
+
+API default URL: `http://localhost:3001` (or your configured `PORT`).
+
+## Start API (Production Build)
+
+From repo root:
+
+```bash
+pnpm --filter @smart-bursary/api run build
+pnpm --filter @smart-bursary/api run start
+```
+
+## Useful Commands
+
+```bash
+pnpm --filter @smart-bursary/api run typecheck
+pnpm --filter @smart-bursary/api run test
+pnpm --filter @smart-bursary/api run prisma:migrate --name <migration_name>
+pnpm --filter @smart-bursary/api run prisma:seed
+docker compose up -d postgres redis
+```
