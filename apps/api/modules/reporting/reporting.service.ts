@@ -32,7 +32,7 @@ export class ReportingService {
 			approvedApplications,
 			rejectedApplications,
 			disbursedCount,
-			approvalRate: totalApplications > 0 ? ((approvedApplications / totalApplications) * 100).toFixed(2) : 0,
+			approvalRate: totalApplications > 0 ? Number(((approvedApplications / totalApplications) * 100).toFixed(2)) : 0,
 		};
 	}
 
@@ -40,12 +40,12 @@ export class ReportingService {
 		const statusCounts = await this.prisma.application.groupBy({
 			by: ['status'],
 			where: { countyId },
-			_count: true,
+			_count: { _all: true },
 		});
 
 		return statusCounts.map((item) => ({
 			status: item.status,
-			count: item._count,
+			count: item._count._all,
 		}));
 	}
 

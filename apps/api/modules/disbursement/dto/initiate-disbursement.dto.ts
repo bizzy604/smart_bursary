@@ -6,6 +6,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsPhoneNumber, IsString, IsUUID } from 'class-validator';
 
+export enum DisbursementMethodDto {
+	MPESA_B2C = 'MPESA_B2C',
+	BANK_EFT = 'BANK_EFT',
+	CHEQUE = 'CHEQUE',
+}
+
+export enum DisbursementStatusDto {
+	PENDING = 'PENDING',
+	SUCCESS = 'SUCCESS',
+	FAILED = 'FAILED',
+	REVERSED = 'REVERSED',
+}
+
 export class InitiateDisbursementDto {
 	@ApiProperty({
 		description: 'Application ID approved for disbursement',
@@ -17,10 +30,10 @@ export class InitiateDisbursementDto {
 	@ApiProperty({
 		description: 'Disbursement method',
 		example: 'MPESA_B2C',
-		enum: ['MPESA_B2C', 'BANK_EFT', 'CHEQUE'],
+		enum: DisbursementMethodDto,
 	})
-	@IsEnum(['MPESA_B2C', 'BANK_EFT', 'CHEQUE'])
-	disbursementMethod!: 'MPESA_B2C' | 'BANK_EFT' | 'CHEQUE';
+	@IsEnum(DisbursementMethodDto)
+	disbursementMethod!: DisbursementMethodDto;
 
 	@ApiPropertyOptional({
 		description: 'Recipient phone number (overrides applicant phone)',
@@ -35,21 +48,21 @@ export class ListDisbursementsDto {
 	@ApiPropertyOptional({
 		description: 'Filter by disbursement status',
 		example: 'PENDING',
-		enum: ['PENDING', 'SUCCESS', 'FAILED', 'REVERSED'],
+		enum: DisbursementStatusDto,
 	})
 	@IsOptional()
-	@IsString()
-	status?: string;
+	@IsEnum(DisbursementStatusDto)
+	status?: DisbursementStatusDto;
 }
 
 export class UpdateTransactionStatusDto {
 	@ApiProperty({
 		description: 'Transaction status',
 		example: 'SUCCESS',
-		enum: ['SUCCESS', 'FAILED', 'PENDING', 'REVERSED'],
+		enum: DisbursementStatusDto,
 	})
-	@IsEnum(['SUCCESS', 'FAILED', 'PENDING', 'REVERSED'])
-	status!: 'SUCCESS' | 'FAILED' | 'PENDING' | 'REVERSED';
+	@IsEnum(DisbursementStatusDto)
+	status!: DisbursementStatusDto;
 
 	@ApiPropertyOptional({
 		description: 'External transaction ID from payment provider',

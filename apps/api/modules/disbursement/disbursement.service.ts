@@ -4,8 +4,8 @@
  * Used by: DisbursementController.
  */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { DisbursementMethod, DisbursementStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-import { DisbursementMethod, DisbursementStatus } from '@prisma/client';
 
 @Injectable()
 export class DisbursementService {
@@ -46,17 +46,19 @@ export class DisbursementService {
 			throw new BadRequestException('No allocated amount found for this application.');
 		}
 
-		const disbursement = await (this.prisma.disbursementRecord as any).createUnchecked({
-			data: {
-				applicationId: data.applicationId,
-				countyId: data.countyId,
-				programId: application.programId,
-				disbursementMethod: data.disbursementMethod,
-				amountKes: allocatedAmount,
-				recipientPhone: data.recipientPhone || application.applicant?.phone,
-				status: DisbursementStatus.PENDING,
-				initiatedBy: data.initiatedBy,
-			},
+		const disbursementData: Prisma.DisbursementRecordUncheckedCreateInput = {
+			applicationId: data.applicationId,
+			countyId: data.countyId,
+			programId: application.programId,
+			disbursementMethod: data.disbursementMethod,
+			amountKes: allocatedAmount,
+			recipientPhone: data.recipientPhone || application.applicant?.phone,
+			status: DisbursementStatus.PENDING,
+			initiatedBy: data.initiatedBy,
+		};
+
+		const disbursement = await this.prisma.disbursementRecord.create({
+			data: disbursementData,
 		});
 
 		return { disbursementId: disbursement.id, amount: Number(allocatedAmount), status: disbursement.status };

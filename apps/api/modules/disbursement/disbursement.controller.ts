@@ -3,7 +3,7 @@
  * Why important: Finance officers initiate, track, and confirm payment execution.
  * Used by: Disbursement workflow in county review/approval phase.
  */
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -24,6 +24,7 @@ export class DisbursementController {
 	constructor(private readonly disbursementService: DisbursementService) {}
 
 	@Post()
+	@HttpCode(200)
 	@Roles(UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN)
 	@ApiOperation({ summary: 'Initiate disbursement for an approved application' })
 	async initiate(@Body() dto: InitiateDisbursementDto, @Req() req: any) {
@@ -32,7 +33,7 @@ export class DisbursementController {
 			countyId: req.user.countyId,
 			disbursementMethod: dto.disbursementMethod,
 			recipientPhone: dto.recipientPhone,
-			initiatedBy: req.user.sub,
+			initiatedBy: req.user.userId,
 		});
 		return { success: true, data: result };
 	}
@@ -40,7 +41,7 @@ export class DisbursementController {
 	@Get()
 	@Roles(UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN)
 	@ApiOperation({ summary: 'List disbursements for county' })
-	async list(@Req() req: any, @Body() query?: ListDisbursementsDto) {
+	async list(@Req() req: any, @Query() query?: ListDisbursementsDto) {
 		const disbursements = await this.disbursementService.listDisbursements(
 			req.user.countyId,
 			{ status: query?.status },
