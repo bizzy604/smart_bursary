@@ -21,6 +21,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { ProgramModule } from './modules/program/program.module';
 import { DocumentModule } from './modules/document/document.module';
+import { ReviewModule } from './modules/review/review.module';
+import { AiModule } from './modules/ai/ai.module';
+import { InternalModule } from './modules/internal/internal.module';
+import { DisbursementModule } from './modules/disbursement/disbursement.module';
+import { ReportingModule } from './modules/reporting/reporting.module';
 import { QueueModule } from './queue/queue.module';
 
 @Module({
@@ -38,6 +43,11 @@ import { QueueModule } from './queue/queue.module';
 		ApplicationModule,
 		ProgramModule,
 		DocumentModule,
+		ReviewModule,
+		AiModule,
+		InternalModule,
+		DisbursementModule,
+		ReportingModule,
 	],
 	controllers: [AppController],
 	providers: [

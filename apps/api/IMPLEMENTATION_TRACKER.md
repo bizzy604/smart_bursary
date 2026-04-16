@@ -32,7 +32,7 @@ Purpose: Track backend implementation in controlled, validated phases and preven
 | P2 | Auth, RBAC, Tenant Context | Completed | GitHub Copilot | 2026-04-15 | 2026-04-15 | 2026-04-15 |
 | P3 | Student Application Vertical Slice | Completed | GitHub Copilot | 2026-04-15 | 2026-04-15 | 2026-04-15 |
 | P4 | Documents and Async Jobs | Completed | GitHub Copilot | 2026-04-15 | 2026-04-15 | 2026-04-15 |
-| P5 | Review and Allocation Workflow | Not Started | TBD | - | - | - |
+| P5 | Review and Allocation Workflow | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 | 2026-04-16 |
 | P6 | Disbursement and Reporting MVP | Not Started | TBD | - | - | - |
 | P7 | Hardening and Release Readiness | Not Started | TBD | - | - | - |
 
@@ -43,6 +43,25 @@ Purpose: Track backend implementation in controlled, validated phases and preven
 Only one phase may be marked In Progress at any time.
 
 Current active phase: None (P4 completed)
+
+## PRD / Design Alignment
+
+This tracker is the execution ledger for the product requirements and architecture docs. The phase boundaries below map directly to the documented source of truth:
+
+| Doc Area | Tracker Phase(s) | Notes |
+|---|---|---|
+| Tenant bootstrap, auth, and shared backend foundations | P0-P2 | Modular NestJS backend, tenant isolation, RBAC, and config validation |
+| Student application flow and wizard submission | P3 | Covers application creation, section persistence, submission, and timeline logging |
+| PDF form preview / download and document lifecycle | P3-P4 | Form rendering and document storage/scanning are split across the application and document slices |
+| AI scoring and review workflow | P5 | NestJS owns the reviewer-facing API and internal ingestion bridge; `apps/ai-scoring` is the separate FastAPI scoring runtime per system design |
+| Disbursement and reporting | P6 | M-Pesa B2C, bank EFT/RTGS, receipts, dashboards, and OCOB exports |
+| Release hardening and readiness | P7 | Performance, observability, security hardening, and release checks |
+
+Product-level notes from the PRD and system design:
+
+- v1 is the web/PWA experience; native mobile apps are a v2 non-goal.
+- County-level data isolation is enforced through `county_id` and PostgreSQL RLS.
+- The AI scoring engine is a separate Python FastAPI microservice, with NestJS exposing the internal ingestion and reviewer APIs.
 
 ---
 
@@ -315,28 +334,28 @@ Scope Window: 2026-04-15
 
 ### Deliverables
 
-- [ ] BursaryProgram module implemented with controller, service, DTOs
-- [ ] Application module implemented with controller, service, DTOs
-- [ ] ApplicationSection logic implemented in Application service
-- [ ] Timeline event recording on application lifecycle changes
-- [ ] End-to-end student application flow integration tests
-- [ ] Build passes for `apps/api`
-- [ ] All tests pass
+- [x] BursaryProgram module implemented with controller, service, DTOs
+- [x] Application module implemented with controller, service, DTOs
+- [x] ApplicationSection logic implemented in Application service
+- [x] Timeline event recording on application lifecycle changes
+- [x] End-to-end student application flow integration tests
+- [x] Build passes for `apps/api`
+- [x] All tests pass
 
 ### Validation Checklist (Required Before Completion)
 
-- [ ] Build passes for `apps/api`
-- [ ] Unit/integration tests for this phase pass
-- [ ] Edge-case checks completed and documented:
-  - [ ] Student can see only their own applications and sections
-  - [ ] Student can only submit draft applications before program closes
-  - [ ] Application status transitions are enforced
-  - [ ] Timeline events record each status change
-- [ ] Architecture/rules checks completed (module boundaries, file length, file headers)
+- [x] Build passes for `apps/api`
+- [x] Unit/integration tests for this phase pass
+- [x] Edge-case checks completed and documented:
+  - [x] Student can see only their own applications and sections
+  - [x] Student can only submit draft applications before program closes
+  - [x] Application status transitions are enforced
+  - [x] Timeline events record each status change
+- [x] Architecture/rules checks completed (module boundaries, file length, file headers)
 
 ### Evidence
 
-- Build command and summary: (pending)
+- Build command and summary: `pnpm run build` passed successfully in `apps/api`.
 - Test command and summary: `pnpm exec jest --config jest.config.ts --runInBand test/integration/student-application.e2e-spec.ts test/integration/auth.e2e-spec.ts test/integration/application.e2e-spec.ts` passed (3 suites, 14 tests).
 - Edge-case checks and summary:
   - [x] List active programs: student sees county-scoped programs within open window
@@ -374,6 +393,7 @@ Scope Window: 2026-04-15
 | 2026-04-15 | P2 | Closed auth module end-to-end by adding OTP password reset flow and validation | GitHub Copilot |
 | 2026-04-15 | P3 | Implemented BursaryProgram and Application modules with complete end-to-end workflow | GitHub Copilot |
 | 2026-04-15 | P4 | Implemented document uploads, Redis-backed queue wiring, and scan status flow | GitHub Copilot |
+| 2026-04-16 | P5 | Implemented review workflow, AI score access, scoring weights, and internal score ingestion | GitHub Copilot |
 
 ---
 
@@ -449,6 +469,196 @@ Scope Window: 2026-04-15
 - [x] All validation checks done
 - [x] No unresolved blocker
 - [x] Phase status set to Completed
+
+---
+
+## P5 - Review and Allocation Workflow
+
+Status: Completed  
+Owner: GitHub Copilot  
+Scope Window: 2026-04-16
+
+### In Scope
+
+- AI score retrieval for reviewer roles
+- Ranked program score listing for ward reviewers
+- County-scoped scoring weight updates
+- Ward review recommendation endpoint
+- County allocation decision endpoint
+- Internal AI score ingestion endpoint
+- Timeline event recording for review and allocation actions
+- Integration tests for the full review and allocation workflow
+
+### Out of Scope
+
+- Disbursement processing (→ P6)
+- Reporting and analytics (→ P6)
+- Performance hardening and caching (→ P7)
+
+### Deliverables
+
+- [x] AI score retrieval and ranked score listing implemented
+- [x] County scoring weight updates implemented
+- [x] Ward review recommendation flow implemented
+- [x] County allocation and budget enforcement implemented
+- [x] Internal score ingestion endpoint implemented
+- [x] Integration test coverage for the full workflow added
+- [x] Build passes for `apps/api`
+- [x] All tests in the phase pass
+
+### Validation Checklist (Required Before Completion)
+
+- [x] Build passes for `apps/api`
+- [x] Unit/integration tests for this phase pass
+- [x] Edge-case checks completed and documented:
+  - [x] Reviewer roles can read AI scores
+  - [x] Ward reviewers can list ranked program scores
+  - [x] County admins can update scoring weights
+  - [x] Ward review transitions the application to the review stage
+  - [x] County allocation enforces budget ceilings and finalizes status
+  - [x] Timeline events remain complete after review actions
+- [x] Architecture/rules checks completed (module boundaries, file length, file headers)
+
+### Evidence
+
+- Build command and summary: `pnpm run build` passed successfully in `apps/api`.
+- Test command and summary: `pnpm exec jest --config jest.config.ts --runInBand test/integration/review-ai.e2e-spec.ts` passed (5/5 tests).
+- Edge-case checks and summary:
+  - [x] AI score response grade follows the implemented threshold bands
+  - [x] Ranked score listing is tenant-scoped to the reviewer ward
+  - [x] County scoring weights persist and validate total allocation
+  - [x] Ward review and county allocation complete the workflow in sequence
+  - [x] Timeline entries are written for review and allocation events
+- Notes:
+  - `RolesGuard` now resolves reviewer roles from the request context without adding an unavailable Nest provider dependency.
+  - The separate FastAPI scoring runtime remains the system-design target; the NestJS AI module and internal controller own the reviewer-facing API and ingestion bridge.
+  - Score grading thresholds intentionally treat `78.5` as `MEDIUM` because `HIGH` begins at `80`.
+
+### Blockers and Gaps
+
+- None active.
+
+### Completion Gate
+
+- [x] All deliverables done
+- [x] All validation checks done
+- [x] No unresolved blocker
+- [x] Phase status set to Completed
+
+---
+
+## P6 - Disbursement and Reporting MVP
+
+Status: Not Started  
+Owner: TBD  
+Scope Window: -
+
+### In Scope
+
+- M-Pesa B2C disbursement for approved applications
+- Bank EFT / RTGS batch export
+- Disbursement receipt PDF generation
+- County dashboard aggregates and budget utilization views
+- OCOB-ready Excel and PDF report generation
+- Ward-level summary exports with AI score and reviewer metadata
+- Integration tests for disbursement and reporting flows
+
+### Out of Scope
+
+- Performance hardening and caching (→ P7)
+
+### Deliverables
+
+- [ ] Disbursement module implemented with controller, service, DTOs
+- [ ] M-Pesa B2C integration implemented
+- [ ] EFT/RTGS export implemented
+- [ ] Receipt PDF generation implemented
+- [ ] Reporting module implemented with dashboard and OCOB exports
+- [ ] Integration tests for disbursement and reporting added
+- [ ] Build passes for `apps/api`
+- [ ] All tests pass
+
+### Validation Checklist (Required Before Completion)
+
+- [ ] Build passes for `apps/api`
+- [ ] Unit/integration tests for this phase pass
+- [ ] Edge-case checks completed and documented:
+  - [ ] Approved applications can be queued for disbursement
+  - [ ] Failed disbursements retry and surface alerts
+  - [ ] Report outputs match the OCOB template
+  - [ ] Ward and county dashboards respect tenant scoping
+- [ ] Architecture/rules checks completed (module boundaries, file length, file headers)
+
+### Evidence
+
+- Build command and summary: (pending)
+- Test command and summary: (pending)
+- Edge-case checks and summary: (pending)
+- Notes: This phase is driven by PRD goals G5-G6 and the disbursement/reporting requirements in the system design.
+
+### Blockers and Gaps
+
+- None active.
+
+### Completion Gate
+
+- [ ] All deliverables done
+- [ ] All validation checks done
+- [ ] No unresolved blocker
+- [ ] Phase status set to Completed
+
+---
+
+## P7 - Hardening and Release Readiness
+
+Status: Not Started  
+Owner: TBD  
+Scope Window: -
+
+### In Scope
+
+- Reliability and observability hardening
+- Performance tuning and caching
+- Security regression checks
+- Release readiness validation and rollout planning
+- Mobile web / PWA polish for the v1 experience
+
+### Out of Scope
+
+- New business workflow features
+
+### Deliverables
+
+- [ ] Load and soak test coverage added
+- [ ] Observability gaps resolved
+- [ ] Security checks and regression suite added
+- [ ] Performance budgets and caching checks documented
+- [ ] Release readiness checklist completed
+
+### Validation Checklist (Required Before Completion)
+
+- [ ] Build passes for `apps/api`
+- [ ] Final regression suite passes
+- [ ] Edge-case checks completed and documented
+- [ ] Architecture/rules checks completed (module boundaries, file length, file headers)
+
+### Evidence
+
+- Build command and summary: (pending)
+- Test command and summary: (pending)
+- Edge-case checks and summary: (pending)
+- Notes: This phase closes out PRD goal G7 and the system-design hardening requirements.
+
+### Blockers and Gaps
+
+- None active.
+
+### Completion Gate
+
+- [ ] All deliverables done
+- [ ] All validation checks done
+- [ ] No unresolved blocker
+- [ ] Phase status set to Completed
 
 ---
 

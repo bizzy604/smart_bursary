@@ -16,18 +16,41 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { County } from '../../common/decorators/county.decorator';
 import { DocumentService } from './document.service';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 
+@ApiTags('Documents')
+@ApiBearerAuth()
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Post('upload')
+  @ApiOperation({ summary: 'Upload a document for an application' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['applicationId', 'docType', 'file'],
+      properties: {
+        applicationId: { type: 'string', format: 'uuid' },
+        docType: { type: 'string' },
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @UseInterceptors(FileInterceptor('file'))
   async uploadDocument(
     @County() countyId: string,
@@ -49,6 +72,8 @@ export class DocumentController {
   }
 
   @Get(':documentId')
+  @ApiOperation({ summary: 'Get a document by id' })
+  @ApiParam({ name: 'documentId', description: 'Document identifier' })
   async getDocument(
     @Param('documentId') documentId: string,
     @County() countyId: string,
@@ -58,6 +83,8 @@ export class DocumentController {
   }
 
   @Get('application/:applicationId')
+  @ApiOperation({ summary: 'List all documents for an application' })
+  @ApiParam({ name: 'applicationId', description: 'Application identifier' })
   async listDocuments(
     @Param('applicationId') applicationId: string,
     @County() countyId: string,

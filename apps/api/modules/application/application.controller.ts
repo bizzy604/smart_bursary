@@ -4,6 +4,7 @@
  * Used by: Frontend student portal for application form workflow.
  */
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -14,11 +15,15 @@ import { SubmitApplicationDto } from './dto/submit-application.dto';
 import { UpdateApplicationSectionDto } from './dto/update-application-section.dto';
 
 @UseGuards(JwtAuthGuard)
+@ApiTags('Applications')
+@ApiBearerAuth()
 @Controller('applications')
 export class ApplicationController {
 	constructor(private readonly applicationService: ApplicationService) {}
 
 	@Post('draft')
+	@ApiOperation({ summary: 'Create a new application draft' })
+	@ApiBody({ type: CreateApplicationDto })
 	createDraft(
 		@County() countyId: string,
 		@CurrentUser() user: Record<string, unknown>,
@@ -29,6 +34,7 @@ export class ApplicationController {
 	}
 
 	@Get('my-applications')
+	@ApiOperation({ summary: 'List current user applications' })
 	listMyApplications(
 		@County() countyId: string,
 		@CurrentUser() user: Record<string, unknown>,
@@ -38,6 +44,8 @@ export class ApplicationController {
 	}
 
 	@Get(':id')
+	@ApiOperation({ summary: 'Get application details by id' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
 	getApplication(
 		@County() countyId: string,
 		@CurrentUser() user: Record<string, unknown>,
@@ -48,6 +56,9 @@ export class ApplicationController {
 	}
 
 	@Put(':id/section')
+	@ApiOperation({ summary: 'Update a specific application section' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	@ApiBody({ type: UpdateApplicationSectionDto })
 	updateSection(
 		@County() countyId: string,
 		@CurrentUser() user: Record<string, unknown>,
@@ -59,6 +70,8 @@ export class ApplicationController {
 	}
 
 	@Post('submit')
+	@ApiOperation({ summary: 'Submit a draft application' })
+	@ApiBody({ type: SubmitApplicationDto })
 	submitApplication(
 		@County() countyId: string,
 		@CurrentUser() user: Record<string, unknown>,
