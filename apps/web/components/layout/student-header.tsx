@@ -1,0 +1,29 @@
+"use client";
+
+import Link from "next/link";
+import { useCounty } from "@/hooks/use-county";
+import { CountyLogo } from "@/components/shared/county-logo";
+
+export function StudentHeader() {
+	const { county } = useCounty();
+
+	return (
+		<header className="border-b border-brand-100 bg-white/90 backdrop-blur-sm">
+			<div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+				<Link href="/dashboard" className="flex items-center gap-3">
+					<CountyLogo label={county.logoText} />
+					<div>
+						<p className="font-display text-sm font-bold text-brand-900 sm:text-base">{county.name}</p>
+						<p className="text-xs text-gray-600">{county.fundName}</p>
+					</div>
+				</Link>
+
+				<div className="text-right">
+					<p className="text-sm font-semibold text-brand-900">Aisha Lokiru</p>
+					<p className="text-xs text-gray-500">Student Applicant</p>
+				</div>
+			</div>
+		</header>
+	);
+}
+
