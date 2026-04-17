@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ApplicationPdfButton } from "@/components/application/application-pdf-button";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Timeline } from "@/components/application/timeline";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -63,9 +64,14 @@ export default function ApplicationDetailPage() {
               <Button size="sm">Continue Draft</Button>
             </Link>
           ) : null}
-          <Link href={`/applications/${application.id}/pdf?download=true`}>
-            <Button size="sm">Download PDF</Button>
-          </Link>
+          <ApplicationPdfButton
+            applicationId={application.id}
+            programId={application.programId}
+            programName={application.programName}
+            reference={application.reference}
+            generatedAt={application.updatedAt}
+            size="sm"
+          />
           <Link href="/applications">
             <Button variant="outline" size="sm">
               Back to list
@@ -82,9 +88,16 @@ export default function ApplicationDetailPage() {
             : "Your application is currently moving through committee review. You will receive an SMS when a decision is made."}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link href={`/applications/${application.id}/pdf?download=true`}>
-            <Button variant="outline" size="sm">Download application PDF</Button>
-          </Link>
+          <ApplicationPdfButton
+            applicationId={application.id}
+            programId={application.programId}
+            programName={application.programName}
+            reference={application.reference}
+            generatedAt={application.updatedAt}
+            label="Download application PDF"
+            variant="outline"
+            size="sm"
+          />
           <a href="tel:+254700000000">
             <Button variant="ghost" size="sm">Contact ward office {program?.ward ? `(${program.ward})` : ""}</Button>
           </a>

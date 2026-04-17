@@ -1,6 +1,6 @@
 # KauntyBursary PRD Traceability Matrix
 
-Status: Drafted (Phase 0 deliverable)
+Status: Maintained (Phase 0 deliverable)
 Last Updated: 2026-04-17
 Source of Truth: Docs/01-PRD.md
 Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
@@ -15,8 +15,8 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 ## Summary Snapshot
 
 - Total functional requirements tracked: 42
-- Implemented: 12
-- Partial: 23
+- Implemented: 15
+- Partial: 20
 - Missing: 7
 - Deferred: 0
 
@@ -42,9 +42,9 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 | BP-03 | Reject late submissions after closes_at | Implemented | apps/api/modules/application/application-submission.service.ts, apps/api/common/filters/global-exception.filter.ts, apps/api/test/integration/program-eligibility.e2e-spec.ts | Submission path now returns semantic `PROGRAM_CLOSED` validation error when closes_at has elapsed | Phase 2 | BE |
 | BP-04 | Budget ceiling via advisory lock | Implemented | apps/api/modules/review/county-review.service.ts | Advisory lock and ceiling guard exist; needs stress validation in hardening | Phase 7 validation | BE |
 | AF-01 | Multi-step wizard A-F aligned with official form | Partial | apps/web/app/(student)/apply/[programId]/section-a/page.tsx through section-f/page.tsx | Wizard exists; strict legal-form parity validation still pending | Phase 2A (new) | FE |
-| AF-02 | Final pre-submit PDF preview with official layout | Partial | apps/web/app/(student)/apply/[programId]/preview/page.tsx, apps/web/lib/application-preview.ts | Preview rendered, but true PDF fidelity and visual-diff acceptance are not yet enforced | Phase 2B (new) | FE |
-| AF-03 | Download filled PDF before/after submission | Partial | apps/web/app/(student)/apply/[programId]/preview/page.tsx, apps/web/app/(student)/applications/[id]/pdf/route.ts | Download path currently HTML-based output, not finalized county-branded PDF artifact | Phase 2B (new) | FE+BE |
-| AF-04 | Document uploads with validation, virus scan, S3 storage | Partial | apps/api/modules/document/document.controller.ts, apps/api/modules/document/document.service.ts, apps/api/queue/queue.service.ts | Upload/scan queue exists; storage is local file path, not S3-backed production flow | Phase 2B (new) | BE |
+| AF-02 | Final pre-submit PDF preview with official layout | Implemented | apps/web/app/(student)/apply/[programId]/preview/page.tsx, apps/web/lib/application-pdf.tsx, apps/web/lib/application-pdf-client.ts, apps/web/app/api/applications/preview/pdf/route.ts | Preview now renders server-generated PDF bytes from captured wizard sections | Phase 2B (new) | FE |
+| AF-03 | Download filled PDF before/after submission | Implemented | apps/web/components/application/application-pdf-button.tsx, apps/web/store/student-application-store.ts, apps/web/app/(student)/applications/[id]/page.tsx, apps/web/components/application/application-card.tsx | Download actions now reuse captured submission snapshots or hydrated wizard sections to generate the PDF | Phase 2B (new) | FE+BE |
+| AF-04 | Document uploads with validation, virus scan, S3 storage | Implemented | apps/api/modules/document/s3.service.ts, apps/api/modules/document/document.service.ts, apps/api/test/integration/document.e2e-spec.ts, apps/api/test/integration/document-scan-auth.e2e-spec.ts | S3-backed upload, signed download URLs, and async scan flow are covered by integration tests | Phase 2B (new) | BE |
 | AF-05 | Duplicate applications rejected with conflict | Partial | apps/api/prisma/schema.prisma (applicantId/programId unique), apps/api/modules/application/application.service.ts | Duplicate attempts return existing record rather than explicit conflict response | Phase 2 | BE |
 | AF-06 | County form customization settings | Missing | apps/web/app/(admin)/settings/branding/page.tsx (placeholder), apps/web/app/(admin)/settings/page.tsx (placeholder) | Settings UI and backend form customization controls missing | Phase 4 | BE+FE |
 | AI-01 | Auto-enqueue AI scoring on submit | Missing | apps/api/modules/application/application.service.ts, apps/api/queue/queue.module.ts | Submit flow does not enqueue AI scoring job | Phase 2C (new) | BE |
@@ -77,7 +77,7 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
   - Phase 2A/2B/2C/2D style profile, form-fidelity, AI trigger, and notification completion slices.
   - Phase 4A tenant provisioning and plan-tier gating.
   - Phase 5A disbursement completion slice.
-- These should be added as plan addendum before Phase 1 execution begins.
+- These have been added to the implementation plan addendum and should be maintained there going forward.
 
 ## Suggested Execution Order Update
 

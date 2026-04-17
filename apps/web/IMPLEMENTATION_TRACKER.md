@@ -270,10 +270,11 @@ Scope Window: 2026-04-16
 	- `apps/web/app/(student)/applications/[id]/page.tsx`
 - [x] Phase 2B PDF fidelity completed with true PDF generation:
 	- `apps/web/lib/application-pdf.tsx`
-	- `apps/web/lib/application-pdf-data.ts`
+	- `apps/web/lib/application-pdf-client.ts`
 	- `apps/web/app/api/applications/preview/pdf/route.ts`
+	- `apps/web/components/application/application-pdf-button.tsx`
 	- `apps/web/app/(student)/apply/[programId]/preview/page.tsx`
-	- Updated `/applications/[id]/pdf` and `/api/applications/[id]/pdf` routes to return `application/pdf` bytes.
+	- Updated preview rendering and student download actions to use captured wizard/submission sections for `application/pdf` output.
 
 ### Validation Checklist
 

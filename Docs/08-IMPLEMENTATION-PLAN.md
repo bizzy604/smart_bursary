@@ -72,7 +72,8 @@ This plan is designed to be executed one phase at a time, with strict completion
 - Backend P7 (hardening/release readiness) remains Not Started.
 
 ### G-05 PRD full-traceability gap (high)
-- No single source currently marks each functional requirement as Implemented/Partial/Missing with evidence links.
+- Traceability matrix is now delivered in `Docs/09-PRD-TRACEABILITY-MATRIX.md`.
+- Remaining work is status maintenance as implementation changes land.
 
 ## 3. Delivery Rules for This Plan
 
@@ -409,7 +410,8 @@ Exit Criteria:
 Current phase notes:
 - Converted web PDF endpoints to return real `application/pdf` bytes with Node runtime generation.
 - Added shared PDF rendering utilities and payload builders for application and preview flows.
-- Added preview PDF API (`POST /api/applications/preview/pdf`) and wired preview download to server-generated PDF.
+- Added preview PDF API (`POST /api/applications/preview/pdf`) and wired preview page rendering to a server-generated PDF preview.
+- Persisted submission-time PDF section snapshots so post-submit download actions reuse the captured application data rather than demo fixtures.
 - Implemented S3-only storage adapter with signed URL generation and fail-fast configuration validation.
 - Tightened document upload validation:
   - Canonical document type allow-list.
@@ -489,4 +491,4 @@ Exit Criteria:
 
 ## 8. Immediate Next Action
 
-Start Phase 2B (Form Fidelity and Document Storage Completion), because Phase 2A is fully implemented, validated, and closed.
+Continue W6 frontend hardening for Playwright coverage and accessibility checks. Phase 2C remains the next functional slice once execution approval is given.

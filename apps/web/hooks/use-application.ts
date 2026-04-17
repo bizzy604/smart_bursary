@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
+
+import type { PreviewSection } from "@/lib/application-preview";
 import {
 	applications,
 	getProgramById,
@@ -132,13 +134,19 @@ export function useApplication() {
 	);
 
 	const submitDraftApplication = useCallback(
-		(payload: { programId: string; programName: string; requestedKes: number }) => {
+		(payload: {
+			programId: string;
+			programName: string;
+			requestedKes: number;
+			previewSections: PreviewSection[];
+		}) => {
 			const existing = mergedApplications.find((item) => item.programId === payload.programId);
 			return submitApplication({
 				programId: payload.programId,
 				programName: payload.programName,
 				requestedKes: payload.requestedKes,
 				applicationId: existing?.id,
+				previewSections: payload.previewSections,
 			});
 		},
 		[mergedApplications, submitApplication],

@@ -1,5 +1,7 @@
 import { create } from "zustand";
 
+import type { PreviewSection } from "@/lib/application-preview";
+
 export interface SubmittedApplicationRecord {
   id: string;
   programId: string;
@@ -9,6 +11,7 @@ export interface SubmittedApplicationRecord {
   requestedKes: number;
   submittedAt: string;
   updatedAt: string;
+  previewSections: PreviewSection[];
 }
 
 interface SubmitApplicationPayload {
@@ -16,6 +19,7 @@ interface SubmitApplicationPayload {
   programName: string;
   requestedKes: number;
   applicationId?: string;
+  previewSections: PreviewSection[];
 }
 
 interface StudentApplicationStore {
@@ -69,7 +73,7 @@ export const useStudentApplicationStore = create<StudentApplicationStore>((set, 
     const submissions = loadFromStorage();
     set({ submissionsByProgram: submissions, hydrated: true });
   },
-  submitApplication: ({ programId, programName, requestedKes, applicationId }) => {
+  submitApplication: ({ programId, programName, requestedKes, applicationId, previewSections }) => {
     const current = get().submissionsByProgram[programId];
     if (current) {
       return current;
@@ -85,6 +89,7 @@ export const useStudentApplicationStore = create<StudentApplicationStore>((set, 
       requestedKes,
       submittedAt: now,
       updatedAt: now,
+      previewSections,
     };
 
     const next = {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ApplicationPdfButton } from "@/components/application/application-pdf-button";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
@@ -33,11 +34,16 @@ export function ApplicationCard({ application }: ApplicationCardProps) {
 							View details
 						</Button>
 					</Link>
-					<Link href={`/applications/${application.id}/pdf?download=true`}>
-						<Button variant="ghost" size="sm">
-							PDF
-						</Button>
-					</Link>
+					<ApplicationPdfButton
+						applicationId={application.id}
+						programId={application.programId}
+						programName={application.programName}
+						reference={application.reference}
+						generatedAt={application.updatedAt}
+						label="PDF"
+						variant="ghost"
+						size="sm"
+					/>
 				</div>
 			</div>
 		</article>
