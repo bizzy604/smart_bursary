@@ -13,6 +13,7 @@ import { useAutoSave } from "@/hooks/use-auto-save";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
 
 interface SectionCForm {
+  familyStatus: string;
   guardianName: string;
   guardianRelationship: string;
   guardianPhone: string;
@@ -23,6 +24,7 @@ interface SectionCForm {
 }
 
 const defaultForm: SectionCForm = {
+  familyStatus: "",
   guardianName: "",
   guardianRelationship: "",
   guardianPhone: "",
@@ -62,6 +64,7 @@ export default function ApplySectionCPage() {
 
   const isUnlocked = Boolean(programState?.completion["section-b"]);
   const isValid =
+    form.familyStatus.trim().length > 0 &&
     form.guardianName.trim().length > 2 &&
     form.guardianRelationship.trim().length > 1 &&
     form.guardianPhone.trim().length >= 10 &&
@@ -121,6 +124,20 @@ export default function ApplySectionCPage() {
     >
       <FieldGroup title="Guardian / Parent Details">
         <div className="grid gap-3 md:grid-cols-2">
+          <label className="space-y-1 text-sm text-gray-700 md:col-span-2">
+            <span className="font-medium">Family Status</span>
+            <select
+              value={form.familyStatus}
+              onChange={(event) => setForm({ ...form, familyStatus: event.target.value })}
+              className="h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 shadow-xs transition-colors focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+            >
+              <option value="">Select family status</option>
+              <option value="BOTH_PARENTS_ALIVE">Both Parents Alive</option>
+              <option value="SINGLE_PARENT">Single Parent</option>
+              <option value="ORPHAN">Orphan</option>
+              <option value="PERSON_WITH_DISABILITY">Person With Disability</option>
+            </select>
+          </label>
           <label className="space-y-1 text-sm text-gray-700">
             <span className="font-medium">Guardian/Parent Name</span>
             <Input value={form.guardianName} onChange={(event) => setForm({ ...form, guardianName: event.target.value })} />

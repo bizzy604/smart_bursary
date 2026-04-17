@@ -7,11 +7,12 @@ import { Module } from '@nestjs/common';
 
 import { AiModule } from '../ai/ai.module';
 import { InternalController } from './internal.controller';
+import { InternalApplicationQueryService } from './internal-application-query.service';
 import { ServiceAuthGuard } from './service-auth.guard';
 
 @Module({
 	imports: [AiModule],
 	controllers: [InternalController],
-	providers: [ServiceAuthGuard],
+	providers: [ServiceAuthGuard, InternalApplicationQueryService],
 })
 export class InternalModule {}

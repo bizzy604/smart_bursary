@@ -8,6 +8,10 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
+import {
+  AiScoringJobData,
+  AiScoringProcessor,
+} from './processors/ai-scoring.processor';
 
 type VirusScanJobData = {
   documentId: string;
@@ -19,14 +23,23 @@ type VirusScanQueueJob = {
   add: (name: string, data: VirusScanJobData) => Promise<void>;
 };
 
+type AiScoringQueueJob = {
+  add: (name: string, data: AiScoringJobData) => Promise<void>;
+};
+
 @Injectable()
 export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueService.name);
   private readonly virusScanQueue: VirusScanQueueJob;
+  private readonly aiScoringQueue: AiScoringQueueJob;
+  private readonly aiScoringProcessor: AiScoringProcessor;
   private readonly redisConnection?: Redis;
   private readonly worker?: Worker<VirusScanJobData>;
+  private readonly aiScoringWorker?: Worker<AiScoringJobData>;
 
   constructor(private readonly prisma: PrismaService) {
+    this.aiScoringProcessor = new AiScoringProcessor(prisma);
+
     const redisUrl = process.env.REDIS_URL;
 
     if (redisUrl) {
@@ -34,7 +47,13 @@ export class QueueService implements OnModuleDestroy {
         maxRetriesPerRequest: null,
         enableReadyCheck: false,
       });
-      const queue = new Queue<VirusScanJobData>('virus-scan', { connection: this.redisConnection });
+      const virusScanQueue = new Queue<VirusScanJobData>('virus-scan', {
+        connection: this.redisConnection,
+      });
+      const aiScoringQueue = new Queue<AiScoringJobData>('ai-scoring', {
+        connection: this.redisConnection,
+      });
+
       this.worker = new Worker<VirusScanJobData>(
         'virus-scan',
         async (job) => {
@@ -52,14 +71,28 @@ export class QueueService implements OnModuleDestroy {
         },
         { connection: this.redisConnection },
       );
+      this.aiScoringWorker = new Worker<AiScoringJobData>(
+        'ai-scoring',
+        async (job) => this.aiScoringProcessor.process(job),
+        { connection: this.redisConnection },
+      );
 
       this.virusScanQueue = {
         add: async (name: string, data: VirusScanJobData) => {
-          await queue.add(name, data);
+          await virusScanQueue.add(name, data);
+        },
+      };
+      this.aiScoringQueue = {
+        add: async (name: string, data: AiScoringJobData) => {
+          await aiScoringQueue.add(name, data, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 1000 },
+            jobId: `ai-scoring-${data.applicationId}`,
+          });
         },
       };
 
-      this.logger.log('Virus scan queue configured for Redis transport');
+      this.logger.log('Queue service configured for Redis transport');
       return;
     }
 
@@ -78,16 +111,26 @@ export class QueueService implements OnModuleDestroy {
         });
       },
     };
+    this.aiScoringQueue = {
+      add: async (_name: string, data: AiScoringJobData) => {
+        await this.aiScoringProcessor.processData(data);
+      },
+    };
 
-    this.logger.log('Virus scan queue configured for in-process fallback');
+    this.logger.log('Queue service configured for in-process fallback');
   }
 
   async onModuleDestroy() {
     await this.worker?.close();
+    await this.aiScoringWorker?.close();
     await this.redisConnection?.quit();
   }
 
   getVirusScanQueue(): VirusScanQueueJob {
     return this.virusScanQueue;
+  }
+
+  getAiScoringQueue(): AiScoringQueueJob {
+    return this.aiScoringQueue;
   }
 }

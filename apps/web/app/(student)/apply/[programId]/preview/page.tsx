@@ -89,6 +89,8 @@ export default function PreviewAndSubmitPage() {
 			const blob = await requestApplicationPdf({
 				countyName: county.name,
 				fundName: county.fundName,
+				primaryColor: county.primaryColor,
+				legalReference: county.legalReference,
 				programName: program.name,
 				reference,
 				generatedAt: previewGeneratedAt,
@@ -118,7 +120,16 @@ export default function PreviewAndSubmitPage() {
 				URL.revokeObjectURL(nextPreviewUrl);
 			}
 		};
-	}, [county.fundName, county.name, previewGeneratedAt, previewSections, program, reference]);
+	}, [
+		county.fundName,
+		county.legalReference,
+		county.name,
+		county.primaryColor,
+		previewGeneratedAt,
+		previewSections,
+		program,
+		reference,
+	]);
 
 	if (!programState) {
 		return (
@@ -229,6 +240,8 @@ export default function PreviewAndSubmitPage() {
 									const blob = await requestApplicationPdf({
 										countyName: county.name,
 										fundName: county.fundName,
+										primaryColor: county.primaryColor,
+										legalReference: county.legalReference,
 										programName: program.name,
 										reference,
 										generatedAt: previewGeneratedAt,

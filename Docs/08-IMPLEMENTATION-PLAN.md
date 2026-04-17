@@ -1,9 +1,9 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, W6 In Progress)
+Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, W6 In Progress)
 Last Updated: 2026-04-17
 Owner: Engineering Team
-References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md
+References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
 
 ## Current Execution Status
 
@@ -34,13 +34,26 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - `pnpm --filter @smart-bursary/web run build` passed.
     - `pnpm --filter @smart-bursary/api run build` passed.
     - `pnpm test -- test/integration/document.e2e-spec.ts test/integration/document-scan-auth.e2e-spec.ts` in `apps/api` passed (13/13) after bringing up local `postgres` and `redis`, applying migrations, and seeding.
+- Backlog Item B-01: Completed.
+  - Implementation: Added strict section A-F payload contracts, family/HELB/prior-bursary fidelity fields, duplicate draft conflict semantics (`409 DUPLICATE_APPLICATION`), and canonical amount/disclosure syncing from section payloads.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- test/integration/student-application.e2e-spec.ts test/integration/student-application-fidelity.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts` passed (14/14).
+    - `pnpm --filter @smart-bursary/web run test` passed (16/16).
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
+- Backlog Item B-02: Completed.
+  - Implementation: Added submit-time `ai-scoring` queue enqueueing, AI queue processor invocation against `apps/ai-scoring`, internal application payload read endpoint for scoring fetch, and explicit AI queue/scoring failure lifecycle timeline events.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- test/integration/review-ai.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts test/integration/student-application.e2e-spec.ts` passed (15/15).
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
-    - `pnpm --filter @smart-bursary/web run test` passed (13/13, repeated run).
+    - `pnpm --filter @smart-bursary/web run test` passed (16/16, repeated run).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Next phase start: Phase 2C is ready when execution approval is given.
+- Next strict backlog item: `B-03 - County settings, branding, and scoring-weight UX` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
 
 ## 1. Objective
 
@@ -491,4 +504,6 @@ Exit Criteria:
 
 ## 8. Immediate Next Action
 
-Continue W6 frontend hardening for Playwright coverage and accessibility checks. Phase 2C remains the next functional slice once execution approval is given.
+Continue W6 frontend hardening for Playwright coverage and accessibility checks in parallel only when it does not block functional closure work.
+
+Next functional execution should start with `B-03 - County settings, branding, and scoring-weight UX` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because county admin configuration capabilities now depend on the stabilized submit-time AI scoring lifecycle delivered in B-02.

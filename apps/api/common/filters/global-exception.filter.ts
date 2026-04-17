@@ -27,11 +27,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 		const exceptionResponse = isHttpException ? exception.getResponse() : null;
 		const code = this.resolveErrorCode(exceptionResponse, isHttpException);
 		const message = this.resolveErrorMessage(exceptionResponse);
+		const details = this.resolveErrorDetails(exceptionResponse);
 
 		response.status(status).json({
 			error: {
 				code,
 				message,
+				...(details !== undefined ? { details } : {}),
 				timestamp: new Date().toISOString(),
 				path: request.url,
 			},
@@ -72,5 +74,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 		}
 
 		return 'Internal server error';
+	}
+
+	private resolveErrorDetails(exceptionResponse: unknown): unknown {
+		if (!exceptionResponse || typeof exceptionResponse !== 'object') {
+			return undefined;
+		}
+
+		const responseRecord = exceptionResponse as Record<string, unknown>;
+		return responseRecord.details;
 	}
 }

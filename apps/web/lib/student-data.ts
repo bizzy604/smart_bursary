@@ -56,6 +56,7 @@ export interface CountyBranding {
   fundName: string;
   logoText: string;
   primaryColor: string;
+  legalReference?: string;
 }
 
 export const countyBranding: CountyBranding = {
@@ -63,6 +64,7 @@ export const countyBranding: CountyBranding = {
   fundName: "Turkana County Education Fund",
   logoText: "TC",
   primaryColor: "#1E3A5F",
+  legalReference: "No. 4 of 2023",
 };
 
 export const programs: ProgramSummary[] = [

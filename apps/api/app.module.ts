@@ -25,6 +25,7 @@ import { DocumentModule } from './modules/document/document.module';
 import { ReviewModule } from './modules/review/review.module';
 import { AiModule } from './modules/ai/ai.module';
 import { InternalModule } from './modules/internal/internal.module';
+import { TenantModule } from './modules/tenant/tenant.module';
 import { DisbursementModule } from './modules/disbursement/disbursement.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { QueueModule } from './queue/queue.module';
@@ -48,6 +49,7 @@ import { QueueModule } from './queue/queue.module';
 		ReviewModule,
 		AiModule,
 		InternalModule,
+		TenantModule,
 		DisbursementModule,
 		ReportingModule,
 	],

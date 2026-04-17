@@ -11,6 +11,11 @@ import request from 'supertest';
 import { AppModule } from '../../app.module';
 import { PrismaService } from '../../database/prisma.service';
 import { seedReviewWorkflow } from './review-ai.helpers';
+import {
+	MockAiScoringService,
+	startMockAiScoringService,
+	waitForAiScoreCard,
+} from './review-ai-mock-scoring';
 
 const serviceKey = 'test-internal-service-key';
 
@@ -22,6 +27,8 @@ describe('Review and AI workflow (e2e)', () => {
 	let wardAdminToken = '';
 	let countyAdminToken = '';
 	let financeOfficerToken = '';
+	let studentToken = '';
+	let mockAiScoringService: MockAiScoringService | null = null;
 
 	beforeAll(async () => {
 		process.env.INTERNAL_SERVICE_KEY = serviceKey;
@@ -38,13 +45,18 @@ describe('Review and AI workflow (e2e)', () => {
 		const jwtService = new JwtService({ secret: process.env.JWT_SECRET || 'test-jwt-secret-test-jwt-secret' });
 		const seed = await seedReviewWorkflow({ prisma, jwtService, countySlug: 'turkana' });
 		programId = seed.programId;
+		studentToken = seed.studentToken;
 		wardAdminToken = seed.wardAdminToken;
 		countyAdminToken = seed.countyAdminToken;
 		financeOfficerToken = seed.financeOfficerToken;
 
+		mockAiScoringService = await startMockAiScoringService(app, serviceKey);
+		process.env.AI_SCORING_SERVICE_URL = mockAiScoringService.baseUrl;
+		process.env.AI_SCORING_REQUEST_TIMEOUT_MS = '2000';
+
 		const draftResponse = await request(app.getHttpServer())
 			.post('/api/v1/applications/draft')
-			.set('Authorization', `Bearer ${seed.studentToken}`)
+			.set('Authorization', `Bearer ${studentToken}`)
 			.send({ programId })
 			.expect(201);
 
@@ -52,39 +64,15 @@ describe('Review and AI workflow (e2e)', () => {
 
 		await request(app.getHttpServer())
 			.post('/api/v1/applications/submit')
-			.set('Authorization', `Bearer ${seed.studentToken}`)
+			.set('Authorization', `Bearer ${studentToken}`)
 			.send({ applicationId })
 			.expect(201);
 
-		await request(app.getHttpServer())
-			.post('/api/v1/internal/ai-scores')
-			.set('X-Service-Key', serviceKey)
-			.send({
-				applicationId,
-				countyId: seed.countyId,
-				totalScore: 78.5,
-				familyStatusScore: 25,
-				familyIncomeScore: 20,
-				educationBurdenScore: 15,
-				academicStandingScore: 10.5,
-				documentQualityScore: 8,
-				integrityScore: 0,
-				weightsApplied: {
-					family_status: 0.3,
-					family_income: 0.25,
-					education_burden: 0.2,
-					academic_standing: 0.1,
-					document_quality: 0.1,
-					integrity: 0.05,
-				},
-				anomalyFlags: [],
-				documentAnalysis: { FEE_STRUCTURE: { quality_score: 9 } },
-				modelVersion: 'v1.2.0',
-			})
-			.expect(201);
+		await waitForAiScoreCard(prisma, applicationId);
 	});
 
 	afterAll(async () => {
+		await mockAiScoringService?.close();
 		await app.close();
 	});
 
@@ -158,6 +146,7 @@ describe('Review and AI workflow (e2e)', () => {
 
 		expect(application.status).toBe('APPROVED');
 		expect(application.reviews.length).toBeGreaterThanOrEqual(2);
+		expect(application.timeline.some((entry) => entry.eventType === 'AI_SCORING_QUEUED')).toBe(true);
 		expect(application.timeline.some((entry) => entry.eventType === 'AI_SCORED')).toBe(true);
 		expect(application.timeline.some((entry) => entry.eventType === 'WARD_REVIEW_RECOMMENDED')).toBe(true);
 		expect(application.timeline.some((entry) => entry.eventType === 'COUNTY_REVIEW_APPROVED')).toBe(true);

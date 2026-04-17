@@ -51,6 +51,8 @@ export async function seedReviewWorkflow(args: SeedArgs): Promise<ReviewWorkflow
 		},
 	});
 
+	await markStudentSubmissionReady(args.prisma, county.id, student.id);
+
 	return {
 		countyId: county.id,
 		wardId: ward.id,
@@ -87,5 +89,59 @@ function signToken(jwtService: JwtService, user: { id: string; email: string; ro
 		role: user.role,
 		countyId: user.countyId,
 		wardId: user.wardId,
+	});
+}
+
+async function markStudentSubmissionReady(
+	prisma: PrismaClient,
+	countyId: string,
+	studentId: string,
+) {
+	await prisma.user.update({
+		where: { id: studentId },
+		data: {
+			emailVerified: true,
+			phoneVerified: true,
+		},
+	});
+
+	await prisma.studentProfile.upsert({
+		where: { userId: studentId },
+		update: {
+			fullName: 'Review Workflow Student',
+			phone: '+254700000333',
+		},
+		create: {
+			userId: studentId,
+			countyId,
+			fullName: 'Review Workflow Student',
+			phone: '+254700000333',
+		},
+	});
+
+	await prisma.academicInfo.upsert({
+		where: { userId: studentId },
+		update: {
+			institutionType: 'UNIVERSITY',
+			institutionName: 'Turkana Technical University',
+		},
+		create: {
+			userId: studentId,
+			countyId,
+			institutionType: 'UNIVERSITY',
+			institutionName: 'Turkana Technical University',
+		},
+	});
+
+	await prisma.familyFinancialInfo.upsert({
+		where: { userId: studentId },
+		update: {
+			familyStatus: 'TWO_PARENTS',
+		},
+		create: {
+			userId: studentId,
+			countyId,
+			familyStatus: 'TWO_PARENTS',
+		},
 	});
 }

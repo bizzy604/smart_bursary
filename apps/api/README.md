@@ -108,3 +108,38 @@ Application semantic validation responses include `422` domain codes for:
 - `INELIGIBLE`
 - `PROGRAM_CLOSED`
 - `PROFILE_INCOMPLETE`
+
+## Application Form Data Fidelity
+
+Application section updates now enforce strict section contracts using these keys:
+
+- `section-a` (personal and academic)
+- `section-b` (amounts, HELB status, prior bursary disclosure)
+- `section-c` (family status and sibling burden)
+- `section-d` (household income and hardship narrative)
+- `section-e` (other disclosures and declarations)
+- `section-f` (supporting attachment metadata)
+
+Duplicate draft creation for the same student and program is rejected with `409 Conflict` and code:
+
+- `DUPLICATE_APPLICATION`
+
+## AI Scoring Orchestration
+
+Submission now triggers asynchronous AI scoring via the `ai-scoring` queue.
+
+- Student submit endpoint enqueues `score-application` jobs.
+- Queue worker invokes the AI scoring service `/score` endpoint.
+- AI service fetches application data from internal API and ingests score cards back into NestJS.
+
+Internal AI service endpoints (service-key protected):
+
+- `GET /api/v1/internal/applications/:id`
+- `POST /api/v1/internal/ai-scores`
+
+Timeline lifecycle events now include:
+
+- `AI_SCORING_QUEUED`
+- `AI_SCORED` or `AI_SCORE_UPDATED`
+- `AI_SCORING_FAILED`
+- `AI_SCORING_QUEUE_FAILED`

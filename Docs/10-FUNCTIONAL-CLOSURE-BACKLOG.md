@@ -1,0 +1,304 @@
+# KauntyBursary Functional Closure Backlog
+
+Status: In Progress (B-01 completed, B-02 completed)  
+Last Updated: 2026-04-17  
+Source Inputs: `Docs/01-PRD.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`
+
+## Objective
+
+Provide one strict, dependency-ordered backlog for every remaining PRD functional requirement currently marked `Partial` or `Missing`.
+
+This backlog supersedes any assumption that the next item should be chosen only from the original phase labels. Original phase labels remain useful for provenance, but execution should now follow the order in this document.
+
+## Ordering Rules
+
+1. Work one backlog item at a time.
+2. Do not start an item until every dependency listed for it is complete.
+3. On completion of each item, update `Docs/09-PRD-TRACEABILITY-MATRIX.md` with evidence paths and status changes.
+4. Validation must cover all touched API, web, async, and document/report surfaces.
+5. W6 and P7 hardening may continue only when they do not obscure functional closure work.
+
+## Strict Queue
+
+| Order | Backlog Item | PRD IDs Closed | Why This Comes Next | Depends On |
+|---|---|---|---|---|
+| B-01 | Application data fidelity and duplicate semantics | `SP-02`, `SP-04`, `AF-01`, `AF-05` | AI scoring, committee review, exports, and receipts all depend on canonical application data and correct duplicate behavior. | Completed Phase 2A and 2B |
+| B-02 | AI scoring trigger, breakdown, and anomaly lifecycle | `AI-01`, `AI-02`, `AI-04` | Review, exports, and anomaly surfaces are not trustworthy until submit-time AI orchestration is complete. | B-01 |
+| B-03 | County settings, branding, and scoring-weight UX | `TM-02`, `AF-06`, `AI-05` | Tenant branding and scoring configuration are core county-admin functional controls and should be usable before broader SaaS rollout. | B-02 |
+| B-04 | Tenant provisioning and plan-tier gates | `TM-03`, `TM-04` | Full SaaS readiness requires county bootstrap and feature gating, but it should follow stable county settings behavior. | B-03 |
+| B-05 | Disbursement execution, receipts, and retry policy | `DB-01`, `DB-02`, `DB-03`, `DB-04` | Reporting and finance workflows depend on real payment execution, retry state, and downloadable receipts. | B-02 |
+| B-06 | Reporting and historical analytics completion | `RP-01`, `RP-02`, `RP-03`, `RP-04` | OCOB and ward exports need completed AI and disbursement data before they can be validated against acceptance criteria. | B-05 |
+| B-07 | Status-change notification integration | `RW-04` | Notifications should be wired after the main workflow and disbursement transitions are stable, to avoid reworking event emitters. | B-05 |
+| B-08 | Isolation, auth, workflow, and audit closure | `TM-01`, `AU-04`, `AU-05`, `AI-06`, `RW-01`, `RW-05` | These are mostly invariant, enforcement, and regression-proof items that should close immediately before release hardening signoff. | B-06, B-07 |
+
+## Backlog Detail
+
+### B-01 - Application Data Fidelity and Duplicate Semantics
+
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- test/integration/student-application.e2e-spec.ts test/integration/student-application-fidelity.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts` passed (14/14).
+- `pnpm --filter @smart-bursary/web run test` passed (16/16).
+- `pnpm --filter @smart-bursary/web run typecheck` passed.
+- `pnpm --filter @smart-bursary/web run build` passed.
+- Form mapping checklist captured in `Docs/B-01-FORM-MAPPING-CHECKLIST.md`.
+- Traceability updates applied in `Docs/09-PRD-TRACEABILITY-MATRIX.md` for `SP-02`, `SP-04`, `AF-01`, and `AF-05`.
+
+PRD IDs:
+- `SP-02`
+- `SP-04`
+- `AF-01`
+- `AF-05`
+
+Scope:
+- Complete formal field mapping from the gazetted county form into the web wizard and API payload model.
+- Ensure family, disability, sibling burden, HELB, prior bursary, and related disclosure fields are persisted and surfaced end to end.
+- Change duplicate draft/application creation behavior from "return existing record" to explicit conflict semantics with explanation.
+
+Primary Areas:
+- `apps/web/app/(student)/apply/[programId]/*`
+- `apps/web/store/application-wizard-store.ts`
+- `apps/api/modules/application/*`
+- `apps/api/modules/profile/*`
+- `apps/api/test/integration/student-application*.ts`
+
+Exit Criteria:
+- All official required fields are captured and stored.
+- Committee- and AI-facing surfaces can read the required family and disclosure fields.
+- Duplicate application attempt returns `409` with a clear conflict payload.
+
+Validation:
+- Form-field mapping checklist against `Docs/Education-Fund-Application-Form.pdf`
+- API integration coverage for full-section persistence and duplicate conflict behavior
+- Web typecheck, build, and critical wizard tests
+
+### B-02 - AI Scoring Trigger, Breakdown, and Anomaly Lifecycle
+
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- test/integration/review-ai.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts test/integration/student-application.e2e-spec.ts` passed (15/15).
+- Submit flow now enqueues `ai-scoring` jobs via `apps/api/queue/queue.service.ts` and `apps/api/modules/application/application-submission.service.ts`.
+- Queue processor integration implemented in `apps/api/queue/processors/ai-scoring.processor.ts`.
+- Internal AI fetch contract completed with `GET /internal/applications/:id` in `apps/api/modules/internal/internal.controller.ts` and `apps/api/modules/internal/internal-application-query.service.ts`.
+- Failure lifecycle visibility validated via `AI_SCORING_FAILED`/`AI_SCORING_QUEUE_FAILED` timeline coverage in `apps/api/test/integration/review-ai-failure.e2e-spec.ts`.
+
+PRD IDs:
+- `AI-01`
+- `AI-02`
+- `AI-04`
+
+Scope:
+- Enqueue AI scoring automatically on successful submission.
+- Persist score lifecycle state, 0-100 breakdown, and anomaly flags on the application.
+- Complete the internal ingest/update loop between NestJS and `apps/ai-scoring`.
+
+Primary Areas:
+- `apps/api/modules/application/*`
+- `apps/api/modules/ai/*`
+- `apps/api/modules/internal/*`
+- `apps/api/queue/*`
+- `apps/ai-scoring/*`
+
+Exit Criteria:
+- Submission enqueues scoring within the accepted time window.
+- Ward/county review surfaces receive score breakdown and anomalies for reviewed applications.
+- Failure handling is explicit and visible without breaking submission flow.
+
+Validation:
+- Submit -> queue -> ingest -> review visibility end-to-end test
+- Negative-path coverage for failed or delayed scoring
+- API build and integration suite for review/AI paths
+
+### B-03 - County Settings, Branding, and Scoring-Weight UX
+
+PRD IDs:
+- `TM-02`
+- `AF-06`
+- `AI-05`
+
+Scope:
+- Replace placeholder county settings pages with working branding, form customization, and AI scoring configuration flows.
+- Ensure branding values affect generated PDFs and county-facing surfaces.
+- Ensure scoring weight changes persist per county and are reflected in score recalculation paths.
+
+Primary Areas:
+- `apps/web/app/(admin)/settings/*`
+- `apps/api/modules/tenant/*`
+- `apps/api/modules/ai/*`
+- Branding consumers in `apps/web/components/layout/*` and PDF generation utilities
+
+Exit Criteria:
+- County admins can manage brand profile and approved form customization controls.
+- County admins can manage scoring weights through the UI.
+- Branding values flow into PDFs and relevant UI surfaces.
+
+Validation:
+- Web component/route tests for settings pages
+- API integration tests for county isolation and settings writes
+- PDF regression checks for branding application
+
+### B-04 - Tenant Provisioning and Plan-Tier Gates
+
+PRD IDs:
+- `TM-03`
+- `TM-04`
+
+Scope:
+- Implement platform-operator provisioning APIs and services.
+- Seed county, ward registry data, and an initial super admin/operator path per tenant.
+- Enforce feature availability by `planTier` at API level.
+
+Primary Areas:
+- `apps/api/modules/tenant/*`
+- Provisioning seed/runtime utilities
+- Feature-gated modules such as settings, reporting, and advanced AI controls
+
+Exit Criteria:
+- Platform operator provisions a new county through supported APIs/workflow.
+- Feature-gated endpoints reject access when the county plan does not allow them.
+
+Validation:
+- Provisioning integration test for a fresh tenant
+- Feature gate regression tests across at least one restricted and one enterprise-only capability
+
+### B-05 - Disbursement Execution, Receipts, and Retry Policy
+
+PRD IDs:
+- `DB-01`
+- `DB-02`
+- `DB-03`
+- `DB-04`
+
+Scope:
+- Complete real M-Pesa B2C execution flow and persisted transaction status.
+- Finish EFT/RTGS export endpoints and operator workflow.
+- Generate downloadable receipt PDFs.
+- Add retry policy, attempt counters, terminal failure state, and finance alerting.
+
+Primary Areas:
+- `apps/api/modules/disbursement/*`
+- Student receipt download surface in `apps/web`
+- Queue/retry infrastructure and alert hooks
+
+Exit Criteria:
+- Finance officer can trigger real disbursement and observe resulting transaction status.
+- RTGS exports are downloadable in the expected format.
+- Receipt PDFs are downloadable by the student.
+- Failed disbursements retry up to 3 times and then escalate.
+
+Validation:
+- Disbursement integration tests covering success, retry, and terminal failure
+- Receipt PDF generation tests
+- Export format snapshots
+
+### B-06 - Reporting and Historical Analytics Completion
+
+PRD IDs:
+- `RP-01`
+- `RP-02`
+- `RP-03`
+- `RP-04`
+
+Scope:
+- Finish near-real-time dashboard refresh behavior.
+- Complete OCOB-ready report outputs.
+- Ensure ward exports include AI score, recommendation, and reviewer metadata.
+- Add historical trend filters by year, program, ward, and education level.
+
+Primary Areas:
+- `apps/api/modules/reporting/*`
+- `apps/web/app/(admin)/county/reports/*`
+- `apps/web/app/(admin)/ward/reports/*`
+
+Exit Criteria:
+- Dashboard, OCOB export, ward export, and trend views meet PRD acceptance intent.
+- Required filters and report fields are present and validated.
+
+Validation:
+- Reporting API contract tests
+- Export snapshot/content validation
+- Web build/typecheck and route tests for reporting states
+
+### B-07 - Status-Change Notification Integration
+
+PRD IDs:
+- `RW-04`
+
+Scope:
+- Implement SMS delivery service and queue-backed notification dispatch.
+- Emit notifications for submission, review transitions, final decisions, and disbursement-related status changes.
+- Persist delivery records for audit/support visibility.
+
+Primary Areas:
+- `apps/api/modules/notification/*`
+- Workflow transition points in `application`, `review`, and `disbursement`
+
+Exit Criteria:
+- Every required status transition emits an SMS job and delivery record.
+- Failures are visible and do not block the underlying workflow transaction.
+
+Validation:
+- Integration tests for status transitions and notification job creation
+- Delivery failure and retry-path coverage
+
+### B-08 - Isolation, Auth, Workflow, and Audit Closure
+
+PRD IDs:
+- `TM-01`
+- `AU-04`
+- `AU-05`
+- `AI-06`
+- `RW-01`
+- `RW-05`
+
+Scope:
+- Close DB-level tenant/ward isolation guarantees and prove them with regression tests.
+- Expand RBAC coverage across the endpoint matrix.
+- Add explicit safeguards ensuring AI cannot change application outcomes.
+- Complete workflow state-machine and audit-note visibility invariants.
+
+Primary Areas:
+- `apps/api/common/guards/*`
+- `apps/api/modules/review/*`
+- `apps/api/modules/application/*`
+- `apps/api/prisma/migrations/*`
+- Security and workflow integration tests
+
+Exit Criteria:
+- RLS or equivalent DB-level isolation guarantees are implemented and verified.
+- Role matrix tests and ward-scope regression tests are green.
+- Timeline and note visibility satisfy PRD audit expectations.
+- No AI path can auto-approve or auto-reject an application.
+
+Validation:
+- Security/regression test pack
+- Workflow state-machine tests
+- Audit trail query and note-visibility tests
+
+## Operational Gap Not Counted In PRD Totals
+
+The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled with B-03 because it blocks county-admin usability:
+
+| Item | Description | Recommended Placement |
+|---|---|---|
+| O-01 | County Admin program management UI for create, edit, publish, and close flows | Execute alongside B-03 or immediately before it |
+
+Primary Areas:
+- `apps/web/app/(admin)/settings/programs/page.tsx`
+- `apps/web/app/(admin)/settings/programs/new/page.tsx`
+- `apps/web/app/(admin)/settings/programs/[id]/page.tsx`
+
+## Recommended Immediate Next Action
+
+Start `B-03 - County settings, branding, and scoring-weight UX`.
+
+Reason:
+- B-02 orchestration and anomaly lifecycle are now complete and validated.
+- County admin usability now depends on enabling settings, branding, and scoring-weight controls.
+- B-03 is the strict next dependency in the backlog queue.

@@ -9,6 +9,8 @@ export const runtime = "nodejs";
 type PreviewPdfPayload = {
 	countyName?: string;
 	fundName?: string;
+	primaryColor?: string;
+	legalReference?: string;
 	programName?: string;
 	reference?: string;
 	generatedAt?: string;
@@ -28,6 +30,8 @@ export async function POST(request: Request) {
 	const pdfBytes = await renderApplicationPdf({
 		countyName: body.countyName ?? countyBranding.name,
 		fundName: body.fundName ?? countyBranding.fundName,
+		primaryColor: body.primaryColor ?? countyBranding.primaryColor,
+		legalReference: body.legalReference ?? countyBranding.legalReference ?? '',
 		programName: body.programName,
 		reference: body.reference,
 		generatedAt: body.generatedAt ?? new Date().toISOString(),

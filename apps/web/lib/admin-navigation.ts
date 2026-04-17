@@ -16,4 +16,5 @@ export const countyNavigationItems: AdminNavigationItem[] = [
   { href: "/county/review", label: "Review Queue" },
   { href: "/county/disbursements", label: "Disbursements" },
   { href: "/county/reports", label: "Reports" },
+  { href: "/settings", label: "Settings" },
 ];

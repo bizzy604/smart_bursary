@@ -3,6 +3,8 @@ import type { PreviewSection } from "@/lib/application-preview";
 export interface ApplicationPdfPayload {
 	countyName: string;
 	fundName: string;
+	primaryColor?: string;
+	legalReference?: string;
 	programName: string;
 	reference: string;
 	generatedAt: string;

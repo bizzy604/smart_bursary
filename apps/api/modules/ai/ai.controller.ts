@@ -64,6 +64,13 @@ export class AiController {
 		);
 	}
 
+	@Get('admin/scoring-weights')
+	@Roles(UserRole.COUNTY_ADMIN)
+	@ApiOperation({ summary: 'Get county scoring weights' })
+	getScoringWeights(@County() countyId: string) {
+		return this.scoringWeightsService.getScoringWeights(countyId);
+	}
+
 	@Patch('admin/scoring-weights')
 	@Roles(UserRole.COUNTY_ADMIN)
 	@ApiOperation({ summary: 'Update county scoring weights' })

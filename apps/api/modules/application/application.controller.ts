@@ -14,6 +14,7 @@ import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { SubmitApplicationDto } from './dto/submit-application.dto';
 import { UpdateApplicationSectionDto } from './dto/update-application-section.dto';
+import { SectionService } from './section.service';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Applications')
@@ -23,6 +24,7 @@ export class ApplicationController {
 	constructor(
 		private readonly applicationService: ApplicationService,
 		private readonly applicationSubmissionService: ApplicationSubmissionService,
+		private readonly sectionService: SectionService,
 	) {}
 
 	@Post('draft')
@@ -70,7 +72,7 @@ export class ApplicationController {
 		@Body() dto: UpdateApplicationSectionDto,
 	) {
 		const applicantId = user['userId'] as string;
-		return this.applicationService.updateSection(countyId, applicantId, applicationId, dto);
+		return this.sectionService.updateSection(countyId, applicantId, applicationId, dto);
 	}
 
 	@Post('submit')

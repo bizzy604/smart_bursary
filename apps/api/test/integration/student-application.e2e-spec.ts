@@ -95,13 +95,22 @@ const response = await request(app.getHttpServer())
 .put(`/api/v1/applications/${applicationId}/section`)
 .set('Authorization', `Bearer ${studentToken}`)
 .send({
-sectionKey: 'ACADEMIC_INFO',
-data: JSON.stringify({ institutionName: 'Test School', yearFormClass: '4' }),
+sectionKey: 'section-a',
+data: JSON.stringify({
+fullName: 'Test Student',
+nationalIdOrBirthCert: '12345678',
+phone: '+254700000001',
+email: 'student@example.com',
+institution: 'Test University',
+admissionNumber: 'TU-001',
+course: 'BSc Education',
+yearOfStudy: 'Year 2',
+}),
 })
 .expect(200);
 
-expect(response.body.sectionKey).toBe('ACADEMIC_INFO');
-expect(response.body.isComplete).toBe(false);
+expect(response.body.sectionKey).toBe('section-a');
+expect(response.body.isComplete).toBe(true);
 expect(typeof response.body.data).toBe('object');
 });
 
@@ -134,9 +143,11 @@ const response = await request(app.getHttpServer())
 .post('/api/v1/applications/draft')
 .set('Authorization', `Bearer ${studentToken}`)
 .send({ programId })
-.expect(201);
+.expect(409);
 
-expect(response.body.id).toBe(applicationId);
+const code = response.body.error?.code ?? response.body.code ?? response.body.message?.code;
+expect(code).toBe('DUPLICATE_APPLICATION');
+expect(response.body.error?.details?.applicationId).toBe(applicationId);
 });
 
 it('student cannot create draft on closed program', async () => {

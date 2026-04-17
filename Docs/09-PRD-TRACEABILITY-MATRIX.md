@@ -4,6 +4,7 @@ Status: Maintained (Phase 0 deliverable)
 Last Updated: 2026-04-17
 Source of Truth: Docs/01-PRD.md
 Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
+Detailed Remaining Queue: Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md
 
 ## Classification Legend
 
@@ -15,9 +16,9 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 ## Summary Snapshot
 
 - Total functional requirements tracked: 42
-- Implemented: 15
-- Partial: 20
-- Missing: 7
+- Implemented: 22
+- Partial: 14
+- Missing: 6
 - Deferred: 0
 
 ## Requirement Matrix
@@ -34,23 +35,23 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 | AU-04 | RBAC roles enforced | Partial | apps/api/common/guards/roles.guard.ts, apps/api/modules/review/review.controller.ts, apps/api/modules/disbursement/disbursement.controller.ts | Role decorators/guard exist, but full endpoint matrix validation is not complete | Phase 7 | BE |
 | AU-05 | Ward admin scope restriction | Partial | apps/api/modules/review/ward-review.service.ts, apps/api/modules/ai/ai.controller.ts | Service-layer ward checks exist; full RLS-backed guarantee and broad integration tests missing | Phase 7 | BE |
 | SP-01 | Multi-step profile completion before submit | Implemented | apps/api/modules/profile/profile.controller.ts, apps/api/modules/profile/profile.service.ts, apps/api/modules/profile/profile-completion.service.ts, apps/api/modules/application/application-submission.service.ts, apps/api/test/integration/profile-gating.e2e-spec.ts | Personal, academic, and family profile sections are enforced prior to submission | Phase 2A (new) | BE |
-| SP-02 | Capture official form fields A-G | Partial | apps/web/app/(student)/apply/[programId]/section-a/page.tsx, apps/web/app/(student)/apply/[programId]/section-f/page.tsx, apps/api/modules/application/application.service.ts | Wizard exists, but formal field mapping/validation parity to gazetted schema is incomplete | Phase 2A (new) | BE+FE |
+| SP-02 | Capture official form fields A-G | Implemented | apps/web/app/(student)/apply/[programId]/section-b/page.tsx, apps/web/app/(student)/apply/[programId]/section-c/page.tsx, apps/api/modules/application/section.service.ts, apps/api/modules/application/dto/section-a.dto.ts through section-f.dto.ts, apps/api/test/integration/student-application-fidelity.e2e-spec.ts | Wizard payload mapping and section-by-section API contract validation are enforced and validated. | B-01 | BE+FE |
 | SP-03 | National ID unique per county | Implemented | apps/api/prisma/schema.prisma, apps/api/prisma/migrations/20260417113000_phase2a_profile_national_id_unique/migration.sql | County-scoped composite uniqueness enforced at DB and Prisma model levels | Phase 2A (new) | BE |
-| SP-04 | Family/financial/HELB/prior-bursary captured and surfaced | Partial | apps/api/prisma/schema.prisma (family/financial models), apps/api/modules/ai/ai-score.service.ts | Data model exists, but profile APIs/surface paths are incomplete | Phase 2A (new) | BE+FE |
+| SP-04 | Family/financial/HELB/prior-bursary captured and surfaced | Implemented | apps/web/app/(student)/apply/[programId]/section-b/page.tsx, apps/web/app/(student)/apply/[programId]/section-c/page.tsx, apps/web/app/(student)/apply/[programId]/section-e/page.tsx, apps/api/modules/application/dto/section-b.dto.ts, apps/api/modules/application/dto/section-c.dto.ts, apps/api/modules/application/dto/section-d.dto.ts, apps/api/modules/application/dto/section-e.dto.ts, apps/api/test/integration/student-application-fidelity.e2e-spec.ts | Family status, guardian income context, sibling burden, HELB status, prior bursary disclosure, and disability disclosures are persisted and surfaced through section payloads. | B-01 | BE+FE |
 | BP-01 | County program creation and management | Implemented | apps/api/modules/program/program.controller.ts, apps/api/modules/program/program-lifecycle.service.ts, apps/api/modules/program/dto/create-program.dto.ts, apps/api/modules/program/dto/update-program.dto.ts, apps/api/test/integration/program-lifecycle.e2e-spec.ts | Lifecycle endpoints implemented and validated with passing integration tests (8/8) | Phase 1 | BE |
 | BP-02 | Eligibility-based program visibility | Implemented | apps/api/modules/program/eligibility.service.ts, apps/api/modules/program/program.service.ts, apps/api/modules/program/program.controller.ts, apps/api/test/integration/program-eligibility.e2e-spec.ts | Student discovery now computes eligibility and exposes ineligibility reason fields with integration validation | Phase 2 | BE |
 | BP-03 | Reject late submissions after closes_at | Implemented | apps/api/modules/application/application-submission.service.ts, apps/api/common/filters/global-exception.filter.ts, apps/api/test/integration/program-eligibility.e2e-spec.ts | Submission path now returns semantic `PROGRAM_CLOSED` validation error when closes_at has elapsed | Phase 2 | BE |
 | BP-04 | Budget ceiling via advisory lock | Implemented | apps/api/modules/review/county-review.service.ts | Advisory lock and ceiling guard exist; needs stress validation in hardening | Phase 7 validation | BE |
-| AF-01 | Multi-step wizard A-F aligned with official form | Partial | apps/web/app/(student)/apply/[programId]/section-a/page.tsx through section-f/page.tsx | Wizard exists; strict legal-form parity validation still pending | Phase 2A (new) | FE |
+| AF-01 | Multi-step wizard A-F aligned with official form | Implemented | apps/web/app/(student)/apply/[programId]/section-a/page.tsx through section-f/page.tsx, apps/web/store/application-wizard-store.ts, apps/web/store/application-wizard-store.test.ts, apps/api/modules/application/section.service.ts | Wizard captures the official section payload shape and backend validates each section contract before persistence. | B-01 | FE |
 | AF-02 | Final pre-submit PDF preview with official layout | Implemented | apps/web/app/(student)/apply/[programId]/preview/page.tsx, apps/web/lib/application-pdf.tsx, apps/web/lib/application-pdf-client.ts, apps/web/app/api/applications/preview/pdf/route.ts | Preview now renders server-generated PDF bytes from captured wizard sections | Phase 2B (new) | FE |
 | AF-03 | Download filled PDF before/after submission | Implemented | apps/web/components/application/application-pdf-button.tsx, apps/web/store/student-application-store.ts, apps/web/app/(student)/applications/[id]/page.tsx, apps/web/components/application/application-card.tsx | Download actions now reuse captured submission snapshots or hydrated wizard sections to generate the PDF | Phase 2B (new) | FE+BE |
 | AF-04 | Document uploads with validation, virus scan, S3 storage | Implemented | apps/api/modules/document/s3.service.ts, apps/api/modules/document/document.service.ts, apps/api/test/integration/document.e2e-spec.ts, apps/api/test/integration/document-scan-auth.e2e-spec.ts | S3-backed upload, signed download URLs, and async scan flow are covered by integration tests | Phase 2B (new) | BE |
-| AF-05 | Duplicate applications rejected with conflict | Partial | apps/api/prisma/schema.prisma (applicantId/programId unique), apps/api/modules/application/application.service.ts | Duplicate attempts return existing record rather than explicit conflict response | Phase 2 | BE |
+| AF-05 | Duplicate applications rejected with conflict | Implemented | apps/api/prisma/schema.prisma, apps/api/modules/application/application-submission.service.ts, apps/api/common/filters/global-exception.filter.ts, apps/api/test/integration/student-application.e2e-spec.ts | Duplicate draft attempts now return `409` with `DUPLICATE_APPLICATION` code and structured details payload. | B-01 | BE |
 | AF-06 | County form customization settings | Missing | apps/web/app/(admin)/settings/branding/page.tsx (placeholder), apps/web/app/(admin)/settings/page.tsx (placeholder) | Settings UI and backend form customization controls missing | Phase 4 | BE+FE |
-| AI-01 | Auto-enqueue AI scoring on submit | Missing | apps/api/modules/application/application.service.ts, apps/api/queue/queue.module.ts | Submit flow does not enqueue AI scoring job | Phase 2C (new) | BE |
-| AI-02 | AI scoring dimensions and 0-100 breakdown | Partial | apps/api/modules/internal/internal.controller.ts, apps/api/modules/internal/dto/ingest-ai-score.dto.ts, apps/ai-scoring/* | Ingestion contract exists; end-to-end triggered scoring pipeline from submit is incomplete | Phase 2C (new) | BE+AI |
+| AI-01 | Auto-enqueue AI scoring on submit | Implemented | apps/api/modules/application/application-submission.service.ts, apps/api/queue/queue.service.ts, apps/api/queue/processors/ai-scoring.processor.ts, apps/api/test/integration/review-ai.e2e-spec.ts | Submission now enqueues `ai-scoring` jobs and records queue lifecycle timeline events without blocking successful submission. | B-02 | BE |
+| AI-02 | AI scoring dimensions and 0-100 breakdown | Implemented | apps/api/modules/internal/internal.controller.ts, apps/api/modules/internal/internal-application-query.service.ts, apps/api/modules/internal/dto/ingest-ai-score.dto.ts, apps/api/modules/ai/ai-score.service.ts, apps/ai-scoring/scoring/pipeline.py, apps/api/test/integration/review-ai.e2e-spec.ts | End-to-end submit -> AI service -> internal ingest now persists full 0-100 score and dimension breakdown for reviewer consumption. | B-02 | BE+AI |
 | AI-03 | Score card visible only to ward/finance/county roles | Implemented | apps/api/modules/ai/ai.controller.ts | Role scope appears correct; validate with security regression tests | Phase 7 validation | BE |
-| AI-04 | Anomaly flags surfaced | Partial | apps/api/modules/internal/dto/ingest-ai-score.dto.ts, apps/web/components/application/ai-score-card.tsx | Data structures and UI exist; systematic anomaly generation flow is incomplete | Phase 2C (new) | BE+FE |
+| AI-04 | Anomaly flags surfaced | Implemented | apps/api/modules/internal/dto/ingest-ai-score.dto.ts, apps/api/modules/ai/ai-score.service.ts, apps/web/components/application/ai-score-card.tsx, apps/api/test/integration/review-ai.e2e-spec.ts, apps/api/test/integration/review-ai-failure.e2e-spec.ts | Anomaly flags now flow from queue-triggered scoring into persisted score cards and remain visible on reviewer score surfaces, with explicit failed-scoring lifecycle coverage. | B-02 | BE+FE |
 | AI-05 | County-configurable scoring weights | Partial | apps/api/modules/ai/ai.controller.ts, apps/api/modules/ai/scoring-weights.service.ts, apps/web/app/(admin)/settings/ai-scoring/page.tsx (placeholder) | Backend endpoint exists; county admin settings UI remains placeholder | Phase 4 | BE+FE |
 | AI-06 | AI never auto-approves/rejects | Partial | apps/api/modules/internal/internal.controller.ts, apps/api/modules/review/review.controller.ts | Separation exists, but explicit safeguards and regression tests should be hardened | Phase 7 | BE |
 | RW-01 | Workflow statuses with timeline audit | Partial | apps/api/modules/application/application.service.ts, apps/api/modules/review/ward-review.service.ts, apps/api/modules/review/county-review.service.ts | Core transitions/timeline exist; full state-machine and audit invariants need coverage | Phase 7 | BE |
@@ -80,6 +81,8 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 - These have been added to the implementation plan addendum and should be maintained there going forward.
 
 ## Suggested Execution Order Update
+
+For strict ordering of the remaining `Partial` and `Missing` rows, use `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`. The list below remains a phase-oriented view rather than the detailed dependency queue.
 
 To keep dependency order coherent:
 

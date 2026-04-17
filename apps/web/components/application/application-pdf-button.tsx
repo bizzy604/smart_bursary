@@ -71,6 +71,8 @@ export function ApplicationPdfButton({
 			const blob = await requestApplicationPdf({
 				countyName: county.name,
 				fundName: county.fundName,
+				primaryColor: county.primaryColor,
+				legalReference: county.legalReference,
 				programName,
 				reference,
 				generatedAt,

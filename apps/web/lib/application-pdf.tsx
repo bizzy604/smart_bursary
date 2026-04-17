@@ -6,6 +6,8 @@ import type { PreviewSection } from "@/lib/application-preview";
 type ApplicationPdfParams = {
 	countyName: string;
 	fundName: string;
+	primaryColor: string;
+	legalReference: string;
 	programName: string;
 	reference: string;
 	generatedAt: string;
@@ -94,25 +96,43 @@ const styles = StyleSheet.create({
 	},
 });
 
+function toRgba(hexColor: string, alpha: number): string {
+	const normalized = hexColor.replace("#", "");
+	if (normalized.length !== 6) {
+		return `rgba(13, 43, 78, ${alpha})`;
+	}
+
+	const r = Number.parseInt(normalized.slice(0, 2), 16);
+	const g = Number.parseInt(normalized.slice(2, 4), 16);
+	const b = Number.parseInt(normalized.slice(4, 6), 16);
+	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function ApplicationPdfDocument(params: ApplicationPdfParams) {
+	const accentColor = params.primaryColor || "#0D2B4E";
+	const sectionBackground = toRgba(accentColor, 0.1);
+
 	return (
 		<Document>
 			<Page size="A4" style={styles.page}>
-				<View style={styles.header}>
-					<Text style={styles.headerCaption}>County Government Bursary Form</Text>
-					<Text style={styles.headerTitle}>
+				<View style={[styles.header, { borderColor: accentColor }]}> 
+					<Text style={[styles.headerCaption, { color: accentColor }]}>County Government Bursary Form</Text>
+					<Text style={[styles.headerTitle, { color: accentColor }]}> 
 						{params.countyName} - {params.fundName}
 					</Text>
 					<View style={styles.metaRow}>
 						<Text style={styles.metaText}>Program: {params.programName}</Text>
 						<Text style={styles.metaText}>Reference: {params.reference}</Text>
+						<Text style={styles.metaText}>Legal Ref: {params.legalReference || "-"}</Text>
 						<Text style={styles.metaText}>Generated: {formatShortDate(params.generatedAt)}</Text>
 					</View>
 				</View>
 
 				{params.sections.map((section) => (
 					<View key={section.slug} style={styles.section}>
-						<Text style={styles.sectionTitle}>{section.title}</Text>
+						<Text style={[styles.sectionTitle, { backgroundColor: sectionBackground, color: accentColor }]}> 
+							{section.title}
+						</Text>
 						{section.entries.length > 0 ? (
 							section.entries.map((entry) => (
 								<View key={`${section.slug}-${entry.label}`} style={styles.row}>

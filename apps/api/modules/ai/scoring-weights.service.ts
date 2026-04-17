@@ -7,6 +7,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import {
+	resolveScoringWeights,
+	scoringWeightsToRecord,
+} from './scoring-weights.constants';
 import { ScoringWeightsDto } from './dto/scoring-weights.dto';
 
 const MAX_WEIGHT = 0.4;
@@ -16,6 +20,31 @@ const TOTAL_EPSILON = 0.0001;
 @Injectable()
 export class ScoringWeightsService {
 	constructor(private readonly prisma: PrismaService) {}
+
+	async getScoringWeights(countyId: string) {
+		const county = await this.prisma.county.findUnique({
+			where: { id: countyId },
+			select: { settings: true },
+		});
+
+		if (!county) {
+			throw new NotFoundException('County not found.');
+		}
+
+		const settings = this.asObject(county.settings);
+		const weights = resolveScoringWeights(settings.scoringWeights);
+		const updatedAt =
+			typeof settings.scoringWeightsUpdatedAt === 'string'
+				? settings.scoringWeightsUpdatedAt
+				: null;
+
+		return {
+			data: {
+				weights: scoringWeightsToRecord(weights),
+				scoringWeightsUpdatedAt: updatedAt,
+			},
+		};
+	}
 
 	async updateScoringWeights(countyId: string, dto: ScoringWeightsDto) {
 		const weights = Object.values(dto);
@@ -39,10 +68,12 @@ export class ScoringWeightsService {
 		}
 
 		const settings = this.asObject(county.settings);
+		const normalized = resolveScoringWeights(dto);
+		const updatedAt = new Date().toISOString();
 		const nextSettings = {
 			...settings,
-			scoringWeights: dto,
-			scoringWeightsUpdatedAt: new Date().toISOString(),
+			scoringWeights: normalized,
+			scoringWeightsUpdatedAt: updatedAt,
 		};
 
 		await this.prisma.county.update({
@@ -53,6 +84,8 @@ export class ScoringWeightsService {
 		return {
 			data: {
 				weightsUpdated: true,
+				weights: scoringWeightsToRecord(normalized),
+				scoringWeightsUpdatedAt: updatedAt,
 				effectiveFrom: 'next cycle',
 			},
 		};
