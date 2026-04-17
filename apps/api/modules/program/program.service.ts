@@ -1,9 +1,10 @@
 /**
  * Purpose: Query and expose available bursary programs to students.
- * Why important: Student-scoped program discovery with county and program status filtering.
- * Used by: ProgramController endpoints.
+ * Why important: Provides county-scoped program discovery and details lookup.
+ * Used by: ProgramController list and read endpoints.
  */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ProgramStatus } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
 import { ListProgramsDto } from './dto/list-programs.dto';
@@ -12,13 +13,44 @@ import { ListProgramsDto } from './dto/list-programs.dto';
 export class ProgramService {
 	constructor(private readonly prisma: PrismaService) {}
 
+	async listPrograms(countyId: string, dto: ListProgramsDto) {
+		const status = this.parseStatus(dto.status);
+
+		return this.prisma.bursaryProgram.findMany({
+			where: {
+				countyId,
+				...(status ? { status } : {}),
+				...(dto.academicYear ? { academicYear: dto.academicYear } : {}),
+			},
+			select: {
+				id: true,
+				name: true,
+				description: true,
+				budgetCeiling: true,
+				allocatedTotal: true,
+				disbursedTotal: true,
+				opensAt: true,
+				closesAt: true,
+				academicYear: true,
+				status: true,
+				eligibilityRules: {
+					select: {
+						ruleType: true,
+						parameters: true,
+					},
+				},
+			},
+			orderBy: { opensAt: 'desc' },
+		});
+	}
+
 	async listActivePrograms(countyId: string, dto: ListProgramsDto) {
 		const now = new Date();
 
-		const programs = await this.prisma.bursaryProgram.findMany({
+		return this.prisma.bursaryProgram.findMany({
 			where: {
 				countyId,
-				status: 'ACTIVE',
+				status: ProgramStatus.ACTIVE,
 				opensAt: { lte: now },
 				closesAt: { gte: now },
 				...(dto.academicYear && { academicYear: dto.academicYear }),
@@ -41,8 +73,6 @@ export class ProgramService {
 			},
 			orderBy: { opensAt: 'desc' },
 		});
-
-		return programs;
 	}
 
 	async getProgramById(countyId: string, programId: string) {
@@ -72,6 +102,24 @@ export class ProgramService {
 			},
 		});
 
+		if (!program) {
+			throw new NotFoundException('Program not found.');
+		}
+
 		return program;
 	}
+
+	private parseStatus(status?: string): ProgramStatus | undefined {
+		if (!status) {
+			return undefined;
+		}
+
+		const normalized = status.toUpperCase() as ProgramStatus;
+		if (!Object.values(ProgramStatus).includes(normalized)) {
+			throw new BadRequestException('Invalid status filter.');
+		}
+
+		return normalized;
+	}
+
 }

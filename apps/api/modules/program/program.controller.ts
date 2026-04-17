@@ -1,15 +1,20 @@
 /**
  * Purpose: Expose program discovery endpoints to students.
- * Why important: Provides entry points for students to browse and view bursary programs.
- * Used by: Frontend student portal and mobile clients.
+ * Why important: Supports student discovery and county-admin program lifecycle actions.
+ * Used by: Frontend student portal and county settings workflows.
  */
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
 import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { CreateProgramDto } from './dto/create-program.dto';
 import { ListProgramsDto } from './dto/list-programs.dto';
+import { UpdateProgramDto } from './dto/update-program.dto';
+import { ProgramLifecycleService } from './program-lifecycle.service';
 import { ProgramService } from './program.service';
 
 @UseGuards(JwtAuthGuard)
@@ -17,7 +22,21 @@ import { ProgramService } from './program.service';
 @ApiBearerAuth()
 @Controller('programs')
 export class ProgramController {
-	constructor(private readonly programService: ProgramService) {}
+	constructor(
+		private readonly programService: ProgramService,
+		private readonly programLifecycleService: ProgramLifecycleService,
+	) {}
+
+	@Get()
+	@ApiOperation({ summary: 'List programs for the current county with optional filters' })
+	@ApiQuery({ name: 'status', required: false, type: String })
+	@ApiQuery({ name: 'academicYear', required: false, type: String })
+	listPrograms(
+		@County() countyId: string,
+		@Query() query: ListProgramsDto,
+	) {
+		return this.programService.listPrograms(countyId, query);
+	}
 
 	@Get('active')
 	@ApiOperation({ summary: 'List active programs for the current county' })
@@ -38,5 +57,52 @@ export class ProgramController {
 		@Param('id') programId: string,
 	) {
 		return this.programService.getProgramById(countyId, programId);
+	}
+
+	@Post()
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Create a new draft bursary program' })
+	@ApiBody({ type: CreateProgramDto })
+	createProgram(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Body() dto: CreateProgramDto,
+	) {
+		return this.programLifecycleService.createProgram(countyId, user['userId'] as string, dto);
+	}
+
+	@Patch(':id')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Update a draft bursary program' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	@ApiBody({ type: UpdateProgramDto })
+	updateProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+		@Body() dto: UpdateProgramDto,
+	) {
+		return this.programLifecycleService.updateProgram(countyId, programId, dto);
+	}
+
+	@Post(':id/publish')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Publish a draft bursary program' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	publishProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+	) {
+		return this.programLifecycleService.publishProgram(countyId, programId);
+	}
+
+	@Post(':id/close')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Close an active bursary program' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	closeProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+	) {
+		return this.programLifecycleService.closeProgram(countyId, programId);
 	}
 }

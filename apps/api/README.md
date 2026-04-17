@@ -51,3 +51,17 @@ pnpm --filter @smart-bursary/api run prisma:migrate --name <migration_name>
 pnpm --filter @smart-bursary/api run prisma:seed
 docker compose up -d postgres redis
 ```
+
+## Program Lifecycle Endpoints
+
+County admin and platform operator roles can now manage bursary program lifecycle via:
+
+- `POST /api/v1/programs`
+- `PATCH /api/v1/programs/:id`
+- `POST /api/v1/programs/:id/publish`
+- `POST /api/v1/programs/:id/close`
+
+Student-facing discovery endpoints remain available:
+
+- `GET /api/v1/programs/active`
+- `GET /api/v1/programs/:id`

@@ -42,7 +42,7 @@ Purpose: Track backend implementation in controlled, validated phases and preven
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: None (P4 completed)
+Current active phase: None (P6 completed)
 
 ## PRD / Design Alignment
 
