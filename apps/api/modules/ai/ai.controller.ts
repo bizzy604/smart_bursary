@@ -9,6 +9,7 @@ import { UserRole } from '@prisma/client';
 
 import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { PlanTiers } from '../../common/decorators/plan-tier.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AiScoreService } from './ai-score.service';
@@ -66,6 +67,7 @@ export class AiController {
 
 	@Get('admin/scoring-weights')
 	@Roles(UserRole.COUNTY_ADMIN)
+	@PlanTiers('ENTERPRISE')
 	@ApiOperation({ summary: 'Get county scoring weights' })
 	getScoringWeights(@County() countyId: string) {
 		return this.scoringWeightsService.getScoringWeights(countyId);
@@ -73,6 +75,7 @@ export class AiController {
 
 	@Patch('admin/scoring-weights')
 	@Roles(UserRole.COUNTY_ADMIN)
+	@PlanTiers('ENTERPRISE')
 	@ApiOperation({ summary: 'Update county scoring weights' })
 	@ApiBody({ type: ScoringWeightsDto })
 	updateScoringWeights(@County() countyId: string, @Body() dto: ScoringWeightsDto) {

@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, W6 In Progress)
+Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, W6 In Progress)
 Last Updated: 2026-04-17
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
@@ -47,13 +47,32 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
   - Validation: Complete.
     - `pnpm --filter @smart-bursary/api run build` passed.
     - `pnpm --filter @smart-bursary/api run test -- test/integration/review-ai.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts test/integration/student-application.e2e-spec.ts` passed (15/15).
+- Backlog Item B-03: Completed.
+  - Implementation: Activated `TenantModule` settings APIs (`GET/PATCH /admin/settings`), delivered county branding + form customization UI, completed county scoring-weight UX (`GET/PATCH /admin/scoring-weights`), and wired county scoring weights into queue scoring requests.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- test/integration/tenant-settings.e2e-spec.ts test/integration/review-ai.e2e-spec.ts` passed (10/10).
+    - `pnpm --filter @smart-bursary/web run test` passed (19/19).
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
+- Backlog Item B-04: Completed.
+  - Implementation: Added platform-operator provisioning APIs and orchestration (`/platform/tenants`), seeded default ward registry data, bootstrapped county-admin accounts, and introduced reusable plan-tier guard/decorator with endpoint enforcement for restricted and enterprise-only capabilities.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/tenant-provisioning-plan-gates.e2e-spec.ts` passed (5/5).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/tenant-settings.e2e-spec.ts test/integration/review-ai.e2e-spec.ts` passed (10/10).
+- Backlog Item B-05: Completed.
+  - Implementation: Added queue-backed disbursement execution lifecycle (success/failure/retry/terminal escalation), manual retry endpoint, receipt PDF generation/download endpoints, and EFT batch export endpoint for finance workflows.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/disbursement.e2e-spec.ts test/integration/disbursement-reporting.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts` passed (11/11).
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
     - `pnpm --filter @smart-bursary/web run test` passed (16/16, repeated run).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Next strict backlog item: `B-03 - County settings, branding, and scoring-weight UX` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
+- Next strict backlog item: `B-06 - Reporting and historical analytics completion` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
 
 ## 1. Objective
 
@@ -69,12 +88,11 @@ This plan is designed to be executed one phase at a time, with strict completion
 - Build and integration validation are complete for this scope.
 
 ### G-02 County Admin settings gap (critical)
-- Multiple county settings routes are still placeholders:
-  - Settings home
+- B-03 closed the core settings gap for branding, form customization, and AI scoring configuration.
+- Remaining county settings gaps are now focused on additional admin surfaces:
   - Programs list/new/edit
-  - AI scoring settings
-  - Branding settings
-  - Users and ward management
+  - Users management
+  - Ward management
 
 ### G-03 Eligibility behavior gap (high)
 - Eligibility engine is implemented and student program discovery now returns eligibility flags and reasons.
@@ -506,4 +524,4 @@ Exit Criteria:
 
 Continue W6 frontend hardening for Playwright coverage and accessibility checks in parallel only when it does not block functional closure work.
 
-Next functional execution should start with `B-03 - County settings, branding, and scoring-weight UX` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because county admin configuration capabilities now depend on the stabilized submit-time AI scoring lifecycle delivered in B-02.
+Next functional execution should start with `B-06 - Reporting and historical analytics completion` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because B-05 disbursement execution, retry handling, and receipt/export flows are now complete and validated.

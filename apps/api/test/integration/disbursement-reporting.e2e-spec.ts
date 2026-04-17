@@ -7,7 +7,6 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import request from 'supertest';
-
 import { AppModule } from '../../app.module';
 import { PrismaService } from '../../database/prisma.service';
 
@@ -21,9 +20,7 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 	let financeOfficerToken = '';
 
 	beforeAll(async () => {
-		const moduleFixture: TestingModule = await Test.createTestingModule({
-			imports: [AppModule],
-		}).compile();
+		const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
 
 		app = moduleFixture.createNestApplication();
 		app.setGlobalPrefix('api/v1');
@@ -31,8 +28,6 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 
 		prisma = moduleFixture.get(PrismaService);
 		jwtService = new JwtService({ secret: process.env.JWT_SECRET || 'test-jwt-secret-test-jwt-secret' });
-
-		// Setup: Create county, program, student, and approved application
 		const county = await prisma.county.findUniqueOrThrow({ where: { slug: 'turkana' } });
 		countyId = county.id;
 
@@ -50,6 +45,8 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 				email: `finance-${Date.now()}@example.com`,
 				passwordHash: 'hashed-password',
 				role: 'FINANCE_OFFICER',
+				emailVerified: true,
+				phoneVerified: true,
 			},
 		});
 
@@ -66,8 +63,37 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 				countyId,
 				wardId: ward.id,
 				email: `student-disbursement-${Date.now()}@example.com`,
+				phone: '+254711222333',
 				passwordHash: 'hashed-password',
 				role: 'STUDENT',
+				emailVerified: true,
+				phoneVerified: true,
+			},
+		});
+
+		await prisma.studentProfile.create({
+			data: {
+				userId: student.id,
+				countyId,
+				fullName: 'Disbursement Test Student',
+				phone: '+254711222333',
+			},
+		});
+
+		await prisma.academicInfo.create({
+			data: {
+				userId: student.id,
+				countyId,
+				institutionType: 'UNIVERSITY',
+				institutionName: 'Turkana University',
+			},
+		});
+
+		await prisma.familyFinancialInfo.create({
+			data: {
+				userId: student.id,
+				countyId,
+				familyStatus: 'NEEDY',
 			},
 		});
 
@@ -95,7 +121,6 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 			wardId: student.wardId,
 		});
 
-		// Create and approve application
 		const draftResponse = await request(app.getHttpServer())
 			.post('/api/v1/applications/draft')
 			.set('Authorization', `Bearer ${studentToken}`)
@@ -110,13 +135,11 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 			.send({ applicationId })
 			.expect(201);
 
-		// Approve the application
 		await prisma.application.update({
 			where: { id: applicationId },
 			data: { status: 'APPROVED', amountAllocated: 50000 },
 		});
 
-		// Add review with allocated amount
 		await prisma.applicationReview.create({
 			data: {
 				applicationId,
@@ -142,7 +165,7 @@ describe('Disbursement and Reporting workflow (e2e)', () => {
 				applicationId,
 				disbursementMethod: 'MPESA_B2C',
 			})
-			.expect(200);
+			.expect(202);
 
 		expect(response.body.data.amount).toBe(50000);
 		expect(response.body.data.status).toBe('PENDING');

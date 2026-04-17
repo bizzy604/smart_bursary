@@ -78,6 +78,10 @@ describe("ApplicationPdfButton", () => {
 		expect(url).toBe("/api/applications/preview/pdf");
 		expect(options.method).toBe("POST");
 		expect(JSON.parse(options.body as string)).toMatchObject({
+			countyName: "Turkana County",
+			fundName: "Turkana County Education Fund",
+			primaryColor: "#1E3A5F",
+			legalReference: "No. 4 of 2023",
 			programName: "2024 Ward Bursary Programme",
 			reference: "TRK-2026-00142",
 			sections: previewSections,

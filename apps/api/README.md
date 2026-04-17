@@ -143,3 +143,66 @@ Timeline lifecycle events now include:
 - `AI_SCORED` or `AI_SCORE_UPDATED`
 - `AI_SCORING_FAILED`
 - `AI_SCORING_QUEUE_FAILED`
+
+County AI weight controls:
+
+- `GET /api/v1/admin/scoring-weights`
+- `PATCH /api/v1/admin/scoring-weights`
+
+## County Tenant Settings
+
+County admins can manage tenant-specific configuration via:
+
+- `GET /api/v1/admin/settings`
+- `PATCH /api/v1/admin/settings`
+
+Settings payloads now include:
+
+- Branding profile: county name, fund name, legal reference, primary color, logo metadata.
+- Form customization: color scheme, logo placement, and approved section order.
+- Current AI scoring weights snapshot for county admin UX hydration.
+
+Plan-tier gate behavior:
+
+- `GET/PATCH /api/v1/admin/settings` requires county plan tier `STANDARD` or `ENTERPRISE`.
+- `GET/PATCH /api/v1/admin/scoring-weights` requires county plan tier `ENTERPRISE`.
+
+## Tenant Provisioning (Platform Operator)
+
+Platform operators can bootstrap and manage county tenants via:
+
+- `GET /api/v1/platform/tenants/status`
+- `GET /api/v1/platform/tenants`
+- `GET /api/v1/platform/tenants/:id`
+- `POST /api/v1/platform/tenants`
+- `PATCH /api/v1/platform/tenants/:id/plan-tier`
+
+Provisioning flow currently creates:
+
+- County record with initial plan tier
+- Default ward seed dataset when explicit ward list is not provided
+- Initial county-admin account for tenant bootstrap
+
+## Disbursement Execution and Receipts
+
+Finance and student disbursement APIs now include:
+
+- `POST /api/v1/disbursements` (returns `202 Accepted` for async execution)
+- `POST /api/v1/disbursements/:disbursementId/retry`
+- `POST /api/v1/disbursements/batch/eft`
+- `GET /api/v1/disbursements/:disbursementId/receipt`
+- `GET /api/v1/disbursements/application/:applicationId/receipt`
+
+Execution behavior:
+
+- M-Pesa B2C disbursements execute asynchronously via queue worker or in-process fallback.
+- Failed attempts retry up to 3 times with backoff before terminal manual intervention timeline events.
+- Successful disbursements persist provider transaction IDs and transition applications to `DISBURSED`.
+
+M-Pesa adapter environment variables:
+
+- `MPESA_B2C_MODE` (`mock` or provider mode)
+- `MPESA_B2C_URL`
+- `MPESA_B2C_BEARER_TOKEN` (optional)
+- `MPESA_B2C_TIMEOUT_MS` (optional)
+- `DISBURSEMENT_RETRY_BASE_DELAY_MS` (optional)

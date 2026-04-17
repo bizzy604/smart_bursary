@@ -44,6 +44,10 @@ describe('Review and AI workflow (e2e)', () => {
 		prisma = moduleFixture.get(PrismaService);
 		const jwtService = new JwtService({ secret: process.env.JWT_SECRET || 'test-jwt-secret-test-jwt-secret' });
 		const seed = await seedReviewWorkflow({ prisma, jwtService, countySlug: 'turkana' });
+		await prisma.county.update({
+			where: { id: seed.countyId },
+			data: { planTier: 'ENTERPRISE' },
+		});
 		programId = seed.programId;
 		studentToken = seed.studentToken;
 		wardAdminToken = seed.wardAdminToken;

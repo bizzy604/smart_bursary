@@ -8,7 +8,7 @@ export function getPdfPayloadByApplicationId(applicationId: string) {
 	}
 
 	const program = getProgramById(application.programId);
-const sections: PreviewSection[] = [
+	const sections: PreviewSection[] = [
 		{
 			slug: "section-a",
 			title: "A. Student Personal Details",
@@ -46,6 +46,8 @@ const sections: PreviewSection[] = [
 		pdfPayload: {
 			countyName: countyBranding.name,
 			fundName: countyBranding.fundName,
+			primaryColor: countyBranding.primaryColor,
+			legalReference: countyBranding.legalReference ?? "",
 			programName: application.programName,
 			reference: application.reference,
 			generatedAt: application.updatedAt,

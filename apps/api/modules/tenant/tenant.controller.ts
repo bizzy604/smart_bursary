@@ -8,6 +8,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
 import { County } from '../../common/decorators/county.decorator';
+import { PlanTiers } from '../../common/decorators/plan-tier.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UpdateSettingsDto } from './dto/update-settings.dto';
@@ -22,6 +23,7 @@ export class TenantController {
 
 	@Get()
 	@Roles(UserRole.COUNTY_ADMIN)
+	@PlanTiers('STANDARD', 'ENTERPRISE')
 	@ApiOperation({ summary: 'Get county tenant settings' })
 	getSettings(@County() countyId: string) {
 		return this.tenantService.getSettings(countyId);
@@ -29,6 +31,7 @@ export class TenantController {
 
 	@Patch()
 	@Roles(UserRole.COUNTY_ADMIN)
+	@PlanTiers('STANDARD', 'ENTERPRISE')
 	@ApiOperation({ summary: 'Update county tenant settings' })
 	@ApiBody({ type: UpdateSettingsDto })
 	updateSettings(@County() countyId: string, @Body() dto: UpdateSettingsDto) {

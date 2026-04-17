@@ -1,6 +1,6 @@
 # KauntyBursary Functional Closure Backlog
 
-Status: In Progress (B-01 completed, B-02 completed)  
+Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed)  
 Last Updated: 2026-04-17  
 Source Inputs: `Docs/01-PRD.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`
 
@@ -26,7 +26,7 @@ This backlog supersedes any assumption that the next item should be chosen only 
 | B-02 | AI scoring trigger, breakdown, and anomaly lifecycle | `AI-01`, `AI-02`, `AI-04` | Review, exports, and anomaly surfaces are not trustworthy until submit-time AI orchestration is complete. | B-01 |
 | B-03 | County settings, branding, and scoring-weight UX | `TM-02`, `AF-06`, `AI-05` | Tenant branding and scoring configuration are core county-admin functional controls and should be usable before broader SaaS rollout. | B-02 |
 | B-04 | Tenant provisioning and plan-tier gates | `TM-03`, `TM-04` | Full SaaS readiness requires county bootstrap and feature gating, but it should follow stable county settings behavior. | B-03 |
-| B-05 | Disbursement execution, receipts, and retry policy | `DB-01`, `DB-02`, `DB-03`, `DB-04` | Reporting and finance workflows depend on real payment execution, retry state, and downloadable receipts. | B-02 |
+| B-05 | Disbursement execution, receipts, and retry policy | `DB-01`, `DB-02`, `DB-03`, `DB-04` | Reporting and finance workflows depend on real payment execution, retry state, and downloadable receipts. | B-04 |
 | B-06 | Reporting and historical analytics completion | `RP-01`, `RP-02`, `RP-03`, `RP-04` | OCOB and ward exports need completed AI and disbursement data before they can be validated against acceptance criteria. | B-05 |
 | B-07 | Status-change notification integration | `RW-04` | Notifications should be wired after the main workflow and disbursement transitions are stable, to avoid reworking event emitters. | B-05 |
 | B-08 | Isolation, auth, workflow, and audit closure | `TM-01`, `AU-04`, `AU-05`, `AI-06`, `RW-01`, `RW-05` | These are mostly invariant, enforcement, and regression-proof items that should close immediately before release hardening signoff. | B-06, B-07 |
@@ -117,6 +117,19 @@ Validation:
 
 ### B-03 - County Settings, Branding, and Scoring-Weight UX
 
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- test/integration/tenant-settings.e2e-spec.ts test/integration/review-ai.e2e-spec.ts` passed (10/10).
+- `pnpm --filter @smart-bursary/web run test` passed (19/19), including new settings route tests and PDF payload branding coverage.
+- `pnpm --filter @smart-bursary/web run typecheck` passed.
+- `pnpm --filter @smart-bursary/web run build` passed.
+- County settings APIs delivered in `apps/api/modules/tenant/tenant.controller.ts`, `apps/api/modules/tenant/tenant.service.ts`, and `apps/api/modules/tenant/dto/update-settings.dto.ts`.
+- County scoring-weight read/update UX completed in `apps/web/app/(admin)/settings/ai-scoring/page.tsx` and `apps/api/modules/ai/ai.controller.ts` (`GET/PATCH /admin/scoring-weights`).
+- Branding propagation now updates county-facing UI and generated PDF payloads via `apps/web/components/layout/county-branding-provider.tsx`, `apps/web/lib/application-pdf.tsx`, and `apps/web/app/api/applications/preview/pdf/route.ts`.
+
 PRD IDs:
 - `TM-02`
 - `AF-06`
@@ -145,6 +158,24 @@ Validation:
 
 ### B-04 - Tenant Provisioning and Plan-Tier Gates
 
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/tenant-provisioning-plan-gates.e2e-spec.ts` passed (5/5).
+- `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/tenant-settings.e2e-spec.ts test/integration/review-ai.e2e-spec.ts` passed (10/10).
+- Platform-operator provisioning routes implemented in `apps/api/modules/tenant/tenant-provisioning.controller.ts`:
+	- `GET /platform/tenants/status`
+	- `GET /platform/tenants`
+	- `GET /platform/tenants/:id`
+	- `POST /platform/tenants`
+	- `PATCH /platform/tenants/:id/plan-tier`
+- Provisioning orchestration now creates county tenant records, seeds wards, and bootstraps a county admin in `apps/api/modules/tenant/provisioning.service.ts`.
+- Plan-tier guard/decorator added in `apps/api/common/guards/plan-tier.guard.ts` and `apps/api/common/decorators/plan-tier.decorator.ts`, with enforcement applied to:
+	- `apps/api/modules/tenant/tenant.controller.ts` (`STANDARD`+ for county settings)
+	- `apps/api/modules/ai/ai.controller.ts` (`ENTERPRISE` for scoring-weight admin)
+
 PRD IDs:
 - `TM-03`
 - `TM-04`
@@ -168,6 +199,17 @@ Validation:
 - Feature gate regression tests across at least one restricted and one enterprise-only capability
 
 ### B-05 - Disbursement Execution, Receipts, and Retry Policy
+
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/disbursement.e2e-spec.ts test/integration/disbursement-reporting.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts` passed (11/11).
+- Disbursement execution lifecycle now uses dedicated execution/queue/query/export services in `apps/api/modules/disbursement/disbursement-execution.service.ts`, `apps/api/modules/disbursement/disbursement-queue.service.ts`, `apps/api/modules/disbursement/disbursement-query.service.ts`, and `apps/api/modules/disbursement/disbursement-export.service.ts`.
+- M-Pesa adapter now executes mock/real B2C calls via `apps/api/modules/disbursement/mpesa.service.ts`, including retry-trigger failure simulation for integration coverage.
+- Receipt output now generates true PDF bytes via `apps/api/modules/disbursement/receipt.service.ts`, exposed by `GET /disbursements/:disbursementId/receipt` and `GET /disbursements/application/:applicationId/receipt`.
+- Finance batch export endpoint delivered at `POST /disbursements/batch/eft`, and reporting awarded totals now include both `APPROVED` and `DISBURSED` states in `apps/api/modules/reporting/reporting.service.ts`.
 
 PRD IDs:
 - `DB-01`
@@ -283,11 +325,11 @@ Validation:
 
 ## Operational Gap Not Counted In PRD Totals
 
-The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled with B-03 because it blocks county-admin usability:
+The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled with B-06 now that B-03 through B-05 are complete:
 
 | Item | Description | Recommended Placement |
 |---|---|---|
-| O-01 | County Admin program management UI for create, edit, publish, and close flows | Execute alongside B-03 or immediately before it |
+| O-01 | County Admin program management UI for create, edit, publish, and close flows | Execute alongside B-06 |
 
 Primary Areas:
 - `apps/web/app/(admin)/settings/programs/page.tsx`
@@ -296,9 +338,9 @@ Primary Areas:
 
 ## Recommended Immediate Next Action
 
-Start `B-03 - County settings, branding, and scoring-weight UX`.
+Start `B-06 - Reporting and historical analytics completion`.
 
 Reason:
-- B-02 orchestration and anomaly lifecycle are now complete and validated.
-- County admin usability now depends on enabling settings, branding, and scoring-weight controls.
-- B-03 is the strict next dependency in the backlog queue.
+- B-05 disbursement execution, retry policy, receipt downloads, and EFT exports are now complete and validated.
+- Remaining `RP-*` requirements are the next blockers for analytics and compliance reporting readiness.
+- B-06 is now the strict next dependency in the functional queue.
