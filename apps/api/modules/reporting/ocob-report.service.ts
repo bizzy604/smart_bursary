@@ -8,9 +8,13 @@ import { Injectable } from '@nestjs/common';
 export type OcobAwardRow = {
 	programId: string;
 	programName: string;
-	wardName?: string | null;
-	awardedCount: number;
-	totalAwarded: number;
+	academicYear: string;
+	budgetCeilingKes: number;
+	applications: number;
+	approved: number;
+	allocatedKes: number;
+	disbursedKes: number;
+	balanceKes: number;
 };
 
 @Injectable()
@@ -18,7 +22,10 @@ export class OcobReportService {
 	buildRows(rows: OcobAwardRow[]): OcobAwardRow[] {
 		return rows.map((row) => ({
 			...row,
-			totalAwarded: Number(row.totalAwarded),
+			budgetCeilingKes: Number(row.budgetCeilingKes),
+			allocatedKes: Number(row.allocatedKes),
+			disbursedKes: Number(row.disbursedKes),
+			balanceKes: Number(row.balanceKes),
 		}));
 	}
 }

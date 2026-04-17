@@ -5,11 +5,13 @@
  */
 import { Module } from '@nestjs/common';
 
+import { NotificationModule } from '../notification/notification.module';
 import { CountyReviewService } from './county-review.service';
 import { ReviewController } from './review.controller';
 import { WardReviewService } from './ward-review.service';
 
 @Module({
+	imports: [NotificationModule],
 	controllers: [ReviewController],
 	providers: [WardReviewService, CountyReviewService],
 })

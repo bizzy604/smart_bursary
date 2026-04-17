@@ -12,11 +12,15 @@ import {
 import { ApplicationStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 import { WardReviewDecision, WardReviewDto } from './dto/ward-review.dto';
 
 @Injectable()
 export class WardReviewService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly notificationLifecycleService: NotificationLifecycleService,
+	) {}
 
 	async submitWardReview(
 		countyId: string,
@@ -108,6 +112,15 @@ export class WardReviewService {
 			});
 
 			return review;
+		});
+
+		await this.notificationLifecycleService.queueStatusChange({
+			countyId,
+			applicationId,
+			eventType,
+			fromStatus: application.status,
+			toStatus: nextStatus,
+			metadata: { decision: dto.decision, reviewId: result.id },
 		});
 
 		return {

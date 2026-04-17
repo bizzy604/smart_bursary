@@ -60,9 +60,14 @@ export class ReportingService {
 			acc[ward.id] = ward.name;
 			return acc;
 		}, {});
-		const wardBreakdown = applications.reduce<Record<string, { applications: number; approved: number; allocated_kes: number }>>((acc, app) => {
+		const wardBreakdown = applications.reduce<Record<string, { ward_name: string; applications: number; approved: number; allocated_kes: number }>>((acc, app) => {
 			const wardName = wardNames[app.wardId] ?? 'Unknown Ward';
-			const current = acc[wardName] ?? { applications: 0, approved: 0, allocated_kes: 0 };
+			const current = acc[app.wardId] ?? {
+				ward_name: wardName,
+				applications: 0,
+				approved: 0,
+				allocated_kes: 0,
+			};
 			if (app.status !== 'DRAFT') {
 				current.applications += 1;
 			}
@@ -70,7 +75,7 @@ export class ReportingService {
 				current.approved += 1;
 				current.allocated_kes += Number(app.amountAllocated ?? 0);
 			}
-			acc[wardName] = current;
+			acc[app.wardId] = current;
 			return acc;
 		}, {});
 
@@ -107,8 +112,9 @@ export class ReportingService {
 			disbursedCount,
 			as_of: new Date().toISOString(),
 			programs: programRows,
-			ward_breakdown: Object.entries(wardBreakdown).map(([ward_name, summary]) => ({
-				ward_name,
+			ward_breakdown: Object.entries(wardBreakdown).map(([ward_id, summary]) => ({
+				ward_id,
+				ward_name: summary.ward_name,
 				applications: summary.applications,
 				approved: summary.approved,
 				allocated_kes: Number(summary.allocated_kes.toFixed(2)),

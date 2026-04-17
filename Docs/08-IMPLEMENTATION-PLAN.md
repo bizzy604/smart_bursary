@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, W6 In Progress)
+Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, W6 In Progress)
 Last Updated: 2026-04-17
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
@@ -66,13 +66,20 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
   - Validation: Complete.
     - `pnpm --filter @smart-bursary/api run build` passed.
     - `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/disbursement.e2e-spec.ts test/integration/disbursement-reporting.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts` passed (11/11).
+- Backlog Item B-06: Completed.
+  - Implementation: Completed reporting analytics APIs (dashboard/OCOB/ward-summary/trends), wired county and ward reporting pages to live API data, added CSV/PDF export downloads, and enabled trend filters for year/program/ward/education-level.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
     - `pnpm --filter @smart-bursary/web run test` passed (16/16, repeated run).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Next strict backlog item: `B-06 - Reporting and historical analytics completion` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
+- Next strict backlog item: `B-07 - Status-change notification integration` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
 
 ## 1. Objective
 
@@ -524,4 +531,4 @@ Exit Criteria:
 
 Continue W6 frontend hardening for Playwright coverage and accessibility checks in parallel only when it does not block functional closure work.
 
-Next functional execution should start with `B-06 - Reporting and historical analytics completion` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because B-05 disbursement execution, retry handling, and receipt/export flows are now complete and validated.
+Next functional execution should start with `B-07 - Status-change notification integration` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because B-06 reporting and historical analytics requirements are now complete and validated.

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { BudgetBar } from "@/components/application/budget-bar";
@@ -6,9 +9,76 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import { countyBudgetSnapshot, getCountyDashboardStats, getCountyReviewQueue } from "@/lib/admin-data";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
+import { fetchDashboardReport, type DashboardReportData } from "@/lib/reporting-api";
 
 export default function CountyDashboardPage() {
-  const stats = getCountyDashboardStats();
+  const [dashboardData, setDashboardData] = useState<DashboardReportData | null>(null);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadDashboard = async () => {
+      try {
+        const data = await fetchDashboardReport();
+        if (!mounted) {
+          return;
+        }
+        setDashboardData(data);
+        setDashboardError(null);
+      } catch (error: unknown) {
+        if (!mounted) {
+          return;
+        }
+        setDashboardError(error instanceof Error ? error.message : "Failed to refresh dashboard metrics.");
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadDashboard();
+    const intervalId = window.setInterval(() => {
+      void loadDashboard();
+    }, 30000);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, []);
+
+  const fallbackStats = getCountyDashboardStats();
+  const stats = useMemo(
+    () => ({
+      approved: dashboardData?.approvedApplications ?? fallbackStats.approved,
+      allocatedKes:
+        dashboardData?.programs.reduce((sum, program) => sum + program.allocated_total, 0) ??
+        fallbackStats.allocatedKes,
+      remainingKes:
+        dashboardData?.programs.reduce((sum, program) => sum + (program.budget_ceiling - program.allocated_total), 0) ??
+        fallbackStats.remainingKes,
+      disbursed: dashboardData?.disbursedCount ?? fallbackStats.disbursed,
+    }),
+    [dashboardData, fallbackStats],
+  );
+
+  const budget = useMemo(() => {
+    const primaryProgram = dashboardData?.programs[0];
+    if (!primaryProgram) {
+      return countyBudgetSnapshot;
+    }
+
+    return {
+      programName: primaryProgram.name,
+      ceilingKes: primaryProgram.budget_ceiling,
+      allocatedKes: primaryProgram.allocated_total,
+      disbursedKes: primaryProgram.disbursed_total,
+    };
+  }, [dashboardData]);
+
   const queue = getCountyReviewQueue();
 
   return (
@@ -21,19 +91,52 @@ export default function CountyDashboardPage() {
         </p>
       </section>
 
+      {dashboardError ? (
+        <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{dashboardError}</p>
+      ) : null}
+
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard label="Approved" value={String(stats.approved)} hint="Approved applications this cycle" />
         <StatsCard label="Allocated" value={formatCurrencyKes(stats.allocatedKes)} hint="Total allocated amount" />
         <StatsCard label="Remaining" value={formatCurrencyKes(stats.remainingKes)} hint="Budget still available" />
-        <StatsCard label="Disbursed" value={String(stats.disbursed)} hint="Applications already paid" />
+        <StatsCard label="Disbursed" value={String(stats.disbursed)} hint={isLoading ? "Refreshing..." : "Applications already paid"} />
       </section>
 
       <BudgetBar
-        programName={countyBudgetSnapshot.programName}
-        ceiling={countyBudgetSnapshot.ceilingKes}
-        allocated={countyBudgetSnapshot.allocatedKes}
-        disbursed={countyBudgetSnapshot.disbursedKes}
+        programName={budget.programName}
+        ceiling={budget.ceilingKes}
+        allocated={budget.allocatedKes}
+        disbursed={budget.disbursedKes}
       />
+
+      {dashboardData?.ward_breakdown?.length ? (
+        <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+          <h2 className="font-display text-xl font-semibold text-brand-900">Ward Breakdown</h2>
+          <p className="text-sm text-gray-600">Auto-refreshes every 30 seconds.</p>
+          <div className="mt-3 overflow-x-auto">
+            <table className="min-w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                  <th className="px-2 py-2">Ward</th>
+                  <th className="px-2 py-2">Applications</th>
+                  <th className="px-2 py-2">Approved</th>
+                  <th className="px-2 py-2">Allocated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dashboardData.ward_breakdown.map((row) => (
+                  <tr key={row.ward_id} className="border-b border-gray-100">
+                    <td className="px-2 py-2 font-medium text-brand-900">{row.ward_name}</td>
+                    <td className="px-2 py-2 text-gray-700">{row.applications}</td>
+                    <td className="px-2 py-2 text-gray-700">{row.approved}</td>
+                    <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.allocated_kes)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">

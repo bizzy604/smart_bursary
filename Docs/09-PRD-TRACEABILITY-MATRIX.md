@@ -16,9 +16,9 @@ Detailed Remaining Queue: Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md
 ## Summary Snapshot
 
 - Total functional requirements tracked: 42
-- Implemented: 31
-- Partial: 9
-- Missing: 2
+- Implemented: 35
+- Partial: 6
+- Missing: 1
 - Deferred: 0
 
 ## Requirement Matrix
@@ -63,10 +63,10 @@ Detailed Remaining Queue: Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md
 | DB-02 | EFT RTGS batch export | Implemented | apps/api/modules/disbursement/disbursement-export.service.ts, apps/api/modules/disbursement/eft-export.service.ts, apps/api/modules/disbursement/disbursement.controller.ts, apps/api/test/integration/disbursement-execution.e2e-spec.ts | Finance-facing `POST /disbursements/batch/eft` now returns downloadable RTGS CSV for approved applications with bank details. | B-05 | BE |
 | DB-03 | Disbursement receipt PDF | Implemented | apps/api/modules/disbursement/receipt.service.ts, apps/api/modules/disbursement/disbursement-query.service.ts, apps/api/modules/disbursement/disbursement.controller.ts, apps/api/test/integration/disbursement-execution.e2e-spec.ts | Receipt generation now emits true PDF payloads with role-scoped download endpoints for finance and students. | B-05 | BE+FE |
 | DB-04 | Failed disbursement retries (max 3) + alerting | Implemented | apps/api/modules/disbursement/disbursement-execution.service.ts, apps/api/modules/disbursement/disbursement-queue.service.ts, apps/api/modules/disbursement/disbursement.service.ts, apps/api/test/integration/disbursement-execution.e2e-spec.ts | Automatic retry policy now caps attempts at three, records failure reasons, and emits terminal manual-intervention timeline events. | B-05 | BE |
-| RP-01 | Real-time dashboard for county finance/admin | Partial | apps/api/modules/reporting/reporting.controller.ts, apps/api/modules/reporting/reporting.service.ts, apps/web/app/(admin)/county/dashboard/page.tsx | Dashboard endpoints/UI exist; near-real-time refresh SLA enforcement remains pending | Phase 5 | BE+FE |
-| RP-02 | OCOB-ready Excel and PDF reports | Partial | apps/web/app/(admin)/county/reports/ocob/page.tsx, apps/web/lib/reporting-data.ts, apps/api/modules/reporting/reporting.controller.ts | OCOB screens/exports exist, but formal compliance validation against OCOB template is pending | Phase 5 | BE+FE |
-| RP-03 | Ward-level Excel/PDF export with AI + recommendation + reviewer | Partial | apps/web/app/(admin)/ward/reports/page.tsx, apps/api/modules/reporting/reporting.service.ts | Export UI exists; required reviewer-level data completeness is not fully enforced | Phase 5 | BE+FE |
-| RP-04 | Historical trend analysis filters | Missing | apps/api/modules/reporting/reporting.service.ts, apps/web/app/(admin)/county/reports/page.tsx | No time-series trend endpoint/filter set for year/program/ward/education-level found | Phase 5 | BE+FE |
+| RP-01 | Real-time dashboard for county finance/admin | Implemented | apps/api/modules/reporting/reporting.controller.ts, apps/api/modules/reporting/reporting.service.ts, apps/web/app/(admin)/county/dashboard/page.tsx, apps/web/lib/reporting-api.ts | County dashboard now consumes live `/reports/dashboard` data with periodic refresh and ward-level allocation breakdown. | B-06 | BE+FE |
+| RP-02 | OCOB-ready Excel and PDF reports | Implemented | apps/api/modules/reporting/reporting.controller.ts, apps/api/modules/reporting/reporting-analytics.service.ts, apps/web/app/(admin)/county/reports/ocob/page.tsx, apps/web/lib/reporting-api.ts, apps/api/test/integration/reporting-analytics.e2e-spec.ts | OCOB dataset and backend CSV/PDF exports are exposed end-to-end and consumed by county reporting UI filters. | B-06 | BE+FE |
+| RP-03 | Ward-level Excel/PDF export with AI + recommendation + reviewer | Implemented | apps/api/modules/reporting/reporting.controller.ts, apps/api/modules/reporting/reporting-analytics.service.ts, apps/web/app/(admin)/ward/reports/page.tsx, apps/web/lib/reporting-api.ts, apps/api/test/integration/reporting-analytics.e2e-spec.ts | Ward summary exports now include AI score, recommendation/allocation values, reviewer identity/stage metadata, and CSV/PDF download support. | B-06 | BE+FE |
+| RP-04 | Historical trend analysis filters | Implemented | apps/api/modules/reporting/reporting.controller.ts, apps/api/modules/reporting/reporting-analytics.service.ts, apps/web/app/(admin)/county/reports/page.tsx, apps/web/lib/reporting-api.ts, apps/api/test/integration/reporting-analytics.e2e-spec.ts | Trend analytics endpoint plus year/program/ward/education-level filters are implemented and wired into county reports UI. | B-06 | BE+FE |
 
 ## Tracker Correction Notes (Phase 0 Deliverable)
 

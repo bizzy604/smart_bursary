@@ -71,6 +71,16 @@ enum DisbursementStatus {
   REVERSED
 }
 
+enum NotificationChannel {
+  SMS
+}
+
+enum NotificationDeliveryStatus {
+  QUEUED
+  SENT
+  FAILED
+}
+
 model County {
   id             String   @id @default(uuid()) @db.Uuid
   slug           String   @unique @db.VarChar(60)
@@ -99,6 +109,7 @@ model County {
   timeline         ApplicationTimeline[]
   aiScoreCards     AIScoreCard[]
   disbursements    DisbursementRecord[]
+  notifications    NotificationDelivery[]
 
   @@map("counties")
 }
@@ -152,6 +163,7 @@ model User {
   reviews                ApplicationReview[]
   timelineEvents         ApplicationTimeline[] @relation("TimelineActor")
   initiatedDisbursements DisbursementRecord[]  @relation("DisbursementInitiator")
+  receivedNotifications  NotificationDelivery[] @relation("NotificationRecipient")
 
   @@unique([email, countyId])
   @@index([countyId], map: "idx_users_county")
@@ -312,6 +324,7 @@ model Application {
   timeline     ApplicationTimeline[]
   scoreCard    AIScoreCard?
   disbursement DisbursementRecord?
+  notifications NotificationDelivery[]
 
   @@unique([applicantId, programId], map: "idx_applications_no_duplicate")
   @@index([countyId], map: "idx_applications_county")
@@ -454,4 +467,33 @@ model DisbursementRecord {
   @@index([countyId, status], map: "idx_disbursement_county_status")
   @@index([status, retryCount], map: "idx_disbursement_pending")
   @@map("disbursement_records")
+}
+
+model NotificationDelivery {
+  id                String                     @id @default(uuid()) @db.Uuid
+  countyId          String                     @map("county_id") @db.Uuid
+  applicationId     String                     @map("application_id") @db.Uuid
+  recipientUserId   String                     @map("recipient_user_id") @db.Uuid
+  channel           NotificationChannel
+  eventType         String                     @map("event_type") @db.VarChar(80)
+  recipientPhone    String?                    @map("recipient_phone") @db.VarChar(20)
+  messageText       String                     @map("message_text")
+  status            NotificationDeliveryStatus @default(QUEUED)
+  queueJobId        String?                    @map("queue_job_id") @db.VarChar(120)
+  providerMessageId String?                    @map("provider_message_id") @db.VarChar(120)
+  failureReason     String?                    @map("failure_reason")
+  attemptCount      Int                        @default(0) @map("attempt_count")
+  metadata          Json                       @default("{}")
+  queuedAt          DateTime                   @default(now()) @map("queued_at") @db.Timestamptz(6)
+  sentAt            DateTime?                  @map("sent_at") @db.Timestamptz(6)
+  failedAt          DateTime?                  @map("failed_at") @db.Timestamptz(6)
+
+  county      County       @relation(fields: [countyId], references: [id])
+  application Application  @relation(fields: [applicationId], references: [id])
+  recipient   User         @relation("NotificationRecipient", fields: [recipientUserId], references: [id])
+
+  @@index([countyId, queuedAt(sort: Desc)], map: "idx_notification_county_queued")
+  @@index([applicationId, queuedAt(sort: Desc)], map: "idx_notification_application")
+  @@index([status, queuedAt(sort: Desc)], map: "idx_notification_status")
+  @@map("notification_deliveries")
 }

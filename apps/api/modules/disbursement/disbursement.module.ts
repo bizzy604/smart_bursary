@@ -4,6 +4,7 @@
  * Used by: AppModule.
  */
 import { Module } from '@nestjs/common';
+import { NotificationModule } from '../notification/notification.module';
 import { DisbursementController } from './disbursement.controller';
 import { DisbursementExecutionService } from './disbursement-execution.service';
 import { DisbursementExportService } from './disbursement-export.service';
@@ -15,6 +16,7 @@ import { EftExportService } from './eft-export.service';
 import { ReceiptService } from './receipt.service';
 
 @Module({
+	imports: [NotificationModule],
 	controllers: [DisbursementController],
 	providers: [
 		DisbursementService,

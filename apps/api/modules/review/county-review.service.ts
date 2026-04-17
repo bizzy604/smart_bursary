@@ -12,11 +12,15 @@ import {
 import { ApplicationStatus, Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 import { CountyReviewDecision, CountyReviewDto } from './dto/county-review.dto';
 
 @Injectable()
 export class CountyReviewService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly notificationLifecycleService: NotificationLifecycleService,
+	) {}
 
 	async submitCountyReview(
 		countyId: string,
@@ -45,7 +49,7 @@ export class CountyReviewService {
 		const eventType = this.resolveEventType(dto.decision);
 
 		try {
-			return await this.prisma.$transaction(
+			const result = await this.prisma.$transaction(
 				async (tx) => {
 					let budgetRemaining: number | null = null;
 
@@ -140,6 +144,21 @@ export class CountyReviewService {
 				},
 				{ isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
 			);
+
+			await this.notificationLifecycleService.queueStatusChange({
+				countyId,
+				applicationId,
+				eventType,
+				fromStatus: application.status,
+				toStatus: result.newStatus,
+				metadata: {
+					decision: dto.decision,
+					reviewId: result.reviewId,
+					allocatedAmount: result.allocatedAmount,
+				},
+			});
+
+			return result;
 		} catch (error: unknown) {
 			const prismaError = error as { code?: string };
 			if (prismaError.code === 'P2034') {

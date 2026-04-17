@@ -9,9 +9,16 @@ import { ReportingService } from './reporting.service';
 import { DashboardService } from './dashboard.service';
 import { OcobReportService } from './ocob-report.service';
 import { ExportService } from './export.service';
+import { ReportingAnalyticsService } from './reporting-analytics.service';
 
 @Module({
 	controllers: [ReportingController],
-	providers: [ReportingService, DashboardService, OcobReportService, ExportService],
+	providers: [
+		ReportingService,
+		ReportingAnalyticsService,
+		DashboardService,
+		OcobReportService,
+		ExportService,
+	],
 })
 export class ReportingModule {}

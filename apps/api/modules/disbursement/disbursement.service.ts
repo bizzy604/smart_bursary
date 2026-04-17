@@ -6,14 +6,15 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { DisbursementMethod, DisbursementStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
-
 import { DisbursementQueueService } from './disbursement-queue.service';
+import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 
 @Injectable()
 export class DisbursementService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly disbursementQueueService: DisbursementQueueService,
+		private readonly notificationLifecycleService: NotificationLifecycleService,
 	) {}
 
 	async initiateDisbursement(data: {
@@ -83,6 +84,18 @@ export class DisbursementService {
 			await this.disbursementQueueService.enqueue(disbursement.id);
 		}
 
+		await this.notificationLifecycleService.queueStatusChange({
+			countyId: data.countyId,
+			applicationId: data.applicationId,
+			eventType: 'DISBURSEMENT_INITIATED',
+			fromStatus: 'APPROVED',
+			toStatus: 'APPROVED',
+			metadata: {
+				disbursementId: disbursement.id,
+				method: data.disbursementMethod,
+			},
+		});
+
 		return {
 			disbursementId: disbursement.id,
 			amount: Number(allocatedAmount),
@@ -96,7 +109,7 @@ export class DisbursementService {
 	async retryDisbursement(disbursementId: string, countyId: string) {
 		const disbursement = await this.prisma.disbursementRecord.findUnique({
 			where: { id: disbursementId },
-			select: { id: true, countyId: true, status: true },
+			select: { id: true, countyId: true, status: true, applicationId: true },
 		});
 
 		if (!disbursement) {
@@ -122,6 +135,14 @@ export class DisbursementService {
 		});
 
 		await this.disbursementQueueService.enqueue(disbursementId);
+		await this.notificationLifecycleService.queueStatusChange({
+			countyId,
+			applicationId: disbursement.applicationId,
+			eventType: 'DISBURSEMENT_RETRY_QUEUED',
+			fromStatus: 'APPROVED',
+			toStatus: 'APPROVED',
+			metadata: { disbursementId },
+		});
 		return {
 			disbursementId,
 			status: DisbursementStatus.PENDING,
@@ -135,8 +156,9 @@ export class DisbursementService {
 		transactionId?: string,
 		failureReason?: string,
 	) {
-		await this.prisma.disbursementRecord.findUniqueOrThrow({
+		const disbursement = await this.prisma.disbursementRecord.findUniqueOrThrow({
 			where: { id: disbursementId },
+			select: { countyId: true, applicationId: true },
 		});
 
 		const updateData: any = { status };
@@ -154,5 +176,25 @@ export class DisbursementService {
 			where: { id: disbursementId },
 			data: updateData,
 		});
+
+		if (status === DisbursementStatus.SUCCESS) {
+			await this.notificationLifecycleService.queueStatusChange({
+				countyId: disbursement.countyId,
+				applicationId: disbursement.applicationId,
+				eventType: 'DISBURSEMENT_SUCCESS',
+				fromStatus: 'APPROVED',
+				toStatus: 'DISBURSED',
+				metadata: { disbursementId, transactionId },
+			});
+		} else if (status === DisbursementStatus.FAILED) {
+			await this.notificationLifecycleService.queueStatusChange({
+				countyId: disbursement.countyId,
+				applicationId: disbursement.applicationId,
+				eventType: 'DISBURSEMENT_MANUAL_INTERVENTION_REQUIRED',
+				fromStatus: 'APPROVED',
+				toStatus: 'APPROVED',
+				metadata: { disbursementId, failureReason },
+			});
+		}
 	}
 }

@@ -1,17 +1,19 @@
 /**
- * Purpose: Provide the document virus-scan queue adapter.
- * Why important: Decouples document uploads from scan execution and allows local or containerized Redis usage.
- * Used by: DocumentService and the virus-scan workflow.
+ * Purpose: Provide queue adapters for virus scan, AI scoring, and SMS notifications.
+ * Why important: Decouples workflow mutations from asynchronous execution workers.
+ * Used by: Document, AI scoring, and notification lifecycle services.
  */
 
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
+import { SmsService } from '../modules/notification/sms.service';
 import {
   AiScoringJobData,
   AiScoringProcessor,
 } from './processors/ai-scoring.processor';
+import { SmsJobData, SmsProcessor } from './processors/sms.processor';
 
 type VirusScanJobData = {
   documentId: string;
@@ -27,18 +29,26 @@ type AiScoringQueueJob = {
   add: (name: string, data: AiScoringJobData) => Promise<void>;
 };
 
+type SmsQueueJob = {
+  add: (name: string, data: SmsJobData) => Promise<string>;
+};
+
 @Injectable()
 export class QueueService implements OnModuleDestroy {
   private readonly logger = new Logger(QueueService.name);
   private readonly virusScanQueue: VirusScanQueueJob;
   private readonly aiScoringQueue: AiScoringQueueJob;
+  private readonly smsQueue: SmsQueueJob;
   private readonly aiScoringProcessor: AiScoringProcessor;
+  private readonly smsProcessor: SmsProcessor;
   private readonly redisConnection?: Redis;
   private readonly worker?: Worker<VirusScanJobData>;
   private readonly aiScoringWorker?: Worker<AiScoringJobData>;
+  private readonly smsWorker?: Worker<SmsJobData>;
 
   constructor(private readonly prisma: PrismaService) {
     this.aiScoringProcessor = new AiScoringProcessor(prisma);
+    this.smsProcessor = new SmsProcessor(prisma, new SmsService());
 
     const redisUrl = process.env.REDIS_URL;
 
@@ -51,6 +61,9 @@ export class QueueService implements OnModuleDestroy {
         connection: this.redisConnection,
       });
       const aiScoringQueue = new Queue<AiScoringJobData>('ai-scoring', {
+        connection: this.redisConnection,
+      });
+      const smsQueue = new Queue<SmsJobData>('sms-notification', {
         connection: this.redisConnection,
       });
 
@@ -76,6 +89,11 @@ export class QueueService implements OnModuleDestroy {
         async (job) => this.aiScoringProcessor.process(job),
         { connection: this.redisConnection },
       );
+      this.smsWorker = new Worker<SmsJobData>(
+        'sms-notification',
+        async (job) => this.smsProcessor.process(job),
+        { connection: this.redisConnection },
+      );
 
       this.virusScanQueue = {
         add: async (name: string, data: VirusScanJobData) => {
@@ -89,6 +107,17 @@ export class QueueService implements OnModuleDestroy {
             backoff: { type: 'exponential', delay: 1000 },
             jobId: `ai-scoring-${data.applicationId}`,
           });
+        },
+      };
+      this.smsQueue = {
+        add: async (name: string, data: SmsJobData) => {
+          const job = await smsQueue.add(name, data, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 1000 },
+            removeOnComplete: true,
+          });
+
+          return String(job.id ?? data.deliveryId);
         },
       };
 
@@ -116,6 +145,12 @@ export class QueueService implements OnModuleDestroy {
         await this.aiScoringProcessor.processData(data);
       },
     };
+    this.smsQueue = {
+      add: async (_name: string, data: SmsJobData) => {
+        await this.smsProcessor.processData(data);
+        return `local-${data.deliveryId}`;
+      },
+    };
 
     this.logger.log('Queue service configured for in-process fallback');
   }
@@ -123,6 +158,7 @@ export class QueueService implements OnModuleDestroy {
   async onModuleDestroy() {
     await this.worker?.close();
     await this.aiScoringWorker?.close();
+    await this.smsWorker?.close();
     await this.redisConnection?.quit();
   }
 
@@ -132,5 +168,9 @@ export class QueueService implements OnModuleDestroy {
 
   getAiScoringQueue(): AiScoringQueueJob {
     return this.aiScoringQueue;
+  }
+
+  getSmsQueue(): SmsQueueJob {
+    return this.smsQueue;
   }
 }

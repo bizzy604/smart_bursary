@@ -7,6 +7,8 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import Redis from 'ioredis';
 
+import { PrismaService } from '../../database/prisma.service';
+import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 import {
 	DisbursementExecutionResult,
 	DisbursementExecutionService,
@@ -27,7 +29,11 @@ export class DisbursementQueueService implements OnModuleDestroy {
 	private readonly redisConnection?: Redis;
 	private readonly worker?: Worker<DisbursementJobData>;
 
-	constructor(private readonly executionService: DisbursementExecutionService) {
+	constructor(
+		private readonly executionService: DisbursementExecutionService,
+		private readonly prisma: PrismaService,
+		private readonly notificationLifecycleService: NotificationLifecycleService,
+	) {
 		const redisUrl = process.env.REDIS_URL;
 		if (!redisUrl) {
 			this.disbursementQueue = {
@@ -80,6 +86,8 @@ export class DisbursementQueueService implements OnModuleDestroy {
 
 	private async process(disbursementId: string): Promise<void> {
 		const result = await this.executionService.execute(disbursementId);
+		await this.notifyOutcome(disbursementId, result);
+
 		if (result.status === 'FAILED_RETRY') {
 			const delayMs = this.resolveBackoffDelayMs(result);
 			await this.enqueue(disbursementId, delayMs);
@@ -91,6 +99,44 @@ export class DisbursementQueueService implements OnModuleDestroy {
 				`Disbursement ${disbursementId} reached terminal failure after ${result.retryCount} attempts.`,
 			);
 		}
+	}
+
+	private async notifyOutcome(
+		disbursementId: string,
+		result: DisbursementExecutionResult,
+	): Promise<void> {
+		if (result.status !== 'SUCCESS' && result.status !== 'FAILED_TERMINAL') {
+			return;
+		}
+
+		const record = await this.prisma.disbursementRecord.findUnique({
+			where: { id: disbursementId },
+			select: { applicationId: true, countyId: true },
+		});
+		if (!record) {
+			return;
+		}
+
+		if (result.status === 'SUCCESS') {
+			await this.notificationLifecycleService.queueStatusChange({
+				countyId: record.countyId,
+				applicationId: record.applicationId,
+				eventType: 'DISBURSEMENT_SUCCESS',
+				fromStatus: 'APPROVED',
+				toStatus: 'DISBURSED',
+				metadata: { disbursementId },
+			});
+			return;
+		}
+
+		await this.notificationLifecycleService.queueStatusChange({
+			countyId: record.countyId,
+			applicationId: record.applicationId,
+			eventType: 'DISBURSEMENT_MANUAL_INTERVENTION_REQUIRED',
+			fromStatus: 'APPROVED',
+			toStatus: 'APPROVED',
+			metadata: { disbursementId, retryCount: result.retryCount },
+		});
 	}
 
 	private resolveBackoffDelayMs(result: DisbursementExecutionResult): number {

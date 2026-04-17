@@ -1,6 +1,6 @@
 # KauntyBursary Functional Closure Backlog
 
-Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed)  
+Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed, B-06 completed)  
 Last Updated: 2026-04-17  
 Source Inputs: `Docs/01-PRD.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`
 
@@ -241,6 +241,19 @@ Validation:
 
 ### B-06 - Reporting and Historical Analytics Completion
 
+Execution Status:
+- Completed (2026-04-17)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
+- `pnpm --filter @smart-bursary/web run typecheck` passed.
+- `pnpm --filter @smart-bursary/web run build` passed.
+- Reporting API now exposes dashboard/OCOB/ward-summary/trends and export endpoints through `apps/api/modules/reporting/reporting.controller.ts`, `apps/api/modules/reporting/reporting.service.ts`, and `apps/api/modules/reporting/reporting-analytics.service.ts`.
+- County dashboard now consumes live `/reports/dashboard` data with periodic refresh in `apps/web/app/(admin)/county/dashboard/page.tsx`.
+- County OCOB and ward export pages now consume live datasets and backend CSV/PDF exports via `apps/web/app/(admin)/county/reports/ocob/page.tsx`, `apps/web/app/(admin)/ward/reports/page.tsx`, and `apps/web/lib/reporting-api.ts`.
+- Historical trend filters (year/program/ward/education level) are implemented against `/reports/trends` in `apps/web/app/(admin)/county/reports/page.tsx`.
+
 PRD IDs:
 - `RP-01`
 - `RP-02`
@@ -325,7 +338,7 @@ Validation:
 
 ## Operational Gap Not Counted In PRD Totals
 
-The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled with B-06 now that B-03 through B-05 are complete:
+The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled as a follow-on operational slice now that B-06 is complete:
 
 | Item | Description | Recommended Placement |
 |---|---|---|
@@ -338,9 +351,9 @@ Primary Areas:
 
 ## Recommended Immediate Next Action
 
-Start `B-06 - Reporting and historical analytics completion`.
+Start `B-07 - Status-change notification integration`.
 
 Reason:
-- B-05 disbursement execution, retry policy, receipt downloads, and EFT exports are now complete and validated.
-- Remaining `RP-*` requirements are the next blockers for analytics and compliance reporting readiness.
-- B-06 is now the strict next dependency in the functional queue.
+- B-06 reporting and trend analytics requirements are now implemented and validated.
+- `RW-04` remains the next functional blocker for production workflow communications.
+- B-07 is now the strict next dependency before B-08 closure.

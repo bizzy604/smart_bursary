@@ -6,29 +6,27 @@
 import {
 	ConflictException,
 	Injectable,
-	Logger,
 	UnprocessableEntityException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
-import { QueueService } from '../../queue/queue.service';
+import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 import { ProfileCompletionService } from '../profile/profile-completion.service';
 import { EligibilityService } from '../program/eligibility.service';
+import { ApplicationAiScoringService } from './application-ai-scoring.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { SubmitApplicationDto } from './dto/submit-application.dto';
 import { ApplicationService } from './application.service';
 
 @Injectable()
 export class ApplicationSubmissionService {
-	private readonly logger = new Logger(ApplicationSubmissionService.name);
-
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly eligibilityService: EligibilityService,
 		private readonly profileCompletionService: ProfileCompletionService,
 		private readonly applicationService: ApplicationService,
-		private readonly queueService: QueueService,
+		private readonly applicationAiScoringService: ApplicationAiScoringService,
+		private readonly notificationLifecycleService: NotificationLifecycleService,
 	) {}
 
 	async createDraft(
@@ -138,7 +136,18 @@ export class ApplicationSubmissionService {
 			dto,
 		);
 
-		await this.enqueueAiScoring(submitted.id, countyId, submitted.status);
+		await this.applicationAiScoringService.enqueue(
+			submitted.id,
+			countyId,
+			submitted.status,
+		);
+		await this.notificationLifecycleService.queueStatusChange({
+			countyId,
+			applicationId: submitted.id,
+			eventType: 'APPLICATION_SUBMITTED',
+			fromStatus: 'DRAFT',
+			toStatus: 'SUBMITTED',
+		});
 
 		return submitted;
 	}
@@ -148,75 +157,5 @@ export class ApplicationSubmissionService {
 			code: 'INELIGIBLE',
 			message: reason,
 		});
-	}
-
-	private async enqueueAiScoring(
-		applicationId: string,
-		countyId: string,
-		status: string,
-	): Promise<void> {
-		try {
-			await this.queueService.getAiScoringQueue().add('score-application', {
-				applicationId,
-				countyId,
-			});
-
-			await this.safeRecordAiTimeline(
-				applicationId,
-				countyId,
-				'AI_SCORING_QUEUED',
-				status,
-				'AI scoring job queued successfully.',
-			);
-		} catch (error) {
-			const message = this.resolveErrorMessage(error);
-			this.logger.error(
-				`Failed to enqueue AI scoring for application ${applicationId}: ${message}`,
-			);
-
-			await this.safeRecordAiTimeline(
-				applicationId,
-				countyId,
-				'AI_SCORING_QUEUE_FAILED',
-				status,
-				message,
-			);
-		}
-	}
-
-	private async safeRecordAiTimeline(
-		applicationId: string,
-		countyId: string,
-		eventType: string,
-		status: string,
-		message: string,
-	): Promise<void> {
-		try {
-			await this.prisma.applicationTimeline.create({
-				data: {
-					applicationId,
-					countyId,
-					eventType,
-					fromStatus: status,
-					toStatus: status,
-					metadata: {
-						message,
-						queue: 'ai-scoring',
-					} as Prisma.InputJsonValue,
-				},
-			});
-		} catch (error) {
-			this.logger.warn(
-				`Failed to persist timeline event ${eventType} for application ${applicationId}: ${this.resolveErrorMessage(error)}`,
-			);
-		}
-	}
-
-	private resolveErrorMessage(error: unknown): string {
-		if (error instanceof Error) {
-			return error.message;
-		}
-
-		return 'Unknown error';
 	}
 }
