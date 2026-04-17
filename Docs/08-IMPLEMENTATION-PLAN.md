@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2A Completed, W6 In Progress)
+Status: In Progress (Phase 2B Completed, W6 In Progress)
 Last Updated: 2026-04-17
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md
@@ -26,13 +26,21 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - `pnpm --filter @smart-bursary/api run build` passed.
     - `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed.
     - `pnpm --filter @smart-bursary/api exec jest --config jest.config.ts test/integration/student-application.e2e-spec.ts test/integration/program-lifecycle.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts test/integration/profile-gating.e2e-spec.ts` passed (23/23).
+- Phase 2B: Completed.
+  - Implementation: Real PDF generation for student preview/download flows and S3-only document storage abstraction with signed download URLs.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/web run test` passed.
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm test -- test/integration/document.e2e-spec.ts test/integration/document-scan-auth.e2e-spec.ts` in `apps/api` passed (13/13) after bringing up local `postgres` and `redis`, applying migrations, and seeding.
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
     - `pnpm --filter @smart-bursary/web run test` passed (13/13, repeated run).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Next phase start: Phase 2B is ready when execution approval is given.
+- Next phase start: Phase 2C is ready when execution approval is given.
 
 ## 1. Objective
 
@@ -397,6 +405,22 @@ Scope:
 Exit Criteria:
 - Student receives true PDF outputs before/after submission.
 - Document uploads stored in S3-compatible backend and scanned asynchronously.
+
+Current phase notes:
+- Converted web PDF endpoints to return real `application/pdf` bytes with Node runtime generation.
+- Added shared PDF rendering utilities and payload builders for application and preview flows.
+- Added preview PDF API (`POST /api/applications/preview/pdf`) and wired preview download to server-generated PDF.
+- Implemented S3-only storage adapter with signed URL generation and fail-fast configuration validation.
+- Tightened document upload validation:
+  - Canonical document type allow-list.
+  - MIME allow-list (`application/pdf`, `image/jpeg`, `image/png`).
+  - Maximum file size now 5 MB.
+- Validation completed:
+  - `pnpm --filter @smart-bursary/web run test`
+  - `pnpm --filter @smart-bursary/web run typecheck`
+  - `pnpm --filter @smart-bursary/web run build`
+  - `pnpm --filter @smart-bursary/api run build`
+  - `pnpm test -- test/integration/document.e2e-spec.ts test/integration/document-scan-auth.e2e-spec.ts` (run in `apps/api` with local Postgres/Redis up, migrations applied, and seed loaded)
 
 ### Phase 2C - AI Trigger Pipeline Completion
 

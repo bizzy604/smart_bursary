@@ -268,6 +268,12 @@ Scope Window: 2026-04-16
 - [x] Application card/detail download actions connected to functional PDF route:
 	- `apps/web/components/application/application-card.tsx`
 	- `apps/web/app/(student)/applications/[id]/page.tsx`
+- [x] Phase 2B PDF fidelity completed with true PDF generation:
+	- `apps/web/lib/application-pdf.tsx`
+	- `apps/web/lib/application-pdf-data.ts`
+	- `apps/web/app/api/applications/preview/pdf/route.ts`
+	- `apps/web/app/(student)/apply/[programId]/preview/page.tsx`
+	- Updated `/applications/[id]/pdf` and `/api/applications/[id]/pdf` routes to return `application/pdf` bytes.
 
 ### Validation Checklist
 
@@ -279,6 +285,7 @@ Scope Window: 2026-04-16
 
 - Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
 - Build: `pnpm --filter @smart-bursary/web run build` passed and generated both `/applications/[id]/pdf` and `/api/applications/[id]/pdf` routes.
+- Phase 2B validation rerun: `pnpm --filter @smart-bursary/web run test`, `pnpm --filter @smart-bursary/web run typecheck`, and `pnpm --filter @smart-bursary/web run build` all passed after true-PDF route conversion and preview download wiring.
 
 ### Blockers and Gaps
 

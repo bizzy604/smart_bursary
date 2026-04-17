@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const pdfBuffer = await renderApplicationPdf({
+	const pdfBytes = await renderApplicationPdf({
 		countyName: body.countyName ?? countyBranding.name,
 		fundName: body.fundName ?? countyBranding.fundName,
 		programName: body.programName,
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
 	const safeReference = body.reference.replace(/[^A-Za-z0-9_-]/g, "_");
 
-	return new NextResponse(new Blob([pdfBuffer], { type: "application/pdf" }), {
+	return new NextResponse(pdfBytes, {
 		status: 200,
 		headers: {
 			"Content-Type": "application/pdf",

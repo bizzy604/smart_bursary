@@ -19,6 +19,7 @@ export default () => ({
 		s3Region: process.env.S3_REGION ?? '',
 		s3Endpoint: process.env.S3_ENDPOINT ?? '',
 		s3AccessKeyId: process.env.S3_ACCESS_KEY_ID ?? '',
+		s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? '',
 		s3ForcePathStyle: process.env.S3_FORCE_PATH_STYLE ?? 'false',
 		signedUrlTtlSeconds: Number.parseInt(process.env.S3_SIGNED_URL_TTL_SECONDS ?? '900', 10),
 	},

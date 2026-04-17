@@ -9,6 +9,7 @@ const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testEnvironment: 'node',
+  setupFilesAfterEnv: ['<rootDir>/test/setup-jest.ts'],
   testMatch: [
     '<rootDir>/test/**/*.spec.ts',
     '<rootDir>/test/**/*.e2e-spec.ts',

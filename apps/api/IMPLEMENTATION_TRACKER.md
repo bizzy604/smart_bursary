@@ -424,10 +424,10 @@ Scope Window: 2026-04-15
 ### Deliverables
 
 - [x] Document module implemented with controller, service, DTOs
-- [x] Document storage backend (local filesystem)
+- [x] S3-only document storage abstraction
 - [x] Async job queue configuration for virus scanning
 - [x] Virus scan processor job handler
-- [x] Document upload endpoint with file validation
+- [x] Document upload endpoint with strict file validation (doc type, MIME, size)
 - [x] Document list/retrieve endpoints (county-scoped)
 - [x] Build passes for `apps/api`
 - [x] All tests pass
@@ -446,18 +446,20 @@ Scope Window: 2026-04-15
 ### Evidence
 
 - Build command and summary: `pnpm run build` passed successfully in `apps/api`.
-- Test command and summary: `pnpm exec jest --config jest.config.ts --runInBand test/integration/document.e2e-spec.ts` passed (13/13 tests).
+- Test command and summary: `pnpm test -- test/integration/document.e2e-spec.ts test/integration/document-scan-auth.e2e-spec.ts` passed (13/13 tests) in `apps/api`.
 - Edge-case checks and summary:
   - [x] Upload document: returns 201 and queues scan work
   - [x] Missing file: returns 400
   - [x] Missing applicationId: returns 400
   - [x] Non-existent application: returns 404
-  - [x] Size limit: returns 400 for files larger than 10 MB
+  - [x] Size limit: returns 400 for files larger than 5 MB
   - [x] Document retrieval: county- and applicant-scoped access only
   - [x] Async scan: uploaded documents reach CLEAN or INFECTED states
 - Notes:
-  - Root `docker-compose.yml` now includes `redis` for queue infrastructure.
+  - Document service now emits signed download metadata (`downloadUrl`, `downloadExpiresAt`) through the storage adapter.
+  - Root `docker-compose.yml` includes `redis` for queue infrastructure.
   - Queue adapter uses Redis when `REDIS_URL` is set and falls back to in-process async processing otherwise.
+  - Validation run used local `postgres` and `redis` containers, `prisma migrate deploy`, and `prisma db seed` before executing the document integration suites.
   - Document module and test files were normalized to the required header format.
 
 ### Blockers and Gaps

@@ -7,8 +7,6 @@
 import { PutObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
 
 type UploadObjectInput = {
 	key: string;
@@ -24,72 +22,69 @@ type SignedDownloadUrl = {
 @Injectable()
 export class S3Service {
 	private readonly logger = new Logger(S3Service.name);
-	private readonly bucket = process.env.S3_BUCKET ?? '';
-	private readonly signedUrlTtlSeconds = Number.parseInt(
-		process.env.S3_SIGNED_URL_TTL_SECONDS ?? '900',
-		10,
-	);
-	private readonly localRoot = path.join(process.cwd(), 'uploads', 'documents');
-	private readonly s3Client: S3Client | null;
+	private readonly bucket: string;
+	private readonly signedUrlTtlSeconds: number;
+	private readonly s3Client: S3Client;
 
 	constructor() {
-		const region = process.env.S3_REGION;
-		const accessKeyId = process.env.S3_ACCESS_KEY_ID;
-		const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY;
-		const endpoint = process.env.S3_ENDPOINT;
+		const bucket = process.env.S3_BUCKET?.trim();
+		const region = process.env.S3_REGION?.trim();
+		const accessKeyId = process.env.S3_ACCESS_KEY_ID?.trim();
+		const secretAccessKey = process.env.S3_SECRET_ACCESS_KEY?.trim();
+		const endpoint = process.env.S3_ENDPOINT?.trim() || undefined;
 
-		if (this.bucket && region && accessKeyId && secretAccessKey) {
-			this.s3Client = new S3Client({
-				region,
-				endpoint: endpoint || undefined,
-				forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-				credentials: {
-					accessKeyId,
-					secretAccessKey,
-				},
-			});
-			this.logger.log(`Document storage configured for S3 bucket ${this.bucket}`);
-			return;
+		if (!bucket || !region) {
+			throw new Error('S3_BUCKET and S3_REGION must be configured for document uploads.');
 		}
 
-		this.s3Client = null;
-		fs.mkdirSync(this.localRoot, { recursive: true });
-		this.logger.log('Document storage configured for local filesystem fallback');
+		if ((accessKeyId && !secretAccessKey) || (!accessKeyId && secretAccessKey)) {
+			throw new Error(
+				'S3 credentials are incomplete. Provide both S3_ACCESS_KEY_ID and S3_SECRET_ACCESS_KEY.',
+			);
+		}
+
+		this.bucket = bucket;
+		this.signedUrlTtlSeconds = Number.parseInt(
+			process.env.S3_SIGNED_URL_TTL_SECONDS ?? '900',
+			10,
+		);
+
+		this.s3Client = new S3Client({
+			region,
+			endpoint,
+			forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+			...(accessKeyId && secretAccessKey
+				? {
+						credentials: {
+							accessKeyId,
+							secretAccessKey,
+						},
+					}
+				: {}),
+		});
+
+		this.logger.log(`Document storage configured for S3 bucket ${this.bucket}`);
 	}
 
 	async uploadObject(input: UploadObjectInput): Promise<void> {
-		if (this.s3Client) {
-			await this.s3Client.send(
-				new PutObjectCommand({
-					Bucket: this.bucket,
-					Key: input.key,
-					Body: input.body,
-					ContentType: input.contentType,
-				}),
-			);
-			return;
-		}
-
-		const localPath = path.join(this.localRoot, input.key);
-		fs.mkdirSync(path.dirname(localPath), { recursive: true });
-		fs.writeFileSync(localPath, input.body);
+		await this.s3Client.send(
+			new PutObjectCommand({
+				Bucket: this.bucket,
+				Key: input.key,
+				Body: input.body,
+				ContentType: input.contentType,
+			}),
+		);
 	}
 
 	async getSignedDownloadUrl(key: string): Promise<SignedDownloadUrl> {
 		const expiresAt = new Date(Date.now() + this.signedUrlTtlSeconds * 1000).toISOString();
+		const url = await getSignedUrl(
+			this.s3Client,
+			new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+			{ expiresIn: this.signedUrlTtlSeconds },
+		);
 
-		if (this.s3Client) {
-			const url = await getSignedUrl(
-				this.s3Client,
-				new GetObjectCommand({ Bucket: this.bucket, Key: key }),
-				{ expiresIn: this.signedUrlTtlSeconds },
-			);
-			return { url, expiresAt };
-		}
-
-		return {
-			url: `local-storage://${key.replaceAll('\\', '/')}`,
-			expiresAt,
-		};
+		return { url, expiresAt };
 	}
 }

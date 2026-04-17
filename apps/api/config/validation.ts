@@ -16,13 +16,13 @@ const validationSchema = Joi.object({
 	REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).optional().allow(''),
 	ACCESS_TOKEN_TTL: Joi.string().default('15m'),
 	REFRESH_TOKEN_TTL: Joi.string().default('7d'),
-	S3_BUCKET: Joi.string().optional().allow(''),
-	S3_REGION: Joi.string().optional().allow(''),
-	S3_ENDPOINT: Joi.string().uri({ scheme: ['http', 'https'] }).optional().allow(''),
-	S3_ACCESS_KEY_ID: Joi.string().optional().allow(''),
-	S3_SECRET_ACCESS_KEY: Joi.string().optional().allow(''),
+	S3_BUCKET: Joi.string().trim().min(1).required(),
+	S3_REGION: Joi.string().trim().min(1).required(),
+	S3_ENDPOINT: Joi.string().uri({ scheme: ['http', 'https'] }).optional(),
+	S3_ACCESS_KEY_ID: Joi.string().trim().min(1).optional(),
+	S3_SECRET_ACCESS_KEY: Joi.string().trim().min(1).optional(),
 	S3_FORCE_PATH_STYLE: Joi.boolean().truthy('true').falsy('false').default(false),
 	S3_SIGNED_URL_TTL_SECONDS: Joi.number().integer().min(60).max(86400).default(900),
-});
+}).and('S3_ACCESS_KEY_ID', 'S3_SECRET_ACCESS_KEY');
 
 export default validationSchema;

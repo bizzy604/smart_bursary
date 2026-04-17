@@ -136,7 +136,11 @@ function ApplicationPdfDocument(params: ApplicationPdfParams) {
 	);
 }
 
-export async function renderApplicationPdf(params: ApplicationPdfParams): Promise<Uint8Array> {
+export async function renderApplicationPdf(
+	params: ApplicationPdfParams,
+): Promise<Uint8Array<ArrayBuffer>> {
 	const buffer = await renderToBuffer(<ApplicationPdfDocument {...params} />);
-	return Uint8Array.from(buffer);
+	const bytes = new Uint8Array(new ArrayBuffer(buffer.byteLength));
+	bytes.set(buffer);
+	return bytes;
 }

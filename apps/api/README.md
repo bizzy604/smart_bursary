@@ -8,6 +8,21 @@ NestJS modular monolith backend for Smart Bursary.
 - pnpm 9+
 - PostgreSQL (and Redis if running queue-backed flows)
 
+## Required Storage Configuration
+
+Document uploads are S3-only. Configure these environment variables before starting the API:
+
+- `S3_BUCKET`
+- `S3_REGION`
+
+Optional for custom endpoints or static credentials:
+
+- `S3_ENDPOINT`
+- `S3_ACCESS_KEY_ID`
+- `S3_SECRET_ACCESS_KEY`
+- `S3_FORCE_PATH_STYLE`
+- `S3_SIGNED_URL_TTL_SECONDS`
+
 ## Install Dependencies
 
 From repo root:

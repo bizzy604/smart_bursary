@@ -15,10 +15,10 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
   const url = new URL(request.url);
   const forceDownload = url.searchParams.get("download") === "true";
 
-  const pdfBuffer = await renderApplicationPdf(payload.pdfPayload);
+  const pdfBytes = await renderApplicationPdf(payload.pdfPayload);
   const filename = `${payload.application.reference.replace(/[^A-Za-z0-9_-]/g, "_")}.pdf`;
 
-  return new NextResponse(new Blob([pdfBuffer], { type: "application/pdf" }), {
+  return new NextResponse(pdfBytes, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
