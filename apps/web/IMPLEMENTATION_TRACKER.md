@@ -26,8 +26,8 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 | W1 | Student Portal Core Slice | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W2 | Application Wizard (Sections A-F) | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W3 | Student Preview and Submission UX | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
-| W4 | Ward and County Admin Portals | Not Started | TBD | - | - |
-| W5 | Reporting and Operational Screens | Not Started | TBD | - | - |
+| W4 | Ward and County Admin Portals | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
+| W5 | Reporting and Operational Screens | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
 | W6 | Frontend Testing and Hardening | Not Started | TBD | - | - |
 
 ---
@@ -36,7 +36,7 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: None (W3 completed)
+Current active phase: None (W5 completed)
 
 ---
 
@@ -217,6 +217,137 @@ Scope Window: 2026-04-16
 
 - Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
 - Build: `pnpm --filter @smart-bursary/web run build` passed and generated both `/applications/[id]/pdf` and `/api/applications/[id]/pdf` routes.
+
+### Blockers and Gaps
+
+- None.
+
+### Completion Gate
+
+- [x] All deliverables done.
+- [x] All validation checks done.
+- [x] No unresolved blocker.
+- [x] Phase status set to Completed.
+
+---
+
+## W4 - Ward and County Admin Portals
+
+Status: Completed
+Owner: GitHub Copilot
+Scope Window: 2026-04-17
+
+### In Scope
+
+- Admin shell for ward and county spaces (header, sidebar, county branding inheritance).
+- Ward portal workflow screens: dashboard, applications queue, application detail, documents view, and AI score view.
+- County finance workflow screens: dashboard, county review queue, final review detail, disbursement queue, and batch export preview.
+- Reusable admin workflow components for AI score visualization, document review list, budget utilization, and review decision capture.
+
+### Out of Scope
+
+- Reporting screens (`/ward/reports`, `/county/reports`, `/county/reports/ocob`) reserved for W5.
+- Operations portal screens (`/tenants`, `/health`) reserved for W5.
+- Backend-persistent review/disbursement writes (this phase remains frontend workflow implementation).
+
+### Deliverables
+
+- [x] Admin layout shell implemented:
+	- `apps/web/app/(admin)/layout.tsx`
+	- `apps/web/components/layout/admin-header.tsx`
+	- `apps/web/components/layout/admin-sidebar.tsx`
+- [x] Admin workflow data and navigation layer implemented:
+	- `apps/web/lib/admin-data.ts`
+	- `apps/web/lib/admin-navigation.ts`
+- [x] Reusable W4 application workflow components implemented:
+	- `apps/web/components/application/ai-score-card.tsx`
+	- `apps/web/components/application/document-viewer.tsx`
+	- `apps/web/components/application/budget-bar.tsx`
+	- `apps/web/components/application/review-panel.tsx`
+- [x] Ward portal W4 routes implemented:
+	- `apps/web/app/(admin)/ward/dashboard/page.tsx`
+	- `apps/web/app/(admin)/ward/applications/page.tsx`
+	- `apps/web/app/(admin)/ward/applications/[id]/page.tsx`
+	- `apps/web/app/(admin)/ward/applications/[id]/documents/page.tsx`
+	- `apps/web/app/(admin)/ward/applications/[id]/score/page.tsx`
+- [x] County finance portal W4 routes implemented:
+	- `apps/web/app/(admin)/county/dashboard/page.tsx`
+	- `apps/web/app/(admin)/county/review/page.tsx`
+	- `apps/web/app/(admin)/county/review/[id]/page.tsx`
+	- `apps/web/app/(admin)/county/disbursements/page.tsx`
+	- `apps/web/app/(admin)/county/disbursements/batch/page.tsx`
+
+### Validation Checklist
+
+- [x] Typecheck passes for `apps/web`.
+- [x] Build passes for `apps/web`.
+- [x] W4 route compilation confirmed for ward and county workflow paths.
+
+### Evidence
+
+- Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
+- Build: `pnpm --filter @smart-bursary/web run build` passed and generated W4 routes (`/ward/*`, `/county/*`).
+
+### Blockers and Gaps
+
+- None.
+
+### Completion Gate
+
+- [x] All deliverables done.
+- [x] All validation checks done.
+- [x] No unresolved blocker.
+- [x] Phase status set to Completed.
+
+---
+
+## W5 - Reporting and Operational Screens
+
+Status: Completed
+Owner: GitHub Copilot
+Scope Window: 2026-04-17
+
+### In Scope
+
+- Reporting surfaces for ward and county teams (`/ward/reports`, `/county/reports`, `/county/reports/ocob`).
+- Operational console shell and routes for tenant oversight and platform health (`/tenants`, `/tenants/[slug]`, `/health`).
+- Frontend-only export and preview actions for report outputs.
+- Completion of document interaction actions (View and Download) in admin review flows.
+
+### Out of Scope
+
+- Backend persistence and workflow APIs for report generation or operator actions.
+- Binary file streaming for uploaded source documents.
+- Frontend automated test hardening (reserved for W6).
+
+### Deliverables
+
+- [x] Reporting data and export utility layer implemented:
+	- `apps/web/lib/reporting-data.ts`
+	- `apps/web/lib/client-download.ts`
+- [x] Ward and county reporting routes implemented:
+	- `apps/web/app/(admin)/ward/reports/page.tsx`
+	- `apps/web/app/(admin)/county/reports/page.tsx`
+	- `apps/web/app/(admin)/county/reports/ocob/page.tsx`
+- [x] Operations data and route stack implemented:
+	- `apps/web/lib/ops-data.ts`
+	- `apps/web/app/(ops)/layout.tsx`
+	- `apps/web/app/(ops)/tenants/page.tsx`
+	- `apps/web/app/(ops)/tenants/[slug]/page.tsx`
+	- `apps/web/app/(ops)/health/page.tsx`
+- [x] Admin document interaction actions implemented:
+	- `apps/web/components/application/document-viewer.tsx` (View and Download actions now functional)
+
+### Validation Checklist
+
+- [x] Typecheck passes for `apps/web`.
+- [x] Build passes for `apps/web`.
+- [x] W5 route compilation confirmed for reporting and operations paths.
+
+### Evidence
+
+- Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
+- Build: `pnpm --filter @smart-bursary/web run build` passed and generated W5 routes (`/ward/reports`, `/county/reports`, `/county/reports/ocob`, `/tenants`, `/tenants/[slug]`, `/health`).
 
 ### Blockers and Gaps
 
