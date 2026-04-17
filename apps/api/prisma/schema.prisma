@@ -177,6 +177,7 @@ model StudentProfile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   county County @relation(fields: [countyId], references: [id])
 
+  @@unique([countyId, nationalId], map: "idx_profile_county_national_id_unique")
   @@index([countyId], map: "idx_profile_county")
   @@map("student_profiles")
 }

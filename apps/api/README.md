@@ -65,3 +65,31 @@ Student-facing discovery endpoints remain available:
 
 - `GET /api/v1/programs/active`
 - `GET /api/v1/programs/:id`
+
+Student `GET /api/v1/programs` and `GET /api/v1/programs/active` responses now include:
+
+- `eligible`
+- `ineligibilityReason`
+- `ineligibility_reason`
+
+## Student Profile Endpoints
+
+Authenticated students can manage profile completion via:
+
+- `GET /api/v1/profile`
+- `PATCH /api/v1/profile/personal`
+- `PATCH /api/v1/profile/academic`
+- `PATCH /api/v1/profile/family`
+- `GET /api/v1/profile/completion`
+
+Application submission now requires:
+
+- Verified email
+- Verified phone
+- Completed profile sections (personal, academic, family)
+
+Application semantic validation responses include `422` domain codes for:
+
+- `INELIGIBLE`
+- `PROGRAM_CLOSED`
+- `PROFILE_INCOMPLETE`

@@ -7,9 +7,15 @@
 		"format": "prettier --check .",
 		"lint": "next lint",
 		"start": "next start",
+		"test": "vitest run",
+		"test:a11y": "playwright test --grep @a11y",
+		"test:e2e": "playwright test",
+		"test:e2e:headed": "playwright test --headed",
+		"test:watch": "vitest",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@react-pdf/renderer": "^3.4.5",
 		"@hookform/resolvers": "^3.10.0",
 		"@radix-ui/react-slot": "^1.1.1",
 		"class-variance-authority": "^0.7.1",
@@ -26,17 +32,24 @@
 		"zustand": "^5.0.3"
 	},
 	"devDependencies": {
+		"@axe-core/playwright": "^4.11.1",
+		"@playwright/test": "^1.59.1",
+		"@testing-library/jest-dom": "^6.9.1",
+		"@testing-library/react": "^16.3.2",
+		"@testing-library/user-event": "^14.6.1",
 		"@types/node": "^22.13.10",
 		"@types/react": "^18.3.18",
 		"@types/react-dom": "^18.3.5",
 		"autoprefixer": "^10.4.21",
 		"eslint": "^9.20.1",
 		"eslint-config-next": "^16.2.3",
+		"jsdom": "^29.0.2",
 		"postcss": "^8.5.3",
 		"prettier": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.6.11",
 		"shadcn": "^4.2.0",
 		"tailwindcss": "^3.4.17",
-		"typescript": "^5.8.3"
+		"typescript": "^5.8.3",
+		"vitest": "^4.1.4"
 	}
 }

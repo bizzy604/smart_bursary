@@ -4,26 +4,39 @@
  * Used by: ProgramController list and read endpoints.
  */
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { ProgramStatus } from '@prisma/client';
+import { ProgramStatus, UserRole } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { EligibilityService } from './eligibility.service';
 import { ListProgramsDto } from './dto/list-programs.dto';
+
+type ProgramViewer = {
+	userId: string;
+	role: UserRole;
+};
 
 @Injectable()
 export class ProgramService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly eligibilityService: EligibilityService,
+	) {}
 
-	async listPrograms(countyId: string, dto: ListProgramsDto) {
-		const status = this.parseStatus(dto.status);
+	async listPrograms(countyId: string, dto: ListProgramsDto, currentUser?: ProgramViewer) {
+		const isStudent = currentUser?.role === UserRole.STUDENT && Boolean(currentUser.userId);
+		const status = isStudent ? ProgramStatus.ACTIVE : this.parseStatus(dto.status);
+		const now = new Date();
 
-		return this.prisma.bursaryProgram.findMany({
+		const programs = await this.prisma.bursaryProgram.findMany({
 			where: {
 				countyId,
 				...(status ? { status } : {}),
+				...(isStudent ? { opensAt: { lte: now }, closesAt: { gte: now } } : {}),
 				...(dto.academicYear ? { academicYear: dto.academicYear } : {}),
 			},
 			select: {
 				id: true,
+				wardId: true,
 				name: true,
 				description: true,
 				budgetCeiling: true,
@@ -42,12 +55,21 @@ export class ProgramService {
 			},
 			orderBy: { opensAt: 'desc' },
 		});
+
+		if (!isStudent || !currentUser) {
+			return programs;
+		}
+
+		return this.eligibilityService.evaluateProgramsForStudent(
+			countyId,
+			currentUser.userId,
+			programs,
+		);
 	}
 
-	async listActivePrograms(countyId: string, dto: ListProgramsDto) {
+	async listActivePrograms(countyId: string, dto: ListProgramsDto, currentUser?: ProgramViewer) {
 		const now = new Date();
-
-		return this.prisma.bursaryProgram.findMany({
+		const programs = await this.prisma.bursaryProgram.findMany({
 			where: {
 				countyId,
 				status: ProgramStatus.ACTIVE,
@@ -57,6 +79,7 @@ export class ProgramService {
 			},
 			select: {
 				id: true,
+				wardId: true,
 				name: true,
 				description: true,
 				budgetCeiling: true,
@@ -73,6 +96,16 @@ export class ProgramService {
 			},
 			orderBy: { opensAt: 'desc' },
 		});
+
+		if (currentUser?.role !== UserRole.STUDENT || !currentUser.userId) {
+			return programs;
+		}
+
+		return this.eligibilityService.evaluateProgramsForStudent(
+			countyId,
+			currentUser.userId,
+			programs,
+		);
 	}
 
 	async getProgramById(countyId: string, programId: string) {

@@ -45,6 +45,8 @@ pnpm --filter @smart-bursary/web run start
 
 ```bash
 pnpm --filter @smart-bursary/web run lint
+pnpm --filter @smart-bursary/web run test
+pnpm --filter @smart-bursary/web run test:watch
 pnpm --filter @smart-bursary/web run typecheck
 pnpm --filter @smart-bursary/web run format
 ```

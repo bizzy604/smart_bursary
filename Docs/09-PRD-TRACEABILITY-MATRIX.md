@@ -15,9 +15,9 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 ## Summary Snapshot
 
 - Total functional requirements tracked: 42
-- Implemented: 6
-- Partial: 26
-- Missing: 10
+- Implemented: 12
+- Partial: 23
+- Missing: 7
 - Deferred: 0
 
 ## Requirement Matrix
@@ -28,18 +28,18 @@ Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 | TM-02 | Configurable county brand profile | Partial | apps/web/components/layout/county-branding-provider.tsx, apps/web/hooks/use-county.ts | Brand surface exists, but admin settings/API for full tenant branding management are incomplete | Phase 4 | BE+FE |
 | TM-03 | Platform operator county provisioning | Missing | apps/api/modules/tenant/provisioning.service.ts (empty), apps/api/modules/tenant/tenant.controller.ts (empty) | No provisioning API/workflow implemented | Phase 4A (new) | BE |
 | TM-04 | Plan-tier feature gating | Missing | apps/api/modules/tenant/tenant.service.ts (empty), apps/api/modules/tenant/tenant.controller.ts (empty) | No enforced plan-tier feature flags found | Phase 4A (new) | BE |
-| AU-01 | Email/password registration + email verification enforcement | Partial | apps/api/modules/auth/auth.controller.ts, apps/api/modules/auth/auth.service.ts | Email verification endpoint exists, but submission gating on verified status is not enforced in application flow | Phase 2A (new) | BE |
-| AU-02 | Phone OTP verification required before first submission | Partial | apps/api/modules/auth/auth.controller.ts, apps/api/modules/auth/auth.service.ts | OTP issuance/verification exists, but first-submission enforcement is not present in application flow | Phase 2A (new) | BE |
+| AU-01 | Email/password registration + email verification enforcement | Implemented | apps/api/modules/auth/auth.controller.ts, apps/api/modules/application/application-submission.service.ts, apps/api/modules/profile/profile-completion.service.ts, apps/api/test/integration/profile-gating.e2e-spec.ts | Submission now returns semantic `PROFILE_INCOMPLETE` until email verification is complete | Phase 2A (new) | BE |
+| AU-02 | Phone OTP verification required before first submission | Implemented | apps/api/modules/auth/auth.controller.ts, apps/api/modules/application/application-submission.service.ts, apps/api/modules/profile/profile-completion.service.ts, apps/api/test/integration/profile-gating.e2e-spec.ts | Submission now returns semantic `PROFILE_INCOMPLETE` until phone OTP verification is complete | Phase 2A (new) | BE |
 | AU-03 | JWT access + refresh token model | Implemented | apps/api/modules/auth/auth.controller.ts, apps/api/modules/auth/auth-token.service.ts, apps/api/modules/auth/auth-session.service.ts | Validate expiry and rotation behavior under hardening suite | Phase 7 validation | BE |
 | AU-04 | RBAC roles enforced | Partial | apps/api/common/guards/roles.guard.ts, apps/api/modules/review/review.controller.ts, apps/api/modules/disbursement/disbursement.controller.ts | Role decorators/guard exist, but full endpoint matrix validation is not complete | Phase 7 | BE |
 | AU-05 | Ward admin scope restriction | Partial | apps/api/modules/review/ward-review.service.ts, apps/api/modules/ai/ai.controller.ts | Service-layer ward checks exist; full RLS-backed guarantee and broad integration tests missing | Phase 7 | BE |
-| SP-01 | Multi-step profile completion before submit | Missing | apps/api/modules/profile/profile.controller.ts (empty), apps/api/modules/profile/profile.service.ts (empty) | No profile API/completeness enforcement in backend submit path | Phase 2A (new) | BE |
+| SP-01 | Multi-step profile completion before submit | Implemented | apps/api/modules/profile/profile.controller.ts, apps/api/modules/profile/profile.service.ts, apps/api/modules/profile/profile-completion.service.ts, apps/api/modules/application/application-submission.service.ts, apps/api/test/integration/profile-gating.e2e-spec.ts | Personal, academic, and family profile sections are enforced prior to submission | Phase 2A (new) | BE |
 | SP-02 | Capture official form fields A-G | Partial | apps/web/app/(student)/apply/[programId]/section-a/page.tsx, apps/web/app/(student)/apply/[programId]/section-f/page.tsx, apps/api/modules/application/application.service.ts | Wizard exists, but formal field mapping/validation parity to gazetted schema is incomplete | Phase 2A (new) | BE+FE |
-| SP-03 | National ID unique per county | Missing | apps/api/prisma/schema.prisma (StudentProfile nationalId has no county composite uniqueness) | Required DB uniqueness constraint not present | Phase 2A (new) | BE |
+| SP-03 | National ID unique per county | Implemented | apps/api/prisma/schema.prisma, apps/api/prisma/migrations/20260417113000_phase2a_profile_national_id_unique/migration.sql | County-scoped composite uniqueness enforced at DB and Prisma model levels | Phase 2A (new) | BE |
 | SP-04 | Family/financial/HELB/prior-bursary captured and surfaced | Partial | apps/api/prisma/schema.prisma (family/financial models), apps/api/modules/ai/ai-score.service.ts | Data model exists, but profile APIs/surface paths are incomplete | Phase 2A (new) | BE+FE |
 | BP-01 | County program creation and management | Implemented | apps/api/modules/program/program.controller.ts, apps/api/modules/program/program-lifecycle.service.ts, apps/api/modules/program/dto/create-program.dto.ts, apps/api/modules/program/dto/update-program.dto.ts, apps/api/test/integration/program-lifecycle.e2e-spec.ts | Lifecycle endpoints implemented and validated with passing integration tests (8/8) | Phase 1 | BE |
-| BP-02 | Eligibility-based program visibility | Missing | apps/api/modules/program/eligibility.service.ts (empty), apps/api/modules/program/program.service.ts | No profile-driven eligibility engine or ineligibility reason response | Phase 2 | BE |
-| BP-03 | Reject late submissions after closes_at | Partial | apps/api/modules/application/application.service.ts | Close-window check exists, but semantics/contract mismatch (error class/status details vs spec) | Phase 2 | BE |
+| BP-02 | Eligibility-based program visibility | Implemented | apps/api/modules/program/eligibility.service.ts, apps/api/modules/program/program.service.ts, apps/api/modules/program/program.controller.ts, apps/api/test/integration/program-eligibility.e2e-spec.ts | Student discovery now computes eligibility and exposes ineligibility reason fields with integration validation | Phase 2 | BE |
+| BP-03 | Reject late submissions after closes_at | Implemented | apps/api/modules/application/application-submission.service.ts, apps/api/common/filters/global-exception.filter.ts, apps/api/test/integration/program-eligibility.e2e-spec.ts | Submission path now returns semantic `PROGRAM_CLOSED` validation error when closes_at has elapsed | Phase 2 | BE |
 | BP-04 | Budget ceiling via advisory lock | Implemented | apps/api/modules/review/county-review.service.ts | Advisory lock and ceiling guard exist; needs stress validation in hardening | Phase 7 validation | BE |
 | AF-01 | Multi-step wizard A-F aligned with official form | Partial | apps/web/app/(student)/apply/[programId]/section-a/page.tsx through section-f/page.tsx | Wizard exists; strict legal-form parity validation still pending | Phase 2A (new) | FE |
 | AF-02 | Final pre-submit PDF preview with official layout | Partial | apps/web/app/(student)/apply/[programId]/preview/page.tsx, apps/web/lib/application-preview.ts | Preview rendered, but true PDF fidelity and visual-diff acceptance are not yet enforced | Phase 2B (new) | FE |

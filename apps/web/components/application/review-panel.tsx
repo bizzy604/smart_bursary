@@ -61,16 +61,26 @@ export function ReviewPanel({ mode, maxAmountKes, defaultAmountKes, existingNote
 			</div>
 
 			<div className="space-y-1">
-				<p className="text-sm font-medium text-gray-700">Recommended Amount (KES)</p>
-				<Input type="number" value={recommendedAmount} onChange={(event) => setRecommendedAmount(event.target.value)} />
+				<label htmlFor={`${mode}-recommended-amount`} className="text-sm font-medium text-gray-700">
+					Recommended Amount (KES)
+				</label>
+				<Input
+					id={`${mode}-recommended-amount`}
+					type="number"
+					value={recommendedAmount}
+					onChange={(event) => setRecommendedAmount(event.target.value)}
+				/>
 				{!amountIsValid ? (
 					<p className="text-xs text-danger-700">Enter an amount between 1 and {formatCurrencyKes(maxAmountKes)}.</p>
 				) : null}
 			</div>
 
 			<div className="space-y-1">
-				<p className="text-sm font-medium text-gray-700">Review Note</p>
+				<label htmlFor={`${mode}-review-note`} className="text-sm font-medium text-gray-700">
+					Review Note
+				</label>
 				<textarea
+					id={`${mode}-review-note`}
 					value={reviewNote}
 					onChange={(event) => setReviewNote(event.target.value)}
 					className="min-h-[110px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"

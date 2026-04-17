@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 1 Completed)
+Status: In Progress (Phase 2A Completed, W6 In Progress)
 Last Updated: 2026-04-17
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md
@@ -14,7 +14,25 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - `pnpm --filter @smart-bursary/api run build` passed.
     - `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed.
     - `pnpm --filter @smart-bursary/api exec jest --config jest.config.ts test/integration/program-lifecycle.e2e-spec.ts` passed (8/8).
-- Next phase start: Phase 2 is ready when execution approval is given.
+- Phase 2: Completed.
+  - Implementation: Eligibility engine and student eligibility visibility implemented.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed.
+    - `pnpm --filter @smart-bursary/api exec jest --config jest.config.ts test/integration/student-application.e2e-spec.ts test/integration/program-lifecycle.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts` passed (20/20).
+- Phase 2A: Completed.
+  - Implementation: Profile APIs, submission readiness gating, and county-level national ID uniqueness completed.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed.
+    - `pnpm --filter @smart-bursary/api exec jest --config jest.config.ts test/integration/student-application.e2e-spec.ts test/integration/program-lifecycle.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts test/integration/profile-gating.e2e-spec.ts` passed (23/23).
+- Phase 6 (W6): In Progress.
+  - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
+  - Validation (current slice):
+    - `pnpm --filter @smart-bursary/web run test` passed (13/13, repeated run).
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
+- Next phase start: Phase 2B is ready when execution approval is given.
 
 ## 1. Objective
 
@@ -38,11 +56,11 @@ This plan is designed to be executed one phase at a time, with strict completion
   - Users and ward management
 
 ### G-03 Eligibility behavior gap (high)
-- Student program listing currently filters active/open windows only.
-- PRD/API require eligibility-based visibility plus ineligibility reason.
+- Eligibility engine is implemented and student program discovery now returns eligibility flags and reasons.
+- Ineligible draft creation and closed-window submission now return semantic `422` error codes.
 
 ### G-04 Hardening phases incomplete (critical for release)
-- Frontend W6 (testing/hardening) remains Not Started.
+- Frontend W6 (testing/hardening) is In Progress.
 - Backend P7 (hardening/release readiness) remains Not Started.
 
 ### G-05 PRD full-traceability gap (high)
@@ -146,12 +164,14 @@ Scope:
 Primary Files:
 - `apps/api/modules/program/eligibility.service.ts`
 - `apps/api/modules/program/program.service.ts`
-- `apps/api/modules/application/application.service.ts`
+- `apps/api/modules/application/application-submission.service.ts`
+- `apps/api/common/filters/global-exception.filter.ts`
 
 Tests:
 - Eligible student sees allowed programs.
 - Ineligible student receives lock reason.
-- Ineligible submit path returns semantic validation error.
+- Ineligible create/submit paths return semantic validation errors.
+- Late submission path returns semantic `PROGRAM_CLOSED` validation error.
 
 Validation Commands:
 - `pnpm --filter @smart-bursary/api run build`
@@ -159,6 +179,12 @@ Validation Commands:
 
 Exit Criteria:
 - Eligibility behavior matches PRD/API contract and test coverage for edge cases is in place.
+
+Current phase notes:
+- Added `eligibility.service.ts` with education-level and income-bracket rule evaluation.
+- Program list endpoints now include `eligible`, `ineligibilityReason`, and `ineligibility_reason` for student responses.
+- Application draft/submit orchestration now enforces ineligibility and closed-window semantics with domain error codes.
+- Phase is completed for this scope after green build, migration check, and integration tests.
 
 ---
 
@@ -340,6 +366,24 @@ Exit Criteria:
 - Submission blocked when profile/email/phone requirements are not met.
 - National ID uniqueness per county enforced at DB level.
 
+Current phase notes:
+- Implemented `apps/api/modules/profile` endpoints and services:
+  - `GET /profile`
+  - `PATCH /profile/personal`
+  - `PATCH /profile/academic`
+  - `PATCH /profile/family`
+  - `GET /profile/completion`
+- Added submit-time profile readiness gate in `application-submission.service.ts` with semantic `PROFILE_INCOMPLETE` errors.
+- Added migration `apps/api/prisma/migrations/20260417113000_phase2a_profile_national_id_unique/migration.sql` and Prisma model uniqueness:
+  - `@@unique([countyId, nationalId], map: "idx_profile_county_national_id_unique")`
+- Added integration coverage in:
+  - `apps/api/test/integration/profile-gating.e2e-spec.ts`
+  - `apps/api/test/integration/student-application.helpers.ts` (refactor for file-size governance)
+- Validation completed:
+  - `pnpm --filter @smart-bursary/api run build`
+  - `pnpm --filter @smart-bursary/api exec prisma migrate deploy`
+  - `pnpm --filter @smart-bursary/api exec jest --config jest.config.ts test/integration/student-application.e2e-spec.ts test/integration/program-lifecycle.e2e-spec.ts test/integration/program-eligibility.e2e-spec.ts test/integration/profile-gating.e2e-spec.ts`
+
 ### Phase 2B - Form Fidelity and Document Storage Completion
 
 Goal:
@@ -421,4 +465,4 @@ Exit Criteria:
 
 ## 8. Immediate Next Action
 
-Start Phase 2 (Eligibility Engine and Program Discovery), because it is now the next dependency in the approved execution order after Phase 1 completion.
+Start Phase 2B (Form Fidelity and Document Storage Completion), because Phase 2A is fully implemented, validated, and closed.

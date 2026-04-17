@@ -160,16 +160,33 @@ export default function PreviewAndSubmitPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => {
-                const printWindow = window.open("", "_blank", "noopener,noreferrer");
-                if (!printWindow) {
+              onClick={async () => {
+                const response = await fetch("/api/applications/preview/pdf", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    countyName: county.name,
+                    fundName: county.fundName,
+                    programName: program?.name ?? "Bursary Program",
+                    reference,
+                    generatedAt: new Date().toISOString(),
+                    sections: previewSections,
+                  }),
+                });
+
+                if (!response.ok) {
                   return;
                 }
 
-                printWindow.document.write(previewHtml);
-                printWindow.document.close();
-                printWindow.focus();
-                printWindow.print();
+                const blob = await response.blob();
+                const downloadUrl = URL.createObjectURL(blob);
+                const anchor = document.createElement("a");
+                anchor.href = downloadUrl;
+                anchor.download = `${reference.replace(/[^A-Za-z0-9_-]/g, "_")}.pdf`;
+                document.body.append(anchor);
+                anchor.click();
+                anchor.remove();
+                URL.revokeObjectURL(downloadUrl);
               }}
             >
               Download / Print PDF

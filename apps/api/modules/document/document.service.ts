@@ -6,10 +6,15 @@
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import * as crypto from 'crypto';
-import * as fs from 'fs';
 import * as path from 'path';
 import { PrismaService } from '../../database/prisma.service';
 import { QueueService } from '../../queue/queue.service';
+import {
+  ALLOWED_DOCUMENT_TYPES,
+  ALLOWED_UPLOAD_CONTENT_TYPES,
+  MAX_DOCUMENT_SIZE_BYTES,
+} from './document.constants';
+import { S3Service } from './s3.service';
 
 type UploadedDocumentFile = {
   buffer: Buffer;
@@ -18,16 +23,26 @@ type UploadedDocumentFile = {
   size: number;
 };
 
+type StoredDocument = {
+  id: string;
+  applicationId: string;
+  docType: string;
+  s3Key: string;
+  originalName: string | null;
+  contentType: string | null;
+  fileSizeBytes: number | null;
+  scanStatus: 'PENDING' | 'CLEAN' | 'INFECTED' | 'FAILED';
+  scanCompletedAt: Date | null;
+  uploadedAt: Date;
+};
+
 @Injectable()
 export class DocumentService {
-  private readonly documentsDir = path.join(process.cwd(), 'uploads', 'documents');
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly queueService: QueueService,
-  ) {
-    fs.mkdirSync(this.documentsDir, { recursive: true });
-  }
+    private readonly s3Service: S3Service,
+  ) {}
 
   async uploadDocument(
     countyId: string,
@@ -36,28 +51,23 @@ export class DocumentService {
     docType: string,
     file: UploadedDocumentFile,
   ) {
-    const application = await this.prisma.application.findFirst({
-      where: { id: applicationId, countyId, applicantId: userId },
+    await this.ensureApplicantApplication(countyId, userId, applicationId);
+
+    const normalizedDocType = this.normalizeDocType(docType);
+    this.validateUpload(file);
+    const s3Key = this.generateS3Key(userId, applicationId, normalizedDocType, file.originalname);
+
+    await this.s3Service.uploadObject({
+      key: s3Key,
+      contentType: file.mimetype,
+      body: file.buffer,
     });
-
-    if (!application) {
-      throw new NotFoundException('Application not found');
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      throw new BadRequestException('File exceeds maximum size of 10MB');
-    }
-
-    const s3Key = this.generateS3Key(userId, applicationId, file.originalname);
-    const filePath = path.join(this.documentsDir, s3Key);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, file.buffer);
 
     const document = await this.prisma.document.create({
       data: {
         applicationId,
         countyId,
-        docType,
+        docType: normalizedDocType,
         s3Key,
         originalName: file.originalname,
         contentType: file.mimetype,
@@ -68,8 +78,8 @@ export class DocumentService {
 
     await this.queueService.getVirusScanQueue().add('scan', {
       documentId: document.id,
-      filePath,
       fileName: file.originalname,
+      filePath: s3Key,
     });
 
     return this.mapDocument(document);
@@ -92,20 +102,14 @@ export class DocumentService {
   }
 
   async listDocuments(countyId: string, userId: string, applicationId: string) {
-    const application = await this.prisma.application.findFirst({
-      where: { id: applicationId, countyId, applicantId: userId },
-    });
-
-    if (!application) {
-      throw new NotFoundException('Application not found');
-    }
+    await this.ensureApplicantApplication(countyId, userId, applicationId);
 
     const documents = await this.prisma.document.findMany({
       where: { applicationId, countyId },
       orderBy: { uploadedAt: 'desc' },
     });
 
-    return documents.map((document) => this.mapDocument(document));
+    return Promise.all(documents.map((document) => this.mapDocument(document)));
   }
 
   async updateScanStatus(documentId: string, scanStatus: 'CLEAN' | 'INFECTED' | 'FAILED') {
@@ -115,17 +119,9 @@ export class DocumentService {
     });
   }
 
-  private mapDocument(document: {
-    id: string;
-    applicationId: string;
-    docType: string;
-    originalName: string | null;
-    contentType: string | null;
-    fileSizeBytes: number | null;
-    scanStatus: 'PENDING' | 'CLEAN' | 'INFECTED' | 'FAILED';
-    scanCompletedAt: Date | null;
-    uploadedAt: Date;
-  }) {
+  private async mapDocument(document: StoredDocument) {
+    const signedDownload = await this.s3Service.getSignedDownloadUrl(document.s3Key);
+
     return {
       id: document.id,
       applicationId: document.applicationId,
@@ -136,12 +132,56 @@ export class DocumentService {
       scanStatus: document.scanStatus,
       scanCompletedAt: document.scanCompletedAt,
       uploadedAt: document.uploadedAt,
+      downloadUrl: signedDownload.url,
+      downloadExpiresAt: signedDownload.expiresAt,
     };
   }
 
-  private generateS3Key(userId: string, applicationId: string, originalName: string): string {
+  private normalizeDocType(docType: string): string {
+    const normalized = docType.trim().toUpperCase();
+    if (!ALLOWED_DOCUMENT_TYPES.includes(normalized as (typeof ALLOWED_DOCUMENT_TYPES)[number])) {
+      throw new BadRequestException('Unsupported document type.');
+    }
+    return normalized;
+  }
+
+  private validateUpload(file: UploadedDocumentFile): void {
+    if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
+      throw new BadRequestException('File exceeds maximum size of 5MB');
+    }
+
+    if (
+      !ALLOWED_UPLOAD_CONTENT_TYPES.includes(
+        file.mimetype as (typeof ALLOWED_UPLOAD_CONTENT_TYPES)[number],
+      )
+    ) {
+      throw new BadRequestException('Unsupported content type. Allowed: PDF, JPEG, PNG.');
+    }
+  }
+
+  private async ensureApplicantApplication(
+    countyId: string,
+    userId: string,
+    applicationId: string,
+  ): Promise<void> {
+    const application = await this.prisma.application.findFirst({
+      where: { id: applicationId, countyId, applicantId: userId },
+      select: { id: true },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+  }
+
+  private generateS3Key(
+    userId: string,
+    applicationId: string,
+    docType: string,
+    originalName: string,
+  ): string {
     const hash = crypto.randomBytes(8).toString('hex');
-    const extension = path.extname(originalName);
-    return path.join(userId, applicationId, `${hash}${extension}`);
+    const extension = path.extname(originalName).toLowerCase() || '.bin';
+    return path.posix.join(userId, applicationId, `${docType.toLowerCase()}-${hash}${extension}`);
   }
 }

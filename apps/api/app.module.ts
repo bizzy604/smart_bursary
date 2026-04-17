@@ -20,6 +20,7 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ApplicationModule } from './modules/application/application.module';
 import { ProgramModule } from './modules/program/program.module';
+import { ProfileModule } from './modules/profile/profile.module';
 import { DocumentModule } from './modules/document/document.module';
 import { ReviewModule } from './modules/review/review.module';
 import { AiModule } from './modules/ai/ai.module';
@@ -42,6 +43,7 @@ import { QueueModule } from './queue/queue.module';
 		AuthModule,
 		ApplicationModule,
 		ProgramModule,
+		ProfileModule,
 		DocumentModule,
 		ReviewModule,
 		AiModule,

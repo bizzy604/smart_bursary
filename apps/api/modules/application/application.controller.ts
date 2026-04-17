@@ -9,6 +9,7 @@ import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs
 import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { SubmitApplicationDto } from './dto/submit-application.dto';
@@ -19,7 +20,10 @@ import { UpdateApplicationSectionDto } from './dto/update-application-section.dt
 @ApiBearerAuth()
 @Controller('applications')
 export class ApplicationController {
-	constructor(private readonly applicationService: ApplicationService) {}
+	constructor(
+		private readonly applicationService: ApplicationService,
+		private readonly applicationSubmissionService: ApplicationSubmissionService,
+	) {}
 
 	@Post('draft')
 	@ApiOperation({ summary: 'Create a new application draft' })
@@ -30,7 +34,7 @@ export class ApplicationController {
 		@Body() dto: CreateApplicationDto,
 	) {
 		const applicantId = user['userId'] as string;
-		return this.applicationService.createDraft(countyId, applicantId, dto);
+		return this.applicationSubmissionService.createDraft(countyId, applicantId, dto);
 	}
 
 	@Get('my-applications')
@@ -78,6 +82,6 @@ export class ApplicationController {
 		@Body() dto: SubmitApplicationDto,
 	) {
 		const applicantId = user['userId'] as string;
-		return this.applicationService.submitApplication(countyId, applicantId, dto);
+		return this.applicationSubmissionService.submitApplication(countyId, applicantId, dto);
 	}
 }

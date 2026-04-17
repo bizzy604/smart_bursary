@@ -25,20 +25,52 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 			: HttpStatus.INTERNAL_SERVER_ERROR;
 
 		const exceptionResponse = isHttpException ? exception.getResponse() : null;
-		const message =
-			typeof exceptionResponse === 'object' &&
-			exceptionResponse !== null &&
-			'message' in exceptionResponse
-				? exceptionResponse.message
-				: 'Internal server error';
+		const code = this.resolveErrorCode(exceptionResponse, isHttpException);
+		const message = this.resolveErrorMessage(exceptionResponse);
 
 		response.status(status).json({
 			error: {
-				code: isHttpException ? 'HTTP_ERROR' : 'INTERNAL_ERROR',
+				code,
 				message,
 				timestamp: new Date().toISOString(),
 				path: request.url,
 			},
 		});
+	}
+
+	private resolveErrorCode(exceptionResponse: unknown, isHttpException: boolean): string {
+		const fallback = isHttpException ? 'HTTP_ERROR' : 'INTERNAL_ERROR';
+		if (!exceptionResponse || typeof exceptionResponse !== 'object') {
+			return fallback;
+		}
+
+		const responseRecord = exceptionResponse as Record<string, unknown>;
+		if (typeof responseRecord.code === 'string') {
+			return responseRecord.code;
+		}
+
+		const nestedMessage = responseRecord.message;
+		if (
+			nestedMessage &&
+			typeof nestedMessage === 'object' &&
+			!Array.isArray(nestedMessage) &&
+			typeof (nestedMessage as Record<string, unknown>).code === 'string'
+		) {
+			return (nestedMessage as Record<string, string>).code;
+		}
+
+		return fallback;
+	}
+
+	private resolveErrorMessage(exceptionResponse: unknown): unknown {
+		if (
+			typeof exceptionResponse === 'object' &&
+			exceptionResponse !== null &&
+			'message' in exceptionResponse
+		) {
+			return (exceptionResponse as Record<string, unknown>).message;
+		}
+
+		return 'Internal server error';
 	}
 }

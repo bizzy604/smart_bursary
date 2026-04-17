@@ -20,19 +20,19 @@ export default function WardApplicationsPage() {
 
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
         <div className="grid gap-3 lg:grid-cols-4">
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Filter applications by status" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>All Statuses</option>
             <option>Ward Review</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Filter applications by program" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>All Programs</option>
             <option>2026 Ward Bursary Programme</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Sort applications" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>Sort: AI Score Desc</option>
             <option>Sort: Submitted Date</option>
           </select>
-          <Input placeholder="Search by name, reference, or ward" />
+          <Input aria-label="Search applications" placeholder="Search by name, reference, or ward" />
         </div>
       </section>
 

@@ -74,13 +74,13 @@ export default function CountyOcobReportsPage() {
 
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
         <div className="grid gap-3 md:grid-cols-4">
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Select OCOB program" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>{reportMeta.programName}</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Select OCOB academic year" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>{reportMeta.academicYear}</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Select OCOB ward scope" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>All Wards</option>
           </select>
           <p className="flex items-center text-sm text-gray-600">Generated {formatShortDate(reportMeta.generatedAt)}</p>

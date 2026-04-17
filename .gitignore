@@ -68,5 +68,12 @@ desktop.ini
 *.pid
 *.pid.lock
 
+# Playwright artifacts
+playwright-report/
+test-results/
+blob-report/
+**/playwright-report/
+**/test-results/
+
 # Docker local overrides
 docker-compose.override.yml

@@ -6,6 +6,8 @@
 
 import { IsUUID, IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsIn } from 'class-validator';
+import { ALLOWED_DOCUMENT_TYPES } from '../document.constants';
 
 export class UploadDocumentDto {
   @ApiProperty({
@@ -18,9 +20,11 @@ export class UploadDocumentDto {
 
   @ApiProperty({
     description: 'Document type/category',
-    example: 'NATIONAL_ID',
+    example: 'FEE_STRUCTURE',
+    enum: ALLOWED_DOCUMENT_TYPES,
   })
   @IsString()
+  @IsIn(ALLOWED_DOCUMENT_TYPES)
   @IsNotEmpty()
   docType!: string;
 }

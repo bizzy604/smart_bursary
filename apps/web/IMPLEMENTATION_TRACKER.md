@@ -28,7 +28,7 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 | W3 | Student Preview and Submission UX | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W4 | Ward and County Admin Portals | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
 | W5 | Reporting and Operational Screens | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
-| W6 | Frontend Testing and Hardening | Not Started | TBD | - | - |
+| W6 | Frontend Testing and Hardening | In Progress | GitHub Copilot | 2026-04-17 | - |
 
 ---
 
@@ -36,7 +36,69 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: None (W5 completed)
+Current active phase: W6 (Frontend Testing and Hardening)
+
+---
+
+## W6 - Frontend Testing and Hardening
+
+Status: In Progress
+Owner: GitHub Copilot
+Scope Window: 2026-04-17
+
+### In Scope
+
+- Introduce deterministic web unit/component test harness.
+- Add critical-flow tests for report generation utilities and document interaction actions.
+- Run repeatable frontend quality gates for tests, typecheck, and production build.
+
+### Out of Scope
+
+- Playwright E2E user-journey suites (scheduled as next W6 slice).
+- Automated WCAG scanner pipeline integration (scheduled as next W6 slice).
+
+### Deliverables
+
+- [x] Vitest + jsdom harness and scripts added:
+	- `apps/web/vitest.config.ts`
+	- `apps/web/test/setup.ts`
+	- `apps/web/package.json` scripts (`test`, `test:watch`)
+- [x] Critical-flow utility tests added:
+	- `apps/web/lib/format.test.ts`
+	- `apps/web/lib/reporting-data.test.ts`
+	- `apps/web/lib/ops-data.test.ts`
+- [x] Component interaction test added:
+	- `apps/web/components/application/document-viewer.test.tsx`
+- [x] Hardening fix implemented and covered:
+	- `apps/web/lib/format.ts` invalid-date fallback behavior
+- [ ] Playwright E2E suites for critical journeys
+- [ ] Accessibility scanner checks for critical flows
+
+### Validation Checklist
+
+- [x] Test suite passes for `apps/web`.
+- [x] Typecheck passes for `apps/web`.
+- [x] Build passes for `apps/web`.
+- [ ] No high-severity accessibility findings in critical flows.
+
+### Evidence
+
+- Test (run 1): `pnpm --filter @smart-bursary/web run test` passed (13/13).
+- Test (run 2): `pnpm --filter @smart-bursary/web run test` passed (13/13).
+- Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
+- Build: `pnpm --filter @smart-bursary/web run build` passed.
+
+### Blockers and Gaps
+
+- Playwright E2E coverage for student submit, ward review, county allocation, and reporting exports is pending.
+- Accessibility scanner baseline for critical flows is pending.
+
+### Completion Gate
+
+- [ ] All deliverables done.
+- [ ] All validation checks done.
+- [ ] No unresolved blocker.
+- [ ] Phase status set to Completed.
 
 ---
 

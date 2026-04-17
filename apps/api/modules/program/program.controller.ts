@@ -33,9 +33,13 @@ export class ProgramController {
 	@ApiQuery({ name: 'academicYear', required: false, type: String })
 	listPrograms(
 		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
 		@Query() query: ListProgramsDto,
 	) {
-		return this.programService.listPrograms(countyId, query);
+		return this.programService.listPrograms(countyId, query, {
+			userId: user['userId'] as string,
+			role: user['role'] as UserRole,
+		});
 	}
 
 	@Get('active')
@@ -44,9 +48,13 @@ export class ProgramController {
 	@ApiQuery({ name: 'academicYear', required: false, type: String })
 	listActivePrograms(
 		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
 		@Query() query: ListProgramsDto,
 	) {
-		return this.programService.listActivePrograms(countyId, query);
+		return this.programService.listActivePrograms(countyId, query, {
+			userId: user['userId'] as string,
+			role: user['role'] as UserRole,
+		});
 	}
 
 	@Get(':id')

@@ -20,20 +20,20 @@ export default function CountyReviewQueuePage() {
 
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
         <div className="grid gap-3 lg:grid-cols-4">
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Filter county queue by ward" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>All Wards</option>
             <option>Kalokol</option>
             <option>Nadapal</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Sort county queue" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>Sort: AI Score Desc</option>
             <option>Sort: Recommendation Amount</option>
           </select>
-          <select className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
+          <select aria-label="Filter county queue by program" className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700">
             <option>All Programs</option>
             <option>2026 Ward Bursary Programme</option>
           </select>
-          <Input placeholder="Search by reference or applicant" />
+          <Input aria-label="Search county queue" placeholder="Search by reference or applicant" />
         </div>
       </section>
 

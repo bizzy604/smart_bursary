@@ -19,7 +19,12 @@ export function formatShortDate(dateIso: string): string {
 		return dateIso;
 	}
 
-	return shortDateFormatter.format(new Date(dateIso));
+	const parsed = new Date(dateIso);
+	if (Number.isNaN(parsed.getTime())) {
+		return dateIso;
+	}
+
+	return shortDateFormatter.format(parsed);
 }
 
 export function formatPercent(value: number): string {
