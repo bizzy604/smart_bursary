@@ -124,6 +124,21 @@ Duplicate draft creation for the same student and program is rejected with `409 
 
 - `DUPLICATE_APPLICATION`
 
+## Workflow Audit Endpoints
+
+Application workflow history is now queryable through role-scoped audit APIs:
+
+- `GET /api/v1/applications/:id/timeline`
+- `GET /api/v1/applications/:id/review-notes`
+
+Access rules:
+
+- Students: own applications only
+- Ward admins: applications in their assigned ward only
+- Finance officers and county admins: county-wide access
+
+Cross-county requests are tenant-scoped and return not found responses.
+
 ## AI Scoring Orchestration
 
 Submission now triggers asynchronous AI scoring via the `ai-scoring` queue.
@@ -183,6 +198,18 @@ Provisioning flow currently creates:
 - Default ward seed dataset when explicit ward list is not provided
 - Initial county-admin account for tenant bootstrap
 
+## Reporting Access Scope
+
+County-wide reporting endpoints are restricted to county admin and finance officer roles:
+
+- `GET /api/v1/reports/dashboard`
+- `GET /api/v1/reports/applications/by-status`
+
+Ward admins should use ward-scoped endpoints:
+
+- `GET /api/v1/reports/ward-summary`
+- `GET /api/v1/reports/ward-summary/export`
+
 ## Disbursement Execution and Receipts
 
 Finance and student disbursement APIs now include:
@@ -206,3 +233,25 @@ M-Pesa adapter environment variables:
 - `MPESA_B2C_BEARER_TOKEN` (optional)
 - `MPESA_B2C_TIMEOUT_MS` (optional)
 - `DISBURSEMENT_RETRY_BASE_DELAY_MS` (optional)
+
+## Status-Change Notifications
+
+Workflow transitions now enqueue SMS notifications and persist delivery records.
+
+Transition coverage includes:
+
+- Application submission
+- Ward review outcomes
+- County final decisions
+- Disbursement initiation/retry/success/manual-intervention events
+
+Notification audit endpoint:
+
+- `GET /api/v1/notifications/deliveries`
+
+Delivery records are persisted in `notification_deliveries` and include queue IDs,
+provider message IDs, attempt counts, and failure reasons.
+
+Optional SMS adapter controls:
+
+- `SMS_FORCE_FAIL=true` (forces provider failures for integration testing)

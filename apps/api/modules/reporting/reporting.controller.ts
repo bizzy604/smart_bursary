@@ -3,14 +3,7 @@
  * Why important: Finance and ward teams depend on these endpoints for OCOB and operational reporting.
  * Used by: Reporting dashboards, county/ward export screens, and analytics workflows.
  */
-import {
-	Controller,
-	Get,
-	Query,
-	Req,
-	StreamableFile,
-	UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Query, Req, StreamableFile, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
@@ -37,7 +30,7 @@ export class ReportingController {
 	) {}
 
 	@Get('dashboard')
-	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER)
 	@ApiOperation({ summary: 'Get dashboard summary for county' })
 	async getDashboard(@Req() req: any) {
 		const summary = await this.reportingService.getDashboardSummary(req.user.countyId);
@@ -45,7 +38,7 @@ export class ReportingController {
 	}
 
 	@Get('applications/by-status')
-	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER)
 	@ApiOperation({ summary: 'Get application counts by status' })
 	async getApplicationsByStatus(@Req() req: any) {
 		const summary = await this.reportingService.getApplicationsByStatus(req.user.countyId);

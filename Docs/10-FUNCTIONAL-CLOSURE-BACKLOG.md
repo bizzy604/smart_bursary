@@ -1,7 +1,7 @@
 # KauntyBursary Functional Closure Backlog
 
-Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed, B-06 completed)  
-Last Updated: 2026-04-17  
+Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed, B-06 completed, B-07 completed, B-08 completed)  
+Last Updated: 2026-04-18  
 Source Inputs: `Docs/01-PRD.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`
 
 ## Objective
@@ -282,6 +282,19 @@ Validation:
 
 ### B-07 - Status-Change Notification Integration
 
+Execution Status:
+- Completed (2026-04-18)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed, applying `20260418083000_b07_notification_delivery`.
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/notification-status-change.e2e-spec.ts` passed (2/2).
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/disbursement-execution.e2e-spec.ts` passed (3/3).
+- Notification module now provides queue-backed lifecycle dispatch and audit query APIs in `apps/api/modules/notification/notification.module.ts`, `apps/api/modules/notification/notification-lifecycle.service.ts`, and `apps/api/modules/notification/notification.controller.ts`.
+- SMS delivery jobs now process through queue adapter/worker flow via `apps/api/queue/queue.service.ts` and `apps/api/queue/processors/sms.processor.ts`.
+- Delivery records are persisted in Prisma through `apps/api/prisma/schema.prisma` and migration `apps/api/prisma/migrations/20260418083000_b07_notification_delivery/migration.sql`.
+- Submission, review, and disbursement transitions now emit notification jobs from `apps/api/modules/application/application-submission.service.ts`, `apps/api/modules/review/ward-review.service.ts`, `apps/api/modules/review/county-review.service.ts`, `apps/api/modules/disbursement/disbursement-queue.service.ts`, and `apps/api/modules/disbursement/disbursement.service.ts`.
+
 PRD IDs:
 - `RW-04`
 
@@ -303,6 +316,19 @@ Validation:
 - Delivery failure and retry-path coverage
 
 ### B-08 - Isolation, Auth, Workflow, and Audit Closure
+
+Execution Status:
+- Completed (2026-04-18)
+
+Completion Evidence:
+- `pnpm --filter @smart-bursary/api run build` passed.
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/b08-security-audit.e2e-spec.ts` passed (3/3).
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/review-ai.e2e-spec.ts` passed (5/5).
+- `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
+- Explicit RBAC decorators were added for student-only application/document routes in `apps/api/modules/application/application.controller.ts` and `apps/api/modules/document/document.controller.ts`.
+- Workflow audit retrieval APIs were implemented in `apps/api/modules/application/application-audit.service.ts` and exposed by `GET /applications/:id/timeline` and `GET /applications/:id/review-notes`.
+- Ward and county isolation checks are enforced for audit retrieval and validated by cross-ward/cross-county assertions in `apps/api/test/integration/b08-security-audit.e2e-spec.ts`.
+- County-wide reporting access was narrowed to county-admin and finance-officer roles in `apps/api/modules/reporting/reporting.controller.ts`.
 
 PRD IDs:
 - `TM-01`
@@ -338,7 +364,7 @@ Validation:
 
 ## Operational Gap Not Counted In PRD Totals
 
-The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled as a follow-on operational slice now that B-06 is complete:
+The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled as a follow-on operational slice now that B-08 is complete:
 
 | Item | Description | Recommended Placement |
 |---|---|---|
@@ -351,9 +377,4 @@ Primary Areas:
 
 ## Recommended Immediate Next Action
 
-Start `B-07 - Status-change notification integration`.
-
-Reason:
-- B-06 reporting and trend analytics requirements are now implemented and validated.
-- `RW-04` remains the next functional blocker for production workflow communications.
-- B-07 is now the strict next dependency before B-08 closure.
+Proceed to release hardening tracks (`W6` frontend hardening and `Phase 7` backend hardening/release readiness) now that strict functional closure backlog items `B-01` through `B-08` are complete.

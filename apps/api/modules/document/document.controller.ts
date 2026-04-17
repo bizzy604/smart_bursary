@@ -24,9 +24,11 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { County } from '../../common/decorators/county.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { DocumentService } from './document.service';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 
@@ -34,6 +36,7 @@ import { UploadDocumentDto } from './dto/upload-document.dto';
 @ApiBearerAuth()
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
+@Roles(UserRole.STUDENT)
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 

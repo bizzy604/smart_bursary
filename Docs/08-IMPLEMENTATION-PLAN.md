@@ -1,7 +1,7 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, W6 In Progress)
-Last Updated: 2026-04-17
+Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, W6 In Progress)
+Last Updated: 2026-04-18
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
 
@@ -73,13 +73,27 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
+- Backlog Item B-07: Completed.
+  - Implementation: Added queue-backed status-change SMS dispatch and persisted notification delivery records, wired submission/review/disbursement transition emitters, and exposed county delivery audit endpoint (`GET /notifications/deliveries`).
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api exec prisma migrate deploy` passed.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/notification-status-change.e2e-spec.ts` passed (2/2).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/disbursement-execution.e2e-spec.ts` passed (3/3).
+- Backlog Item B-08: Completed.
+  - Implementation: Added explicit student RBAC decorators for application/document endpoints, implemented role-aware application timeline/review-note audit query APIs, and tightened county-wide reporting endpoint access to county-admin/finance roles.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/b08-security-audit.e2e-spec.ts` passed (3/3).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/review-ai.e2e-spec.ts` passed (5/5).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
     - `pnpm --filter @smart-bursary/web run test` passed (16/16, repeated run).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Next strict backlog item: `B-07 - Status-change notification integration` in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`.
+- Next strict backlog item: None (`B-01` through `B-08` complete in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`).
 
 ## 1. Objective
 
@@ -531,4 +545,4 @@ Exit Criteria:
 
 Continue W6 frontend hardening for Playwright coverage and accessibility checks in parallel only when it does not block functional closure work.
 
-Next functional execution should start with `B-07 - Status-change notification integration` from `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`, because B-06 reporting and historical analytics requirements are now complete and validated.
+Strict functional backlog execution is complete (`B-01` through `B-08`); continue hardening tracks in sequence (`W6`, then backend Phase 7 release readiness).

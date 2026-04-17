@@ -9,6 +9,7 @@ import { NotificationModule } from '../notification/notification.module';
 import { ProfileModule } from '../profile/profile.module';
 import { ProgramModule } from '../program/program.module';
 import { QueueModule } from '../../queue/queue.module';
+import { ApplicationAuditService } from './application-audit.service';
 import { ApplicationAiScoringService } from './application-ai-scoring.service';
 import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationController } from './application.controller';
@@ -19,6 +20,7 @@ import { SectionService } from './section.service';
 	imports: [ProgramModule, ProfileModule, QueueModule, NotificationModule],
 	controllers: [ApplicationController],
 	providers: [
+		ApplicationAuditService,
 		ApplicationService,
 		ApplicationSubmissionService,
 		ApplicationAiScoringService,

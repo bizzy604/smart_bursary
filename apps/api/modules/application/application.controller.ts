@@ -1,14 +1,17 @@
 /**
- * Purpose: Expose application lifecycle endpoints to students.
- * Why important: Provides entry points for creating, editing, and submitting applications.
- * Used by: Frontend student portal for application form workflow.
+ * Purpose: Expose application lifecycle and audit retrieval endpoints.
+ * Why important: Provides controlled access to create/submit flows and workflow audit visibility.
+ * Used by: Student application workflow and county review audit surfaces.
  */
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 
 import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ApplicationAuditService } from './application-audit.service';
 import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -17,11 +20,13 @@ import { UpdateApplicationSectionDto } from './dto/update-application-section.dt
 import { SectionService } from './section.service';
 
 @UseGuards(JwtAuthGuard)
+@Roles(UserRole.STUDENT)
 @ApiTags('Applications')
 @ApiBearerAuth()
 @Controller('applications')
 export class ApplicationController {
 	constructor(
+		private readonly applicationAuditService: ApplicationAuditService,
 		private readonly applicationService: ApplicationService,
 		private readonly applicationSubmissionService: ApplicationSubmissionService,
 		private readonly sectionService: SectionService,
@@ -47,6 +52,38 @@ export class ApplicationController {
 	) {
 		const applicantId = user['userId'] as string;
 		return this.applicationService.listMyApplications(countyId, applicantId);
+	}
+
+	@Get(':id/timeline')
+	@Roles(UserRole.STUDENT, UserRole.WARD_ADMIN, UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN)
+	@ApiOperation({ summary: 'Get application timeline audit events by id' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	getApplicationTimeline(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		return this.applicationAuditService.getTimeline(countyId, applicationId, {
+			userId: user['userId'] as string,
+			role: user['role'] as UserRole,
+			wardId: (user['wardId'] as string | null) ?? null,
+		});
+	}
+
+	@Get(':id/review-notes')
+	@Roles(UserRole.STUDENT, UserRole.WARD_ADMIN, UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN)
+	@ApiOperation({ summary: 'Get application review-note audit entries by id' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	getApplicationReviewNotes(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		return this.applicationAuditService.getReviewNotes(countyId, applicationId, {
+			userId: user['userId'] as string,
+			role: user['role'] as UserRole,
+			wardId: (user['wardId'] as string | null) ?? null,
+		});
 	}
 
 	@Get(':id')
