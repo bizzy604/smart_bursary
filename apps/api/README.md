@@ -62,10 +62,25 @@ pnpm --filter @smart-bursary/api run start
 ```bash
 pnpm --filter @smart-bursary/api run typecheck
 pnpm --filter @smart-bursary/api run test
+pnpm --filter @smart-bursary/api run perf:smoke
 pnpm --filter @smart-bursary/api run prisma:migrate --name <migration_name>
 pnpm --filter @smart-bursary/api run prisma:seed
 docker compose up -d postgres redis
 ```
+
+Performance smoke tuning knobs:
+
+- `P7_LOAD_TOTAL_REQUESTS` (default `240`)
+- `P7_LOAD_CONCURRENCY` (default `24`)
+- `P7_HEALTH_P95_BUDGET_MS` (default `250`)
+
+## Observability Headers
+
+The API now emits request correlation headers on all HTTP responses:
+
+- `X-Request-Id`: generated per request or propagated from incoming `x-request-id`.
+
+This supports log correlation across gateways, API logs, and downstream systems.
 
 ## Program Lifecycle Endpoints
 

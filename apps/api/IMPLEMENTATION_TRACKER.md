@@ -34,7 +34,7 @@ Purpose: Track backend implementation in controlled, validated phases and preven
 | P4 | Documents and Async Jobs | Completed | GitHub Copilot | 2026-04-15 | 2026-04-15 | 2026-04-15 |
 | P5 | Review and Allocation Workflow | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 | 2026-04-16 |
 | P6 | Disbursement and Reporting MVP | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 | 2026-04-16 |
-| P7 | Hardening and Release Readiness | Not Started | TBD | - | - | - |
+| P7 | Hardening and Release Readiness | Completed | GitHub Copilot | 2026-04-18 | 2026-04-18 | 2026-04-18 |
 
 ---
 
@@ -42,7 +42,7 @@ Purpose: Track backend implementation in controlled, validated phases and preven
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: None (P6 completed)
+Current active phase: None (P0-P7 are Completed)
 
 ## PRD / Design Alignment
 
@@ -614,9 +614,9 @@ Scope Window: 2026-04-16
 
 ## P7 - Hardening and Release Readiness
 
-Status: Not Started  
-Owner: TBD  
-Scope Window: -
+Status: Completed  
+Owner: GitHub Copilot  
+Scope Window: 2026-04-18
 
 ### In Scope
 
@@ -632,25 +632,53 @@ Scope Window: -
 
 ### Deliverables
 
-- [ ] Load and soak test coverage added
-- [ ] Observability gaps resolved
-- [ ] Security checks and regression suite added
-- [ ] Performance budgets and caching checks documented
-- [ ] Release readiness checklist completed
+- [x] P7-S1 security and reliability baseline validation captured
+- [x] P7-S2 request observability baseline instrumentation captured
+- [x] P7-S3 dependency and secret scanning baseline captured
+- [x] P7-S4 load smoke baseline coverage captured
+- [x] Load and soak test coverage added
+- [x] Observability gaps resolved
+- [x] Security checks and regression suite added
+- [x] Performance budgets and caching checks documented
+- [x] Release readiness checklist completed
 
 ### Validation Checklist (Required Before Completion)
 
-- [ ] Build passes for `apps/api`
-- [ ] Final regression suite passes
-- [ ] Edge-case checks completed and documented
-- [ ] Architecture/rules checks completed (module boundaries, file length, file headers)
+- [x] Build passes for `apps/api`
+- [x] Final regression suite passes
+- [x] Edge-case checks completed and documented
+- [x] Architecture/rules checks completed (module boundaries, file length, file headers)
 
 ### Evidence
 
-- Build command and summary: (pending)
-- Test command and summary: (pending)
-- Edge-case checks and summary: (pending)
-- Notes: This phase closes out PRD goal G7 and the system-design hardening requirements.
+- Build command and summary:
+  - `pnpm --filter @smart-bursary/api run build` passed (2026-04-18).
+  - `pnpm --filter @smart-bursary/api run build` passed after P7-S2 instrumentation updates (2026-04-18).
+  - `pnpm --filter @smart-bursary/api run build` passed after P7-S4 load smoke harness updates (2026-04-18).
+  - `pnpm --filter @smart-bursary/api run build` passed at final P7 hardening gate (2026-04-18).
+- Test command and summary:
+  - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/b08-security-audit.e2e-spec.ts test/integration/notification-status-change.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts` passed (4 suites, 9 tests).
+  - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/application.e2e-spec.ts test/integration/b08-security-audit.e2e-spec.ts test/integration/notification-status-change.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts` passed (5 suites, 12 tests).
+  - Regression fixes applied for stale test contracts in `test/unit/review.service.spec.ts`, `test/unit/application.service.spec.ts`, `test/unit/eligibility.service.spec.ts`, and `test/integration/document-scan-auth.e2e-spec.ts`.
+  - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/document-scan-auth.e2e-spec.ts test/unit/review.service.spec.ts test/unit/application.service.spec.ts test/unit/eligibility.service.spec.ts` passed (4 suites, 16 tests).
+  - `pnpm --filter @smart-bursary/api run test -- --runInBand` passed (24 suites, 97 tests).
+  - `cd apps/api ; pnpm audit --prod` passed (0 known vulnerabilities).
+  - `pnpm --filter @smart-bursary/api run perf:smoke` passed with `totalRequests=240`, `concurrency=24`, `p95Ms=99.56`, `requestsPerSecond=335.7`.
+  - `pnpm --filter @smart-bursary/api run perf:smoke` re-run at final gate passed with `p95Ms=103.41`, `requestsPerSecond=359.9`.
+  - Soak-style run passed: `P7_LOAD_TOTAL_REQUESTS=1200`, `P7_LOAD_CONCURRENCY=20`, `pnpm --filter @smart-bursary/api run perf:smoke` with `p95Ms=168.37`, `requestsPerSecond=291.9`.
+- Edge-case checks and summary:
+  - RBAC/audit access constraints validated via `b08-security-audit.e2e-spec.ts`.
+  - Notification transition emission and delivery paths validated via `notification-status-change.e2e-spec.ts`.
+  - Disbursement execution retry/failure paths validated via `disbursement-execution.e2e-spec.ts`.
+  - AI scoring failure lifecycle handling validated via `review-ai-failure.e2e-spec.ts`.
+  - Request correlation baseline validated via `application.e2e-spec.ts` assertions for generated and propagated `X-Request-Id`.
+  - Source/config secret-hygiene baseline scan found no hardcoded private keys or cloud key signatures in `apps/api/**`; token/password literals observed are in test fixtures.
+  - Performance smoke harness includes retry protection for transient socket resets to keep local and CI baselines deterministic.
+  - Performance budget baseline documented via `P7_HEALTH_P95_BUDGET_MS` (default `250ms`) in `apps/api/README.md` and validated under load/soak runs.
+  - Caching baseline check documented: config caching is enabled in `ConfigModule.forRoot({ cache: true })`; no route-level response caching decorators/interceptors are currently active.
+  - Architecture/rules checks verified for modified P7 files: required header comment present and file length <= 200 lines for all modified `apps/api/**/*.ts` files.
+  - Release checklist completed in `apps/api/RELEASE_READINESS_CHECKLIST.md`.
+- Notes: P7 closed with full hardening evidence and final regression gate green.
 
 ### Blockers and Gaps
 
@@ -658,10 +686,10 @@ Scope Window: -
 
 ### Completion Gate
 
-- [ ] All deliverables done
-- [ ] All validation checks done
-- [ ] No unresolved blocker
-- [ ] Phase status set to Completed
+- [x] All deliverables done
+- [x] All validation checks done
+- [x] No unresolved blocker
+- [x] Phase status set to Completed
 
 ---
 

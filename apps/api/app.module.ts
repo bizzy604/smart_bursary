@@ -10,6 +10,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { PlanTierGuard } from './common/guards/plan-tier.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { RequestObservabilityInterceptor } from './common/interceptors/request-observability.interceptor';
 import { TenantContextInterceptor } from './common/interceptors/tenant-context.interceptor';
 import configuration from './config/configuration';
 import databaseConfig from './config/database.config';
@@ -62,6 +63,7 @@ import { QueueModule } from './queue/queue.module';
 		{ provide: APP_FILTER, useClass: GlobalExceptionFilter },
 		{ provide: APP_GUARD, useClass: RolesGuard },
 		{ provide: APP_GUARD, useClass: PlanTierGuard },
+		{ provide: APP_INTERCEPTOR, useClass: RequestObservabilityInterceptor },
 		{ provide: APP_INTERCEPTOR, useClass: TenantContextInterceptor },
 	],
 })

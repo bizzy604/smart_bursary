@@ -11,12 +11,20 @@ import { WardReviewDecision } from '../../modules/review/dto/ward-review.dto';
 import { WardReviewService } from '../../modules/review/ward-review.service';
 
 describe('Review services', () => {
+	const notificationLifecycleService = {
+		queueStatusChange: jest.fn().mockResolvedValue(undefined),
+	} as any;
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	it('rejects ward reviews from a different ward', async () => {
 		const prisma = {
 			application: { findFirst: jest.fn().mockResolvedValue({ id: 'app-1', status: 'WARD_REVIEW', wardId: 'ward-2', amountRequested: 40_000 }) },
 		} as any;
 
-		const service = new WardReviewService(prisma);
+		const service = new WardReviewService(prisma, notificationLifecycleService);
 
 		await expect(
 			service.submitWardReview('county-1', 'reviewer-1', 'ward-1', 'app-1', {
@@ -31,7 +39,7 @@ describe('Review services', () => {
 			application: { findFirst: jest.fn().mockResolvedValue({ id: 'app-1', status: 'WARD_REVIEW', wardId: 'ward-1', amountRequested: 15_000 }) },
 		} as any;
 
-		const service = new WardReviewService(prisma);
+		const service = new WardReviewService(prisma, notificationLifecycleService);
 
 		await expect(
 			service.submitWardReview('county-1', 'reviewer-1', 'ward-1', 'app-1', {
@@ -52,7 +60,7 @@ describe('Review services', () => {
 			$transaction: jest.fn(async (callback: (transaction: typeof tx) => Promise<unknown>) => callback(tx)),
 		} as any;
 
-		const service = new WardReviewService(prisma);
+		const service = new WardReviewService(prisma, notificationLifecycleService);
 		const result = await service.submitWardReview('county-1', 'reviewer-1', 'ward-1', 'app-1', {
 			decision: WardReviewDecision.RECOMMENDED,
 			recommendedAmount: 25_000,
@@ -61,6 +69,7 @@ describe('Review services', () => {
 		expect(result.newStatus).toBe('COUNTY_REVIEW');
 		expect(tx.application.update).toHaveBeenCalled();
 		expect(tx.applicationTimeline.create).toHaveBeenCalled();
+		expect(notificationLifecycleService.queueStatusChange).toHaveBeenCalled();
 	});
 
 	it('rejects county approval when budget ceiling would be exceeded', async () => {
@@ -76,7 +85,7 @@ describe('Review services', () => {
 			$transaction: jest.fn(async (callback: (transaction: typeof tx) => Promise<unknown>) => callback(tx)),
 		} as any;
 
-		const service = new CountyReviewService(prisma);
+		const service = new CountyReviewService(prisma, notificationLifecycleService);
 
 		await expect(
 			service.submitCountyReview('county-1', 'finance-1', 'app-1', {
@@ -92,7 +101,7 @@ describe('Review services', () => {
 			$transaction: jest.fn().mockRejectedValue({ code: 'P2034' }),
 		} as any;
 
-		const service = new CountyReviewService(prisma);
+		const service = new CountyReviewService(prisma, notificationLifecycleService);
 
 		await expect(
 			service.submitCountyReview('county-1', 'finance-1', 'app-1', {

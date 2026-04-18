@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, O-01 Completed, W6 In Progress)
+Status: Completed (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, O-01 Completed, W6 Completed, P7 Completed)
 Last Updated: 2026-04-18
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
@@ -92,12 +92,31 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
   - Validation: Complete.
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
-- Phase 6 (W6): In Progress.
-  - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
-  - Validation (current slice):
-    - `pnpm --filter @smart-bursary/web run test` passed (16/16, repeated run).
+- Phase 6 (W6): Completed.
+  - Implementation: Deterministic frontend hardening completed (unit/component expansion, Playwright critical journeys, accessibility baseline, and low-bandwidth critical coverage) with resilient PDF route fallback handling to prevent render-path 500 regressions.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/web run test` passed (21/21).
+    - `pnpm --filter @smart-bursary/web run test:e2e` passed (12/12).
+    - `pnpm --filter @smart-bursary/web run test:a11y` passed (7/7).
     - `pnpm --filter @smart-bursary/web run typecheck` passed.
     - `pnpm --filter @smart-bursary/web run build` passed.
+- Phase 7 (P7): Completed.
+  - Implementation:
+    - P7-S1 security and reliability baseline regression validation.
+    - P7-S2 request observability baseline instrumentation (global `X-Request-Id` propagation/generation and request latency logging).
+    - P7-S3 dependency and secret scanning baseline (`pnpm audit --prod` for API package and source secret-hygiene scan).
+    - P7-S4 API load smoke baseline harness (`perf:smoke`) with p95 budget enforcement.
+    - P7-S5 release checklist closure with full regression gate execution.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/api run build` passed.
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/b08-security-audit.e2e-spec.ts test/integration/notification-status-change.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts` passed (4 suites, 9 tests).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/application.e2e-spec.ts test/integration/b08-security-audit.e2e-spec.ts test/integration/notification-status-change.e2e-spec.ts test/integration/disbursement-execution.e2e-spec.ts test/integration/review-ai-failure.e2e-spec.ts` passed (5 suites, 12 tests).
+    - `pnpm --filter @smart-bursary/api run test -- --runInBand` passed (24 suites, 97 tests).
+    - `cd apps/api ; pnpm audit --prod` passed (0 known vulnerabilities).
+    - `pnpm --filter @smart-bursary/api run perf:smoke` passed (`totalRequests=240`, `concurrency=24`, `p95Ms=99.56`, `requestsPerSecond=335.7`).
+    - Soak-style run passed using perf harness (`totalRequests=1200`, `concurrency=20`, `p95Ms=168.37`, `requestsPerSecond=291.9`).
+    - Performance/caching baseline documented: p95 budget configurable via `P7_HEALTH_P95_BUDGET_MS`; config caching is enabled in `ConfigModule.forRoot({ cache: true })`; route-level response caching remains intentionally unset pending targeted endpoint profiling.
+    - Release checklist completed: `apps/api/RELEASE_READINESS_CHECKLIST.md`.
 - Next strict backlog item: None (`B-01` through `B-08` complete in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`).
 
 ## 1. Objective
@@ -125,8 +144,8 @@ This plan is designed to be executed one phase at a time, with strict completion
 - Ineligible draft creation and closed-window submission now return semantic `422` error codes.
 
 ### G-04 Hardening phases incomplete (critical for release)
-- Frontend W6 (testing/hardening) is In Progress.
-- Backend P7 (hardening/release readiness) remains Not Started.
+- Frontend W6 (testing/hardening) is Completed.
+- Backend P7 (hardening/release readiness) is Completed.
 
 ### G-05 PRD full-traceability gap (high)
 - Traceability matrix is now delivered in `Docs/09-PRD-TRACEABILITY-MATRIX.md`.
@@ -548,6 +567,6 @@ Exit Criteria:
 
 ## 8. Immediate Next Action
 
-Continue W6 frontend hardening for Playwright coverage and accessibility checks in parallel only when it does not block functional closure work.
+Transition to release-candidate packaging and deployment readiness handoff using completed P7 evidence.
 
-Strict functional backlog execution is complete (`B-01` through `B-08`); continue hardening tracks in sequence (`W6`, then backend Phase 7 release readiness).
+Strict functional backlog execution is complete (`B-01` through `B-08`), frontend hardening (`W6`) is complete, and backend hardening (`P7`) is complete.

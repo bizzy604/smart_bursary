@@ -45,7 +45,7 @@ describe('ApplicationService', () => {
 
 		await expect(
 			service.updateSection('county-1', 'student-1', 'app-1', {
-				sectionKey: 'section_b',
+				sectionKey: 'section-b',
 				data: '{invalid-json',
 			}),
 		).rejects.toBeInstanceOf(BadRequestException);

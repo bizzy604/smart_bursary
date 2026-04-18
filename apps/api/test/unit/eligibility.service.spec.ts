@@ -3,6 +3,8 @@
  * Why important: Ensures active-program filtering remains county and window scoped.
  * Used by: Jest unit suite for program listing and lookup logic.
  */
+import { NotFoundException } from '@nestjs/common';
+
 import { ProgramService } from '../../modules/program/program.service';
 
 describe('ProgramService eligibility/listing behavior', () => {
@@ -12,12 +14,15 @@ describe('ProgramService eligibility/listing behavior', () => {
 			findFirst: jest.fn(),
 		},
 	} as any;
+	const eligibilityService = {
+		evaluateProgramsForStudent: jest.fn(),
+	} as any;
 
 	let service: ProgramService;
 
 	beforeEach(() => {
 		jest.clearAllMocks();
-		service = new ProgramService(prisma);
+		service = new ProgramService(prisma, eligibilityService);
 	});
 
 	it('lists only active programs in the current application window', async () => {
@@ -48,11 +53,11 @@ describe('ProgramService eligibility/listing behavior', () => {
 		expect(callArg.where.academicYear).toBeUndefined();
 	});
 
-	it('returns null when program id is not found in county scope', async () => {
+	it('throws not found when program id is not found in county scope', async () => {
 		prisma.bursaryProgram.findFirst.mockResolvedValue(null);
 
-		const result = await service.getProgramById('county-1', 'missing-program');
-
-		expect(result).toBeNull();
+		await expect(service.getProgramById('county-1', 'missing-program')).rejects.toBeInstanceOf(
+			NotFoundException,
+		);
 	});
 });

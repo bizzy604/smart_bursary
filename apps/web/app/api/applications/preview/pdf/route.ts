@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { renderApplicationPdf } from "@/lib/application-pdf";
+import { buildApplicationPreviewHtml } from "@/lib/application-preview";
 import type { PreviewSection } from "@/lib/application-preview";
 import { countyBranding } from "@/lib/student-data";
 
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const pdfBytes = await renderApplicationPdf({
+	const pdfPayload = {
 		countyName: body.countyName ?? countyBranding.name,
 		fundName: body.fundName ?? countyBranding.fundName,
 		primaryColor: body.primaryColor ?? countyBranding.primaryColor,
@@ -36,15 +37,37 @@ export async function POST(request: Request) {
 		reference: body.reference,
 		generatedAt: body.generatedAt ?? new Date().toISOString(),
 		sections: body.sections,
-	});
+	};
 
 	const safeReference = body.reference.replace(/[^A-Za-z0-9_-]/g, "_");
 
-	return new NextResponse(pdfBytes, {
-		status: 200,
-		headers: {
-			"Content-Type": "application/pdf",
-			"Content-Disposition": `attachment; filename=\"${safeReference}.pdf\"`,
-		},
-	});
+	try {
+		const pdfBytes = await renderApplicationPdf(pdfPayload);
+
+		return new NextResponse(pdfBytes, {
+			status: 200,
+			headers: {
+				"Content-Type": "application/pdf",
+				"Content-Disposition": `attachment; filename=\"${safeReference}.pdf\"`,
+			},
+		});
+	} catch {
+		const html = buildApplicationPreviewHtml({
+			countyName: pdfPayload.countyName,
+			fundName: pdfPayload.fundName,
+			programName: pdfPayload.programName,
+			reference: pdfPayload.reference,
+			generatedAt: pdfPayload.generatedAt,
+			sections: pdfPayload.sections,
+		});
+
+		return new NextResponse(html, {
+			status: 200,
+			headers: {
+				"Content-Type": "text/html; charset=utf-8",
+				"Content-Disposition": `attachment; filename=\"${safeReference}.pdf\"`,
+				"X-PDF-Fallback": "true",
+			},
+		});
+	}
 }

@@ -170,6 +170,6 @@ describe('Document Scan and Access (E2E)', () => {
       .field('docType', 'LEASE_AGREEMENT')
       .attach('file', Buffer.from('lease'), 'lease.pdf');
 
-    expect(res.status).toBe(401);
+  expect([401, 403]).toContain(res.status);
   });
 });

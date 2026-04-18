@@ -28,7 +28,7 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 | W3 | Student Preview and Submission UX | Completed | GitHub Copilot | 2026-04-16 | 2026-04-16 |
 | W4 | Ward and County Admin Portals | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
 | W5 | Reporting and Operational Screens | Completed | GitHub Copilot | 2026-04-17 | 2026-04-17 |
-| W6 | Frontend Testing and Hardening | In Progress | GitHub Copilot | 2026-04-17 | - |
+| W6 | Frontend Testing and Hardening | Completed | GitHub Copilot | 2026-04-17 | 2026-04-18 |
 
 ---
 
@@ -36,13 +36,13 @@ Purpose: Track frontend implementation in controlled, validated phases and preve
 
 Only one phase may be marked In Progress at any time.
 
-Current active phase: W6 (Frontend Testing and Hardening)
+Current active phase: None (W0-W6 are Completed)
 
 ---
 
 ## W6 - Frontend Testing and Hardening
 
-Status: In Progress
+Status: Completed
 Owner: GitHub Copilot
 Scope Window: 2026-04-17
 
@@ -54,8 +54,7 @@ Scope Window: 2026-04-17
 
 ### Out of Scope
 
-- Playwright E2E user-journey suites (scheduled as next W6 slice).
-- Automated WCAG scanner pipeline integration (scheduled as next W6 slice).
+- Backend hardening and release readiness tasks (Phase 7 scope).
 
 ### Deliverables
 
@@ -71,34 +70,43 @@ Scope Window: 2026-04-17
 	- `apps/web/components/application/document-viewer.test.tsx`
 - [x] Hardening fix implemented and covered:
 	- `apps/web/lib/format.ts` invalid-date fallback behavior
-- [ ] Playwright E2E suites for critical journeys
-- [ ] Accessibility scanner checks for critical flows
+- [x] Playwright E2E suites for critical journeys:
+	- `apps/web/e2e/student-submit.spec.ts`
+	- `apps/web/e2e/ward-review.spec.ts`
+	- `apps/web/e2e/county-allocation.spec.ts`
+	- `apps/web/e2e/reporting-exports.spec.ts`
+	- `apps/web/e2e/low-bandwidth-critical.spec.ts`
+- [x] Accessibility scanner checks for critical flows:
+	- `apps/web/e2e/accessibility-critical.spec.ts`
 
 ### Validation Checklist
 
 - [x] Test suite passes for `apps/web`.
 - [x] Typecheck passes for `apps/web`.
 - [x] Build passes for `apps/web`.
-- [ ] No high-severity accessibility findings in critical flows.
+- [x] No high-severity accessibility findings in critical flows.
+- [x] E2E critical-path suites pass in production-server mode.
 
 ### Evidence
 
 - Test (run 1): `pnpm --filter @smart-bursary/web run test` passed (13/13).
 - Test (run 2): `pnpm --filter @smart-bursary/web run test` passed (13/13).
+- Test (final): `pnpm --filter @smart-bursary/web run test` passed (21/21).
+- E2E (final): `pnpm --filter @smart-bursary/web run test:e2e` passed (12/12).
+- Accessibility (final): `pnpm --filter @smart-bursary/web run test:a11y` passed (7/7).
 - Typecheck: `pnpm --filter @smart-bursary/web run typecheck` passed.
 - Build: `pnpm --filter @smart-bursary/web run build` passed.
 
 ### Blockers and Gaps
 
-- Playwright E2E coverage for student submit, ward review, county allocation, and reporting exports is pending.
-- Accessibility scanner baseline for critical flows is pending.
+- None.
 
 ### Completion Gate
 
-- [ ] All deliverables done.
-- [ ] All validation checks done.
-- [ ] No unresolved blocker.
-- [ ] Phase status set to Completed.
+- [x] All deliverables done.
+- [x] All validation checks done.
+- [x] No unresolved blocker.
+- [x] Phase status set to Completed.
 
 ---
 
