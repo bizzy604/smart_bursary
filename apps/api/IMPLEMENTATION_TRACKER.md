@@ -395,6 +395,7 @@ Scope Window: 2026-04-15
 | 2026-04-15 | P4 | Implemented document uploads, Redis-backed queue wiring, and scan status flow | GitHub Copilot |
 | 2026-04-16 | P5 | Implemented review workflow, AI score access, scoring weights, and internal score ingestion | GitHub Copilot |
 | 2026-04-16 | P6 | Implemented disbursement and reporting MVP, validated integration workflow, and closed phase | GitHub Copilot |
+| 2026-04-19 | P7 | Revalidated backend release gates (`pnpm --filter @smart-bursary/api run build`; `pnpm --filter @smart-bursary/api run test -- --runInBand`) with all suites passing | GitHub Copilot |
 
 ---
 

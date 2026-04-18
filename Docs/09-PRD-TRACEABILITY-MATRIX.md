@@ -1,7 +1,7 @@
 # KauntyBursary PRD Traceability Matrix
 
 Status: Maintained (Phase 0 deliverable)
-Last Updated: 2026-04-18
+Last Updated: 2026-04-19
 Source of Truth: Docs/01-PRD.md
 Related Plan: Docs/08-IMPLEMENTATION-PLAN.md
 Detailed Remaining Queue: Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md
@@ -79,6 +79,12 @@ Detailed Remaining Queue: Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md
   - Phase 4A tenant provisioning and plan-tier gating.
   - Phase 5A disbursement completion slice (now implemented through B-05).
 - These have been added to the implementation plan addendum and should be maintained there going forward.
+
+## Convergence Reconciliation Notes (2026-04-19)
+
+- C4 closure evidence now includes county-scoped users and wards runtime pages: `apps/web/app/(admin)/settings/users/page.tsx` and `apps/web/app/(admin)/settings/wards/page.tsx` with matching tests.
+- Runtime fixture-import reconciliation was re-run for persona-critical app routes: no `@/lib/student-data`, `@/lib/admin-data`, or `@/lib/ops-data` imports remain under `apps/web/app`.
+- C5 release-grade validation gates were re-run and passed: web unit tests, full web E2E, accessibility suite, web typecheck/build, API build, and API run-in-band tests.
 
 ## Suggested Execution Order Update
 
