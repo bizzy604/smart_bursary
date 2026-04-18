@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -46,8 +46,8 @@ describe("NewProgramSettingsPage", () => {
 
 		await user.type(screen.getByLabelText("Program Name"), "2026 County Bursary Intake");
 		await user.type(screen.getByLabelText("Budget Ceiling (KES)"), "450000");
-		await user.type(screen.getByLabelText("Opens At"), "2026-04-20T08:00");
-		await user.type(screen.getByLabelText("Closes At"), "2026-05-20T17:00");
+		fireEvent.change(screen.getByLabelText("Opens At"), { target: { value: "2026-04-20T08:00" } });
+		fireEvent.change(screen.getByLabelText("Closes At"), { target: { value: "2026-05-20T17:00" } });
 
 		await user.click(screen.getByRole("button", { name: "Create Program" }));
 

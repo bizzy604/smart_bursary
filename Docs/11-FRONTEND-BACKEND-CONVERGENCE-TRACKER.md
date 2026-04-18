@@ -1,7 +1,7 @@
 # KauntyBursary Frontend-Backend Convergence Tracker
 
-Status: Active (C0 completed; C1 completed; C2 completed)  
-Last Updated: 2026-04-18  
+Status: Active (C0 completed; C1 completed; C2 completed; C3 completed; C4 completed; C5 in progress)  
+Last Updated: 2026-04-19  
 Owner: Engineering Team  
 Source Inputs: `Docs/01-PRD.md`, `Docs/04-API-DESIGN.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`, frontend/backend audit run dated 2026-04-18
 
@@ -53,9 +53,9 @@ Out of scope:
 | C0 | Baseline Audit and Plan Lock | Completed | None | Baseline verdict and scope frozen in this tracker |
 | C1 | Student Runtime API Wiring | Completed | C0 | Student routes no longer depend on fixture-only runtime data paths |
 | C2 | Ward and County Workflow API Wiring | Completed | C1 | Queue/review/disbursement runtime routes are API-driven |
-| C3 | Ops Runtime API Wiring | Not Started | C2 | Tenants/health runtime routes are API-driven |
-| C4 | County Settings Users/Wards Completion | Not Started | C3 | Users/wards settings routes are implemented (not placeholders) |
-| C5 | Traceability Reconciliation and Final Gates | Not Started | C4 | PRD matrix and trackers reflect validated runtime truth |
+| C3 | Ops Runtime API Wiring | Completed | C2 | Tenants/health runtime routes are API-driven |
+| C4 | County Settings Users/Wards Completion | Completed | C3 | Users/wards settings routes are implemented (not placeholders) |
+| C5 | Traceability Reconciliation and Final Gates | In Progress | C4 | PRD matrix and trackers reflect validated runtime truth |
 
 ## Phase Detail and Checklists
 
@@ -118,19 +118,19 @@ Blockers:
 
 ### C3 - Ops Runtime API Wiring
 
-Status: Not Started
+Status: Completed
 
 Checklist:
-- [ ] Replace ops tenants list/detail fixture reads with API-backed data.
-- [ ] Replace ops health snapshot fixture reads with API-backed data source.
-- [ ] Preserve existing role and access assumptions for platform-operator surfaces.
+- [x] Replace ops tenants list/detail fixture reads with API-backed data.
+- [x] Replace ops health snapshot fixture reads with API-backed data source.
+- [x] Preserve existing role and access assumptions for platform-operator surfaces.
 
 Validation:
-- [ ] `pnpm --filter @smart-bursary/web run test`
-- [ ] `pnpm --filter @smart-bursary/web run typecheck`
-- [ ] `pnpm --filter @smart-bursary/web run build`
-- [ ] Targeted API contract tests for tenant provisioning/list/detail flows pass when touched.
-- [ ] Runtime route scan confirms no fixture-only ops imports remain on these routes.
+- [x] `pnpm --filter @smart-bursary/web run test`
+- [x] `pnpm --filter @smart-bursary/web run typecheck`
+- [x] `pnpm --filter @smart-bursary/web run build`
+- [x] Targeted API contract tests for tenant provisioning/list/detail flows pass when touched.
+- [x] Runtime route scan confirms no fixture-only ops imports remain on these routes.
 
 Blockers:
 - None logged.
@@ -139,18 +139,18 @@ Blockers:
 
 ### C4 - County Settings Users/Wards Completion
 
-Status: Not Started
+Status: Completed
 
 Checklist:
-- [ ] Replace users settings placeholder route with functional implementation.
-- [ ] Replace wards settings placeholder route with functional implementation.
-- [ ] Ensure settings behaviors are county-scoped and role-protected.
+- [x] Replace users settings placeholder route with functional implementation.
+- [x] Replace wards settings placeholder route with functional implementation.
+- [x] Ensure settings behaviors are county-scoped and role-protected.
 
 Validation:
-- [ ] `pnpm --filter @smart-bursary/web run test`
-- [ ] `pnpm --filter @smart-bursary/web run typecheck`
-- [ ] `pnpm --filter @smart-bursary/web run build`
-- [ ] Targeted API tests pass for newly used settings endpoints.
+- [x] `pnpm --filter @smart-bursary/web run test`
+- [x] `pnpm --filter @smart-bursary/web run typecheck`
+- [x] `pnpm --filter @smart-bursary/web run build`
+- [x] Targeted API tests pass for newly used settings endpoints.
 
 Blockers:
 - None logged.
@@ -159,7 +159,7 @@ Blockers:
 
 ### C5 - Traceability Reconciliation and Final Gates
 
-Status: Not Started
+Status: In Progress
 
 Checklist:
 - [ ] Update `Docs/09-PRD-TRACEABILITY-MATRIX.md` statuses/evidence to match validated runtime behavior.
@@ -187,6 +187,8 @@ Blockers:
 | 2026-04-18 | C1 | Student submit critical flow E2E stabilized with endpoint-exact API mocks aligned to backend-driven runtime | `pnpm --filter @smart-bursary/web run typecheck` pass; `pnpm --filter @smart-bursary/web run test:e2e -- student-submit.spec.ts` pass; route scan: no `@/lib/student-data` imports under `apps/web/app/(student)` and `apps/web/hooks` |
 | 2026-04-18 | C1 | C1 validation gate closed and phase marked complete | `pnpm --filter @smart-bursary/web run test` pass; `pnpm --filter @smart-bursary/web run build` pass |
 | 2026-04-18 | C2 | Ward/county workflow runtime wiring validated and C2 gate closed | `pnpm --filter @smart-bursary/web run typecheck` pass; `pnpm --filter @smart-bursary/web run test` pass (21 tests); `pnpm --filter @smart-bursary/web run build` pass; `pnpm --filter @smart-bursary/web run test:e2e -- ward-review.spec.ts county-allocation.spec.ts` pass (2 tests); route scan: no `@/lib/admin-data` imports under `apps/web/app/(admin)/ward` and `apps/web/app/(admin)/county` |
+| 2026-04-18 | C3 | Ops tenant/health runtime routes migrated to platform APIs and C3 gate closed | `pnpm --filter @smart-bursary/web run typecheck` pass; `pnpm --filter @smart-bursary/web run test` pass (21 tests); `pnpm --filter @smart-bursary/web run build` pass; `pnpm --filter @smart-bursary/web run test:e2e -- ops-runtime.spec.ts` pass (2 tests); `pnpm --filter @smart-bursary/api run test -- --runInBand test/integration/tenant-provisioning-plan-gates.e2e-spec.ts` pass (5 tests); route scan: no `@/lib/ops-data` imports under `apps/web/app/(ops)` |
+| 2026-04-19 | C4 | Settings users/wards placeholders replaced by county-scoped runtime analytics pages and C4 gate closed | `pnpm --filter @smart-bursary/web run typecheck` pass; `pnpm --filter @smart-bursary/web run test` pass (23 tests); `pnpm --filter @smart-bursary/web run build` pass; targeted coverage: `app/(admin)/settings/users/page.test.tsx` and `app/(admin)/settings/wards/page.test.tsx` |
 
 ## Change Log
 
@@ -194,3 +196,6 @@ Blockers:
 - 2026-04-18: Updated C1 status to In Progress with latest validation evidence from student submit/runtime integration and critical E2E pass.
 - 2026-04-18: Closed C1 after full validation and advanced active execution to C2.
 - 2026-04-18: Closed C2 after ward/county API wiring, E2E mock alignment, and full web validation gates passed.
+- 2026-04-18: Closed C3 after replacing ops fixture-backed tenants/health routes with API-driven runtime pages and passing targeted web/API validations.
+- 2026-04-19: Closed C4 by implementing county-scoped users/wards settings runtime pages and validating with web gates plus new page tests.
+- 2026-04-19: Advanced active execution to C5 (traceability reconciliation and final release-grade gates).
