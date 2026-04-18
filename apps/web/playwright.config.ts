@@ -5,7 +5,7 @@ const baseURL = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
 	testDir: "./e2e",
-	fullyParallel: true,
+	fullyParallel: false,
 	retries: process.env.CI ? 2 : 0,
 	reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"], ["html", { open: "never" }]],
 	use: {
@@ -21,11 +21,11 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: `pnpm exec next dev -p ${port}`,
+		command: `pnpm exec next build && pnpm exec next start -p ${port}`,
 		url: baseURL,
 		reuseExistingServer: !process.env.CI,
 		stdout: "pipe",
 		stderr: "pipe",
-		timeout: 120 * 1000,
+		timeout: 240 * 1000,
 	},
 });

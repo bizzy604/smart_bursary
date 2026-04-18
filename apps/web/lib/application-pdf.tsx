@@ -14,6 +14,27 @@ type ApplicationPdfParams = {
 	sections: PreviewSection[];
 };
 
+function toText(value: unknown): string {
+	if (typeof value === "string") {
+		return value;
+	}
+
+	if (typeof value === "number" || typeof value === "boolean") {
+		return String(value);
+	}
+
+	if (value === null || value === undefined) {
+		return "-";
+	}
+
+	try {
+		const serialized = JSON.stringify(value);
+		return typeof serialized === "string" ? serialized : String(value);
+	} catch {
+		return String(value);
+	}
+}
+
 const styles = StyleSheet.create({
 	page: {
 		paddingTop: 28,
@@ -118,26 +139,26 @@ function ApplicationPdfDocument(params: ApplicationPdfParams) {
 				<View style={[styles.header, { borderColor: accentColor }]}> 
 					<Text style={[styles.headerCaption, { color: accentColor }]}>County Government Bursary Form</Text>
 					<Text style={[styles.headerTitle, { color: accentColor }]}> 
-						{params.countyName} - {params.fundName}
+						{toText(params.countyName)} - {toText(params.fundName)}
 					</Text>
 					<View style={styles.metaRow}>
-						<Text style={styles.metaText}>Program: {params.programName}</Text>
-						<Text style={styles.metaText}>Reference: {params.reference}</Text>
-						<Text style={styles.metaText}>Legal Ref: {params.legalReference || "-"}</Text>
-						<Text style={styles.metaText}>Generated: {formatShortDate(params.generatedAt)}</Text>
+						<Text style={styles.metaText}>Program: {toText(params.programName)}</Text>
+						<Text style={styles.metaText}>Reference: {toText(params.reference)}</Text>
+						<Text style={styles.metaText}>Legal Ref: {toText(params.legalReference || "-")}</Text>
+						<Text style={styles.metaText}>Generated: {toText(formatShortDate(params.generatedAt))}</Text>
 					</View>
 				</View>
 
 				{params.sections.map((section) => (
 					<View key={section.slug} style={styles.section}>
 						<Text style={[styles.sectionTitle, { backgroundColor: sectionBackground, color: accentColor }]}> 
-							{section.title}
+							{toText(section.title)}
 						</Text>
 						{section.entries.length > 0 ? (
-							section.entries.map((entry) => (
-								<View key={`${section.slug}-${entry.label}`} style={styles.row}>
-									<Text style={styles.labelCell}>{entry.label}</Text>
-									<Text style={styles.valueCell}>{entry.value}</Text>
+							section.entries.map((entry, entryIndex) => (
+								<View key={`${section.slug}-${entryIndex}`} style={styles.row}>
+									<Text style={styles.labelCell}>{toText(entry.label)}</Text>
+									<Text style={styles.valueCell}>{toText(entry.value)}</Text>
 								</View>
 							))
 						) : (

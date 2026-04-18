@@ -1,6 +1,6 @@
 # KauntyBursary Functional Closure Backlog
 
-Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed, B-06 completed, B-07 completed, B-08 completed)  
+Status: In Progress (B-01 completed, B-02 completed, B-03 completed, B-04 completed, B-05 completed, B-06 completed, B-07 completed, B-08 completed, O-01 completed)  
 Last Updated: 2026-04-18  
 Source Inputs: `Docs/01-PRD.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`
 
@@ -362,18 +362,13 @@ Validation:
 - Workflow state-machine tests
 - Audit trail query and note-visibility tests
 
-## Operational Gap Not Counted In PRD Totals
+## Operational Follow-On Item (Completed)
 
-The following item is not one of the remaining `Partial` or `Missing` rows in the matrix, but it remains operationally important and should be scheduled as a follow-on operational slice now that B-08 is complete:
+The following item is not one of the PRD matrix `Partial` or `Missing` rows, but was completed as an operational closure slice after B-08:
 
-| Item | Description | Recommended Placement |
+| Item | Description | Completion Evidence |
 |---|---|---|
-| O-01 | County Admin program management UI for create, edit, publish, and close flows | Execute alongside B-06 |
-
-Primary Areas:
-- `apps/web/app/(admin)/settings/programs/page.tsx`
-- `apps/web/app/(admin)/settings/programs/new/page.tsx`
-- `apps/web/app/(admin)/settings/programs/[id]/page.tsx`
+| O-01 | County Admin program management UI for create, edit, publish, and close flows | Implemented in `apps/web/lib/admin-programs.ts`, `apps/web/app/(admin)/settings/programs/page.tsx`, `apps/web/app/(admin)/settings/programs/new/page.tsx`, `apps/web/app/(admin)/settings/programs/[id]/page.tsx`, and linked from `apps/web/app/(admin)/settings/page.tsx`; validated by `pnpm --filter @smart-bursary/web run typecheck` and `pnpm --filter @smart-bursary/web run build` |
 
 ## Recommended Immediate Next Action
 

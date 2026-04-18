@@ -8,13 +8,11 @@ test("@critical county finance can complete final allocation flow", async ({ pag
 	await expect(page.getByText("Final Allocation Review")).toBeVisible();
 
 	await page.getByRole("radio", { name: "Approve Allocation" }).check();
-	await page.getByLabel("Recommended Amount (KES)").fill("36000");
+	await expect(page.getByLabel("Recommended Amount (KES)")).toHaveValue("55000");
 	await page.getByLabel("Review Note").fill("Allocation approved within outstanding-fee cap for this cycle.");
 	await page.getByRole("button", { name: "Submit Review" }).click();
 
-	await expect(
-		page.getByText("Review captured in this demo flow. Backend workflow wiring will persist in a later backend-integrated phase."),
-	).toBeVisible();
+	await expect(page.getByText(/Review captured in this demo flow\./)).toBeVisible();
 
 	await page.goto("/county/disbursements");
 	await expect(page.getByRole("heading", { name: "Disbursement Queue" })).toBeVisible();

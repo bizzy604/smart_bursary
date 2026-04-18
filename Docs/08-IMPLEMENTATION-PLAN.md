@@ -1,6 +1,6 @@
 # KauntyBursary Gap Closure and Hardening Implementation Plan
 
-Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, W6 In Progress)
+Status: In Progress (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, O-01 Completed, W6 In Progress)
 Last Updated: 2026-04-18
 Owner: Engineering Team
 References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
@@ -87,6 +87,11 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/b08-security-audit.e2e-spec.ts` passed (3/3).
     - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/review-ai.e2e-spec.ts` passed (5/5).
     - `pnpm --filter @smart-bursary/api run test -- --runInBand --runTestsByPath test/integration/reporting-analytics.e2e-spec.ts` passed (4/4).
+- Operational Slice O-01 (County Admin Program UI): Completed.
+  - Implementation: Replaced settings programs placeholders with functional list/new/detail pages wired to lifecycle endpoints, added shared admin programs API client, and linked program management from settings index.
+  - Validation: Complete.
+    - `pnpm --filter @smart-bursary/web run typecheck` passed.
+    - `pnpm --filter @smart-bursary/web run build` passed.
 - Phase 6 (W6): In Progress.
   - Implementation: Frontend unit/component test harness and initial critical-flow tests added.
   - Validation (current slice):
@@ -110,8 +115,8 @@ This plan is designed to be executed one phase at a time, with strict completion
 
 ### G-02 County Admin settings gap (critical)
 - B-03 closed the core settings gap for branding, form customization, and AI scoring configuration.
-- Remaining county settings gaps are now focused on additional admin surfaces:
-  - Programs list/new/edit
+- O-01 closed the county program management UI surface (list/new/edit/publish/close).
+- Remaining county settings gaps are now focused on:
   - Users management
   - Ward management
 

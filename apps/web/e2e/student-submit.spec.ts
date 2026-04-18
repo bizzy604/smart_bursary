@@ -22,8 +22,13 @@ async function startApplicationFromPrograms(page: Page): Promise<string> {
 	return programId;
 }
 
+async function waitForSection(page: Page, headingName: RegExp): Promise<void> {
+	await expect(page.getByText("Loading section...")).toHaveCount(0, { timeout: 20_000 });
+	await expect(page.getByRole("heading", { name: headingName })).toBeVisible();
+}
+
 async function completeSectionA(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section A/i })).toBeVisible();
+	await waitForSection(page, /Section A/i);
 	await page.getByLabel("Full Name").fill("E2E Student Applicant");
 	await page.getByLabel("National ID / Birth Cert No.").fill("12345678");
 	await page.getByLabel("Phone Number").fill("+254712345678");
@@ -37,7 +42,7 @@ async function completeSectionA(page: Page, programId: string): Promise<void> {
 }
 
 async function completeSectionB(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section B/i })).toBeVisible();
+	await waitForSection(page, /Section B/i);
 	await page.getByLabel("Requested Amount (KES)").fill("45000");
 	await page.getByLabel("Current Fee Balance (KES)").fill("60000");
 	await page.getByLabel("Total Annual Fee (KES)").fill("75000");
@@ -50,7 +55,8 @@ async function completeSectionB(page: Page, programId: string): Promise<void> {
 }
 
 async function completeSectionC(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section C/i })).toBeVisible();
+	await waitForSection(page, /Section C/i);
+	await page.getByLabel("Family Status").selectOption("SINGLE_PARENT");
 	await page.getByLabel("Guardian/Parent Name").fill("Mary Akinyi");
 	await page.getByLabel("Relationship").fill("Mother");
 	await page.getByLabel("Phone Number").fill("+254700000111");
@@ -62,7 +68,7 @@ async function completeSectionC(page: Page, programId: string): Promise<void> {
 }
 
 async function completeSectionD(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section D/i })).toBeVisible();
+	await waitForSection(page, /Section D/i);
 	await page.getByLabel("Father Monthly Income (KES)").fill("20000");
 	await page.getByLabel("Mother Monthly Income (KES)").fill("12000");
 	await page
@@ -73,7 +79,7 @@ async function completeSectionD(page: Page, programId: string): Promise<void> {
 }
 
 async function completeSectionE(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section E/i })).toBeVisible();
+	await waitForSection(page, /Section E/i);
 	await page.getByLabel("Declaration Full Name").fill("E2E Student Applicant");
 	await page.getByRole("checkbox", { name: "I confirm that all information provided is true and complete." }).check();
 	await page
@@ -87,7 +93,7 @@ async function completeSectionE(page: Page, programId: string): Promise<void> {
 }
 
 async function completeSectionF(page: Page, programId: string): Promise<void> {
-	await expect(page.getByRole("heading", { name: /Section F/i })).toBeVisible();
+	await waitForSection(page, /Section F/i);
 
 	const uploadInputs = page.locator('input[type="file"]');
 	for (let index = 0; index < 3; index += 1) {
@@ -130,7 +136,8 @@ test("@critical student can complete, submit, and export application", async ({ 
 	await completeSectionF(page, programId);
 
 	const applicationId = await submitFromPreview(page);
-	await expect(page.getByText("Submitted")).toBeVisible();
+	await expect(page.getByRole("heading", { name: "Current Status" })).toBeVisible();
+	await expect(page.getByRole("heading", { name: "Status Timeline" })).toBeVisible();
 
 	const printableResponse = await request.get(`/applications/${applicationId}/pdf?download=true`);
 	expect(printableResponse.status()).toBe(200);
