@@ -1,4 +1,4 @@
-import type { ScoreDimension } from "@/lib/admin-data";
+import type { ScoreDimension } from "@/lib/review-types";
 
 interface AIScoreCardProps {
 	score: number;

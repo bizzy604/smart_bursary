@@ -7,9 +7,12 @@ import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatPercent, formatShortDate } from "@/lib/format";
 import { useApplication } from "@/hooks/use-application";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 
 export default function DashboardPage() {
-  const { programs, applications } = useApplication();
+  const { programs, applications, isLoading, error } = useApplication();
+  const { profile } = useStudentProfile();
+  const studentName = profile?.fullName && profile.fullName !== "Not provided" ? profile.fullName : "Student";
   const activePrograms = programs.length;
   const submittedApplications = applications.filter((application) => application.status !== "DRAFT").length;
   const inReview = applications.filter((application) => application.status.includes("REVIEW")).length;
@@ -18,7 +21,7 @@ export default function DashboardPage() {
     <main className="space-y-6">
       <section className="rounded-2xl bg-gradient-to-r from-brand-900 to-brand-700 p-6 text-white shadow-lg">
         <p className="text-sm uppercase tracking-wider text-brand-100">Student Dashboard</p>
-        <h1 className="mt-2 font-display text-3xl font-bold">Welcome back, Aisha</h1>
+        <h1 className="mt-2 font-display text-3xl font-bold">Welcome back, {studentName}</h1>
         <p className="mt-2 max-w-2xl text-sm text-brand-50">
           Track your bursary journey, check open county programs, and review your application progress in one place.
         </p>
@@ -30,6 +33,12 @@ export default function DashboardPage() {
         <StatsCard label="In Review" value={String(inReview)} hint="Ward or county committee stage" />
       </section>
 
+      {error ? (
+        <section className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">
+          {error}
+        </section>
+      ) : null}
+
       <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-xl font-semibold text-brand-900">Open Programs</h2>
@@ -40,7 +49,10 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {programs.map((program) => {
+        {isLoading ? (
+          <p className="text-sm text-gray-600">Loading programs...</p>
+        ) : (
+          programs.map((program) => {
           const utilization = (program.allocatedKes / program.budgetCeilingKes) * 100;
 
           return (
@@ -68,7 +80,8 @@ export default function DashboardPage() {
               </div>
             </article>
           );
-        })}
+          })
+        )}
       </section>
 
       <section className="space-y-4">
@@ -81,7 +94,9 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {applications.length > 0 ? (
+        {isLoading ? (
+          <p className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">Loading applications...</p>
+        ) : applications.length > 0 ? (
           <div className="space-y-3">
             {applications.map((application) => (
               <ApplicationCard key={application.id} application={application} />

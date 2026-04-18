@@ -1,13 +1,54 @@
+"use client";
+
 import Link from "next/link";
 import type { Route } from "next";
+import { useEffect, useState } from "react";
+import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrencyKes, formatShortDate } from "@/lib/format";
-import { getWardQueue } from "@/lib/admin-data";
+import { formatShortDate } from "@/lib/format";
+import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
+import type { ReviewQueueItem } from "@/lib/review-types";
 
 export default function WardApplicationsPage() {
-  const queue = getWardQueue().sort((a, b) => b.aiScore - a.aiScore);
+  const [queue, setQueue] = useState<ReviewQueueItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadQueue = async () => {
+      setIsLoading(true);
+      try {
+        const rows = await fetchWorkflowQueueByStatus("WARD_REVIEW");
+        if (!mounted) {
+          return;
+        }
+
+        setQueue(rows);
+        setError(null);
+      } catch (reason: unknown) {
+        if (!mounted) {
+          return;
+        }
+
+        const message = reason instanceof Error ? reason.message : "Failed to load ward review queue.";
+        setError(message);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadQueue();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <main className="space-y-5">
@@ -36,17 +77,33 @@ export default function WardApplicationsPage() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        {queue.map((application) => (
-          <article key={application.id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
+      {isLoading ? (
+        <section className="rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
+          Loading ward queue...
+        </section>
+      ) : error ? (
+        <section className="rounded-2xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
+          {error}
+        </section>
+      ) : queue.length === 0 ? (
+        <EmptyState
+          title="No applications in ward review"
+          description="There are no applications currently waiting for ward committee decisions."
+        />
+      ) : (
+        <section className="space-y-3">
+          {queue.map((application) => (
+            <article key={application.applicationId} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold text-brand-900">{application.reference} • {application.applicantName}</h2>
                 <p className="mt-1 text-sm text-gray-600">
-                  {application.ward} Ward • {application.subCounty} • {application.institution}
+                  {application.wardName} Ward • {application.programName} • {application.educationLevel}
                 </p>
                 <p className="mt-1 text-sm text-gray-600">
-                  Requested {formatCurrencyKes(application.requestedKes)} • Submitted {formatShortDate(application.submittedAt)}
+                  {application.reviewedAt
+                    ? `Last updated ${formatShortDate(application.reviewedAt)}`
+                    : "Awaiting ward committee review"}
                 </p>
               </div>
               <div className="text-right">
@@ -59,19 +116,20 @@ export default function WardApplicationsPage() {
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
-              <Link href={`/ward/applications/${application.id}` as Route}>
+              <Link href={`/ward/applications/${application.applicationId}` as Route}>
                 <Button size="sm">Review</Button>
               </Link>
-              <Link href={`/ward/applications/${application.id}/documents` as Route}>
+              <Link href={`/ward/applications/${application.applicationId}/documents` as Route}>
                 <Button variant="outline" size="sm">View Documents</Button>
               </Link>
-              <Link href={`/ward/applications/${application.id}/score` as Route}>
+              <Link href={`/ward/applications/${application.applicationId}/score` as Route}>
                 <Button variant="ghost" size="sm">AI Score</Button>
               </Link>
             </div>
-          </article>
-        ))}
-      </section>
+            </article>
+          ))}
+        </section>
+      )}
     </main>
   );
 }

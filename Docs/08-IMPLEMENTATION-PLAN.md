@@ -3,7 +3,7 @@
 Status: Completed (Phase 2B Completed, B-01 Completed, B-02 Completed, B-03 Completed, B-04 Completed, B-05 Completed, B-06 Completed, B-07 Completed, B-08 Completed, O-01 Completed, W6 Completed, P7 Completed)
 Last Updated: 2026-04-18
 Owner: Engineering Team
-References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md
+References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEGY.md, 09-PRD-TRACEABILITY-MATRIX.md, 10-FUNCTIONAL-CLOSURE-BACKLOG.md, 11-FRONTEND-BACKEND-CONVERGENCE-TRACKER.md
 
 ## Current Execution Status
 
@@ -118,6 +118,7 @@ References: 01-PRD.md, 02-SYSTEM_DESIGN.md, 04-API-DESIGN.md, 07-TESTING-STRATEG
     - Performance/caching baseline documented: p95 budget configurable via `P7_HEALTH_P95_BUDGET_MS`; config caching is enabled in `ConfigModule.forRoot({ cache: true })`; route-level response caching remains intentionally unset pending targeted endpoint profiling.
     - Release checklist completed: `apps/api/RELEASE_READINESS_CHECKLIST.md`.
 - Next strict backlog item: None (`B-01` through `B-08` complete in `Docs/10-FUNCTIONAL-CLOSURE-BACKLOG.md`).
+- Post-P7 frontend-backend convergence execution is tracked in `Docs/11-FRONTEND-BACKEND-CONVERGENCE-TRACKER.md` as the single active status source for that plan.
 
 ## 1. Objective
 

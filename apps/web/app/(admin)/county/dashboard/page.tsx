@@ -7,12 +7,14 @@ import { BudgetBar } from "@/components/application/budget-bar";
 import { StatusBadge } from "@/components/application/status-badge";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
-import { countyBudgetSnapshot, getCountyDashboardStats, getCountyReviewQueue } from "@/lib/admin-data";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import { fetchDashboardReport, type DashboardReportData } from "@/lib/reporting-api";
+import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
+import type { ReviewQueueItem } from "@/lib/review-types";
 
 export default function CountyDashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardReportData | null>(null);
+  const [queue, setQueue] = useState<ReviewQueueItem[]>([]);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,17 +23,25 @@ export default function CountyDashboardPage() {
 
     const loadDashboard = async () => {
       try {
-        const data = await fetchDashboardReport();
+        const [dashboard, countyQueue] = await Promise.all([
+          fetchDashboardReport(),
+          fetchWorkflowQueueByStatus("COUNTY_REVIEW"),
+        ]);
+
         if (!mounted) {
           return;
         }
-        setDashboardData(data);
+
+        setDashboardData(dashboard);
+        setQueue(countyQueue);
         setDashboardError(null);
-      } catch (error: unknown) {
+      } catch (reason: unknown) {
         if (!mounted) {
           return;
         }
-        setDashboardError(error instanceof Error ? error.message : "Failed to refresh dashboard metrics.");
+
+        const message = reason instanceof Error ? reason.message : "Failed to refresh dashboard metrics.";
+        setDashboardError(message);
       } finally {
         if (mounted) {
           setIsLoading(false);
@@ -50,25 +60,29 @@ export default function CountyDashboardPage() {
     };
   }, []);
 
-  const fallbackStats = getCountyDashboardStats();
   const stats = useMemo(
     () => ({
-      approved: dashboardData?.approvedApplications ?? fallbackStats.approved,
-      allocatedKes:
-        dashboardData?.programs.reduce((sum, program) => sum + program.allocated_total, 0) ??
-        fallbackStats.allocatedKes,
+      approved: dashboardData?.approvedApplications ?? 0,
+      allocatedKes: dashboardData?.programs.reduce((sum, program) => sum + program.allocated_total, 0) ?? 0,
       remainingKes:
-        dashboardData?.programs.reduce((sum, program) => sum + (program.budget_ceiling - program.allocated_total), 0) ??
-        fallbackStats.remainingKes,
-      disbursed: dashboardData?.disbursedCount ?? fallbackStats.disbursed,
+        dashboardData?.programs.reduce(
+          (sum, program) => sum + (program.budget_ceiling - program.allocated_total),
+          0,
+        ) ?? 0,
+      disbursed: dashboardData?.disbursedCount ?? 0,
     }),
-    [dashboardData, fallbackStats],
+    [dashboardData],
   );
 
   const budget = useMemo(() => {
     const primaryProgram = dashboardData?.programs[0];
     if (!primaryProgram) {
-      return countyBudgetSnapshot;
+      return {
+        programName: "County Bursary Programme",
+        ceilingKes: 0,
+        allocatedKes: 0,
+        disbursedKes: 0,
+      };
     }
 
     return {
@@ -78,8 +92,6 @@ export default function CountyDashboardPage() {
       disbursedKes: primaryProgram.disbursed_total,
     };
   }, [dashboardData]);
-
-  const queue = getCountyReviewQueue();
 
   return (
     <main className="space-y-5">
@@ -149,32 +161,40 @@ export default function CountyDashboardPage() {
           </Link>
         </div>
 
-        <div className="mt-4 space-y-3">
-          {queue.map((application) => (
-            <article key={application.id} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{application.reference} • {application.applicantName}</p>
-                  <p className="mt-1 text-sm text-gray-600">
-                    Ward recommendation: {formatCurrencyKes(application.wardRecommendationKes ?? 0)} • Submitted {formatShortDate(application.submittedAt)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs uppercase tracking-wide text-gray-500">AI Score</p>
-                  <p className="font-display text-lg font-semibold text-brand-900">{application.aiScore.toFixed(1)}</p>
-                  <div className="mt-1">
-                    <StatusBadge status={application.status} />
+        {isLoading ? (
+          <p className="mt-4 text-sm text-gray-600">Loading county queue...</p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {queue.map((application) => (
+              <article key={application.applicationId} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{application.reference} • {application.applicantName}</p>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Ward recommendation: {formatCurrencyKes(application.wardRecommendationKes)}
+                      {application.reviewedAt ? ` • Reviewed ${formatShortDate(application.reviewedAt)}` : ""}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">AI Score</p>
+                    <p className="font-display text-lg font-semibold text-brand-900">{application.aiScore.toFixed(1)}</p>
+                    <div className="mt-1">
+                      <StatusBadge status={application.status} />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="mt-3">
-                <Link href={`/county/review/${application.id}` as Route}>
-                  <Button size="sm">Final Review</Button>
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
+                <div className="mt-3">
+                  <Link href={`/county/review/${application.applicationId}` as Route}>
+                    <Button size="sm">Final Review</Button>
+                  </Link>
+                </div>
+              </article>
+            ))}
+            {!queue.length ? (
+              <p className="text-sm text-gray-600">No applications are currently waiting at county review stage.</p>
+            ) : null}
+          </div>
+        )}
       </section>
     </main>
   );

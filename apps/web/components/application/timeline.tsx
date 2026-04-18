@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { formatShortDate } from "@/lib/format";
-import type { TimelineEvent } from "@/lib/student-data";
+import type { TimelineEvent } from "@/lib/student-types";
 
 export function Timeline({ events }: { events: TimelineEvent[] }) {
 	return (

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { downloadTextFile, openPreviewHtml } from "@/lib/client-download";
-import type { SupportingDocument } from "@/lib/admin-data";
+import type { SupportingDocument } from "@/lib/review-types";
 import { cn } from "@/lib/utils";
 
 interface DocumentViewerProps {
@@ -62,6 +62,9 @@ export function DocumentViewer({ documents }: DocumentViewerProps) {
 	return (
 		<section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
 			<h3 className="font-display text-lg font-semibold text-brand-900">Supporting Documents</h3>
+			{documents.length === 0 ? (
+				<p className="mt-3 text-sm text-gray-600">No supporting documents are available for this application yet.</p>
+			) : null}
 			<div className="mt-4 space-y-3">
 				{documents.map((document) => {
 					const isBlocked = document.status === "MISSING";

@@ -5,11 +5,28 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
-import { getProgramById } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 
 export default function ProgramDetailPage() {
   const params = useParams<{ id: string }>();
+  const { getProgramById, isLoading, error } = useApplication();
   const program = getProgramById(params.id);
+
+  if (isLoading) {
+    return (
+      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+        Loading program...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+        {error}
+      </section>
+    );
+  }
 
   if (!program) {
     return (

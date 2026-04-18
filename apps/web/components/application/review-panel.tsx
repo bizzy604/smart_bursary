@@ -12,6 +12,11 @@ interface ReviewPanelProps {
 	maxAmountKes: number;
 	defaultAmountKes: number;
 	existingNote?: string;
+	onSubmit?: (payload: {
+		decision: string;
+		recommendedAmount: number;
+		note: string;
+	}) => Promise<string | void>;
 }
 
 const decisionOptions: Record<ReviewMode, Array<{ value: string; label: string }>> = {
@@ -27,14 +32,24 @@ const decisionOptions: Record<ReviewMode, Array<{ value: string; label: string }
 	],
 };
 
-export function ReviewPanel({ mode, maxAmountKes, defaultAmountKes, existingNote }: ReviewPanelProps) {
+export function ReviewPanel({
+	mode,
+	maxAmountKes,
+	defaultAmountKes,
+	existingNote,
+	onSubmit,
+}: ReviewPanelProps) {
 	const [decision, setDecision] = useState(decisionOptions[mode][0]?.value ?? "");
 	const [recommendedAmount, setRecommendedAmount] = useState(String(defaultAmountKes));
 	const [reviewNote, setReviewNote] = useState(existingNote ?? "");
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [feedback, setFeedback] = useState<string | null>(null);
 
 	const amount = Number(recommendedAmount || 0);
-	const amountIsValid = amount > 0 && amount <= maxAmountKes;
+	const decisionNeedsAmount =
+		(mode === "ward" && decision === "recommend") ||
+		(mode === "county" && decision === "approve");
+	const amountIsValid = !decisionNeedsAmount || (amount > 0 && amount <= maxAmountKes);
 
 	return (
 		<section className="space-y-4 rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
@@ -90,16 +105,36 @@ export function ReviewPanel({ mode, maxAmountKes, defaultAmountKes, existingNote
 
 			<div className="flex flex-wrap items-center gap-3">
 				<Button
-					onClick={() => {
+					disabled={isSubmitting}
+					onClick={async () => {
 						if (!amountIsValid) {
 							setFeedback("Correct the recommended amount before submitting.");
 							return;
 						}
 
-						setFeedback("Review captured in this demo flow. Backend workflow wiring will persist in a later backend-integrated phase.");
+						if (!onSubmit) {
+							setFeedback("Review captured in this demo flow. Backend workflow wiring will persist in a later backend-integrated phase.");
+							return;
+						}
+
+						setIsSubmitting(true);
+						setFeedback(null);
+						try {
+							const customMessage = await onSubmit({
+								decision,
+								recommendedAmount: amount,
+								note: reviewNote,
+							});
+							setFeedback(customMessage ?? "Review decision submitted successfully.");
+						} catch (reason: unknown) {
+							const message = reason instanceof Error ? reason.message : "Failed to submit review decision.";
+							setFeedback(message);
+						} finally {
+							setIsSubmitting(false);
+						}
 					}}
 				>
-					Submit Review
+					{isSubmitting ? "Submitting..." : "Submit Review"}
 				</Button>
 				{feedback ? <p className="text-xs text-info-700">{feedback}</p> : null}
 			</div>

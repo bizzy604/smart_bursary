@@ -1,170 +1,113 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { PreviewSection } from "@/lib/application-preview";
 import {
-	applications,
-	getProgramById,
-	getTimelineForApplication,
-	programs,
-	type StudentApplicationSummary,
-	type TimelineEvent,
-} from "@/lib/student-data";
-import { useStudentApplicationStore } from "@/store/student-application-store";
-
-function toSubmittedTimeline(submittedAt: string): TimelineEvent[] {
-	return [
-		{
-			label: "Application Created",
-			status: "complete",
-			date: submittedAt,
-			note: "Your draft was completed and ready for final submission.",
-		},
-		{
-			label: "Submitted",
-			status: "complete",
-			date: submittedAt,
-			note: "Application successfully submitted and queued for review.",
-		},
-		{
-			label: "AI Scoring",
-			status: "current",
-			date: "Pending",
-			note: "Automated scoring and checks are in progress.",
-		},
-		{
-			label: "Ward Review",
-			status: "upcoming",
-			date: "Pending",
-			note: "Ward bursary committee review starts after scoring completes.",
-		},
-		{
-			label: "County Review",
-			status: "upcoming",
-			date: "Pending",
-			note: "County finance team will make final allocation decisions.",
-		},
-	];
-}
-
-function mergeApplications(
-	base: StudentApplicationSummary[],
-	submissionsByProgram: Record<string, {
-		id: string;
-		programId: string;
-		programName: string;
-		status: "SUBMITTED";
-		reference: string;
-		requestedKes: number;
-		submittedAt: string;
-		updatedAt: string;
-	}>,
-): StudentApplicationSummary[] {
-	const mergedBase = base.map((application) => {
-		const submission = submissionsByProgram[application.programId];
-		if (!submission || application.status !== "DRAFT") {
-			return application;
-		}
-
-		return {
-			...application,
-			status: submission.status,
-			reference: submission.reference,
-			requestedKes: submission.requestedKes,
-			submittedAt: submission.submittedAt,
-			updatedAt: submission.updatedAt,
-		};
-	});
-
-	const existingProgramIds = new Set(mergedBase.map((item) => item.programId));
-	const extraSubmissions = Object.values(submissionsByProgram)
-		.filter((submission) => !existingProgramIds.has(submission.programId))
-		.map((submission) => ({
-			id: submission.id,
-			reference: submission.reference,
-			programId: submission.programId,
-			programName: submission.programName,
-			status: submission.status,
-			requestedKes: submission.requestedKes,
-			submittedAt: submission.submittedAt,
-			updatedAt: submission.updatedAt,
-		}));
-
-	return [...mergedBase, ...extraSubmissions].sort((a, b) => {
-		return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-	});
-}
+	buildApplicationSectionPayloads,
+	createApplicationDraft,
+	fetchStudentApplications,
+	fetchStudentPrograms,
+	saveApplicationSection,
+	submitStudentApplication,
+} from "@/lib/student-api";
+import type { StudentApplicationSummary, StudentProgramSummary } from "@/lib/student-types";
 
 export function useApplication() {
-	const hydrateSubmissions = useStudentApplicationStore((state) => state.hydrate);
-	const submitApplication = useStudentApplicationStore((state) => state.submitApplication);
-	const submissionsByProgram = useStudentApplicationStore((state) => state.submissionsByProgram);
+	const [programs, setPrograms] = useState<StudentProgramSummary[]>([]);
+	const [applications, setApplications] = useState<StudentApplicationSummary[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	const refresh = useCallback(async () => {
+		setIsLoading(true);
+		try {
+			const [nextPrograms, nextApplications] = await Promise.all([
+				fetchStudentPrograms(),
+				fetchStudentApplications(),
+			]);
+			setPrograms(nextPrograms);
+			setApplications(nextApplications);
+			setError(null);
+		} catch (reason: unknown) {
+			const message = reason instanceof Error ? reason.message : "Failed to load student application data.";
+			setError(message);
+		} finally {
+			setIsLoading(false);
+		}
+	}, []);
 
 	useEffect(() => {
-		hydrateSubmissions();
-	}, [hydrateSubmissions]);
+		void refresh();
+	}, [refresh]);
 
-	const mergedApplications = useMemo(
-		() => mergeApplications(applications, submissionsByProgram),
-		[submissionsByProgram],
-	);
+	const programsById = useMemo(() => {
+		return new Map(programs.map((program) => [program.id, program]));
+	}, [programs]);
+
+	const applicationsById = useMemo(() => {
+		return new Map(applications.map((application) => [application.id, application]));
+	}, [applications]);
 
 	const getMergedApplicationById = useCallback(
 		(applicationId: string): StudentApplicationSummary | null => {
-			return mergedApplications.find((application) => application.id === applicationId) ?? null;
+			return applicationsById.get(applicationId) ?? null;
 		},
-		[mergedApplications],
-	);
-
-	const getTimeline = useCallback(
-		(applicationId: string): TimelineEvent[] => {
-			const application = getMergedApplicationById(applicationId);
-			if (!application) {
-				return [];
-			}
-
-			if (application.status === "SUBMITTED") {
-				return toSubmittedTimeline(application.submittedAt);
-			}
-
-			return getTimelineForApplication(applicationId);
-		},
-		[getMergedApplicationById],
+		[applicationsById],
 	);
 
 	const submitDraftApplication = useCallback(
-		(payload: {
+		async (payload: {
 			programId: string;
 			programName: string;
 			requestedKes: number;
-			previewSections: PreviewSection[];
+			sectionData: Record<string, unknown>;
 		}) => {
-			const existing = mergedApplications.find((item) => item.programId === payload.programId);
-			return submitApplication({
-				programId: payload.programId,
-				programName: payload.programName,
-				requestedKes: payload.requestedKes,
-				applicationId: existing?.id,
-				previewSections: payload.previewSections,
-			});
+			const existing = applications.find((item) => item.programId === payload.programId);
+
+			if (existing && existing.status !== "DRAFT") {
+				throw new Error("This application is already submitted and cannot be resubmitted.");
+			}
+
+			let applicationId = existing?.id;
+			if (!applicationId) {
+				const draft = await createApplicationDraft(payload.programId);
+				applicationId = draft.id;
+			}
+
+			const sectionPayloads = buildApplicationSectionPayloads(payload.sectionData);
+			for (const sectionPayload of sectionPayloads) {
+				await saveApplicationSection(applicationId, sectionPayload.sectionKey, sectionPayload.data);
+			}
+
+			const submitted = await submitStudentApplication(applicationId);
+			await refresh();
+			return submitted;
 		},
-		[mergedApplications, submitApplication],
+		[applications, refresh],
 	);
 
 	const getApplicationByProgramId = useCallback(
 		(programId: string): StudentApplicationSummary | null => {
-			return mergedApplications.find((application) => application.programId === programId) ?? null;
+			return applications.find((application) => application.programId === programId) ?? null;
 		},
-		[mergedApplications],
+		[applications],
+	);
+
+	const getProgramById = useCallback(
+		(programId: string): StudentProgramSummary | null => {
+			return programsById.get(programId) ?? null;
+		},
+		[programsById],
 	);
 
 	return {
 		programs,
-		applications: mergedApplications,
+		applications,
+		isLoading,
+		error,
+		refresh,
 		getProgramById,
 		getApplicationById: getMergedApplicationById,
-		getTimelineForApplication: getTimeline,
 		submitDraftApplication,
 		getApplicationByProgramId,
 	};

@@ -7,7 +7,7 @@ import { useParams, usePathname } from "next/navigation";
 import { StepProgress } from "@/components/forms/step-progress";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
-import { getProgramById } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 import { getWizardSteps } from "@/lib/wizard";
 import { useApplicationWizardStore, type SectionSlug } from "@/store/application-wizard-store";
 
@@ -16,6 +16,7 @@ const wizardSections: SectionSlug[] = ["section-a", "section-b", "section-c", "s
 export default function ApplyWizardLayout({ children }: { children: ReactNode }) {
   const params = useParams<{ programId: string }>();
   const pathname = usePathname();
+  const { getProgramById, isLoading, error } = useApplication();
   const hydrateProgram = useApplicationWizardStore((state) => state.hydrateProgram);
   const completion = useApplicationWizardStore((state) => state.programs[params.programId]?.completion);
   const program = getProgramById(params.programId);
@@ -23,6 +24,22 @@ export default function ApplyWizardLayout({ children }: { children: ReactNode })
   useEffect(() => {
     hydrateProgram(params.programId);
   }, [hydrateProgram, params.programId]);
+
+  if (isLoading) {
+    return (
+      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+        Loading application wizard...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+        {error}
+      </section>
+    );
+  }
 
   if (!program) {
     return (

@@ -5,13 +5,14 @@ import type { Route } from "next";
 import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getProgramById } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
 
 const sectionOrder = ["section-a", "section-b", "section-c", "section-d", "section-e", "section-f"] as const;
 
 export default function ApplyEntryPage() {
   const params = useParams<{ programId: string }>();
+  const { getProgramById, isLoading, error } = useApplication();
   const hydrateProgram = useApplicationWizardStore((state) => state.hydrateProgram);
   const resetProgram = useApplicationWizardStore((state) => state.resetProgram);
   const programState = useApplicationWizardStore((state) => state.programs[params.programId]);
@@ -33,6 +34,22 @@ export default function ApplyEntryPage() {
 
     return `/apply/${params.programId}/${firstIncomplete}` as Route;
   }, [programState, params.programId]);
+
+  if (isLoading) {
+    return (
+      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
+        Loading application...
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700 shadow-sm">
+        {error}
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

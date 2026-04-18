@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
 
 export default function ApplicationsPage() {
-  const { applications } = useApplication();
+  const { applications, isLoading, error } = useApplication();
 
   return (
     <main className="space-y-5">
@@ -18,7 +18,15 @@ export default function ApplicationsPage() {
         </p>
       </section>
 
-      {applications.length > 0 ? (
+      {isLoading ? (
+        <section className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
+          Loading applications...
+        </section>
+      ) : error ? (
+        <section className="rounded-xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
+          {error}
+        </section>
+      ) : applications.length > 0 ? (
         <section className="space-y-3">
           {applications.map((application) => (
             <ApplicationCard key={application.id} application={application} />

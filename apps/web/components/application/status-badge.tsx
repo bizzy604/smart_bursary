@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import type { ApplicationStatus } from "@/lib/student-data";
+import type { ApplicationStatus } from "@/lib/student-types";
 
 const statusStyleMap: Record<ApplicationStatus, "neutral" | "info" | "success" | "warning" | "danger"> = {
 	DRAFT: "neutral",

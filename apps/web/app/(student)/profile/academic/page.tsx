@@ -1,9 +1,29 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { profileSnapshot } from "@/lib/student-data";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 
 export default function AcademicProfilePage() {
+  const { profile, isLoading, error } = useStudentProfile();
+
+  if (isLoading) {
+    return (
+      <section className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-xs">
+        Loading profile...
+      </section>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <section className="rounded-xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+        {error ?? "Failed to load profile."}
+      </section>
+    );
+  }
+
   return (
     <main className="space-y-5">
       <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
@@ -15,15 +35,15 @@ export default function AcademicProfilePage() {
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
             <label className="text-sm font-medium text-gray-700">Institution</label>
-            <Input value={profileSnapshot.institution} readOnly />
+            <Input value={profile.institution} readOnly />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Course</label>
-            <Input value={profileSnapshot.course} readOnly />
+            <Input value={profile.course} readOnly />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Year of Study</label>
-            <Input value={profileSnapshot.yearOfStudy} readOnly />
+            <Input value={profile.yearOfStudy} readOnly />
           </div>
         </div>
       </section>

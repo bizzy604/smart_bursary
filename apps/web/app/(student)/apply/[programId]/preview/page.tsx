@@ -28,13 +28,15 @@ export default function PreviewAndSubmitPage() {
 	const params = useParams<{ programId: string }>();
 	const router = useRouter();
 	const { county } = useCounty();
-	const { getProgramById, submitDraftApplication, getApplicationByProgramId } = useApplication();
+	const { getProgramById, submitDraftApplication, getApplicationByProgramId, isLoading, error } = useApplication();
 	const hydrateProgram = useApplicationWizardStore((state) => state.hydrateProgram);
 	const programState = useApplicationWizardStore((state) => state.programs[params.programId]);
 	const [agreedToDeclaration, setAgreedToDeclaration] = useState(false);
 	const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
 	const [isPreviewLoading, setIsPreviewLoading] = useState(true);
 	const [isDownloading, setIsDownloading] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [submissionError, setSubmissionError] = useState<string | null>(null);
 
 	useEffect(() => {
 		hydrateProgram(params.programId);
@@ -71,7 +73,7 @@ export default function PreviewAndSubmitPage() {
 	}, [programState]);
 
 	const reference = existingApplication?.reference ?? `TRK-${new Date().getFullYear()}-PREVIEW`;
-	const canSubmit = incompleteSections.length === 0 && agreedToDeclaration && !isAlreadySubmitted;
+	const canSubmit = incompleteSections.length === 0 && agreedToDeclaration && !isAlreadySubmitted && !isSubmitting;
 
 	useEffect(() => {
 		let nextPreviewUrl: string | null = null;
@@ -135,6 +137,22 @@ export default function PreviewAndSubmitPage() {
 		return (
 			<section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
 				Loading preview...
+			</section>
+		);
+	}
+
+	if (isLoading) {
+		return (
+			<section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+				Loading application context...
+			</section>
+		);
+	}
+
+	if (error) {
+		return (
+			<section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+				{error}
 			</section>
 		);
 	}
@@ -225,6 +243,12 @@ export default function PreviewAndSubmitPage() {
 						</label>
 					</div>
 
+					{submissionError ? (
+						<p className="rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-xs text-danger-700">
+							{submissionError}
+						</p>
+					) : null}
+
 					<div className="space-y-2">
 						<Button
 							variant="outline"
@@ -264,21 +288,31 @@ export default function PreviewAndSubmitPage() {
 						<Button
 							className="w-full"
 							disabled={!canSubmit}
-							onClick={() => {
+							onClick={async () => {
 								if (!canSubmit) {
 									return;
 								}
 
-								const result = submitDraftApplication({
-									programId: params.programId,
-									programName: program.name,
-									requestedKes,
-									previewSections,
-								});
-								router.push(`/applications/${result.id}?submitted=1` as Route);
+								setSubmissionError(null);
+								setIsSubmitting(true);
+
+								try {
+									const result = await submitDraftApplication({
+										programId: params.programId,
+										programName: program.name,
+										requestedKes,
+										sectionData: programState.sectionData as Record<string, unknown>,
+									});
+									router.push(`/applications/${result.id}?submitted=1` as Route);
+								} catch (reason: unknown) {
+									const message = reason instanceof Error ? reason.message : "Failed to submit application.";
+									setSubmissionError(message);
+								} finally {
+									setIsSubmitting(false);
+								}
 							}}
 						>
-							Submit Application
+							{isSubmitting ? "Submitting..." : "Submit Application"}
 						</Button>
 
 						{isAlreadySubmitted ? (

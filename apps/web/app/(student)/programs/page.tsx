@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/shared/empty-state";
 import { formatCurrencyKes, formatPercent, formatShortDate } from "@/lib/format";
-import { programs } from "@/lib/student-data";
+import { useApplication } from "@/hooks/use-application";
 
 export default function ProgramsPage() {
+	const { programs, isLoading, error } = useApplication();
+
   return (
     <main className="space-y-6">
       <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
@@ -13,6 +18,20 @@ export default function ProgramsPage() {
         </p>
       </section>
 
+      {isLoading ? (
+        <section className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
+          Loading programs...
+        </section>
+      ) : error ? (
+        <section className="rounded-xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
+          {error}
+        </section>
+      ) : programs.length === 0 ? (
+        <EmptyState
+          title="No eligible programs"
+          description="There are no open programs matching your current profile at the moment."
+        />
+      ) : (
       <section className="grid gap-4">
         {programs.map((program) => {
           const utilization = (program.allocatedKes / program.budgetCeilingKes) * 100;
@@ -57,6 +76,7 @@ export default function ProgramsPage() {
           );
         })}
       </section>
+      )}
     </main>
   );
 }

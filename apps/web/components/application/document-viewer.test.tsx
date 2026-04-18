@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DocumentViewer } from "@/components/application/document-viewer";
 import { downloadTextFile, openPreviewHtml } from "@/lib/client-download";
-import type { SupportingDocument } from "@/lib/admin-data";
+import type { SupportingDocument } from "@/lib/review-types";
 
 vi.mock("@/lib/client-download", () => ({
 	downloadTextFile: vi.fn(),

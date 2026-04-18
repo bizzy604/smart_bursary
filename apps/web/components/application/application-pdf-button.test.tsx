@@ -4,8 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApplicationPdfButton } from "@/components/application/application-pdf-button";
 import type { PreviewSection } from "@/lib/application-preview";
-import { useApplicationWizardStore } from "@/store/application-wizard-store";
-import { useStudentApplicationStore } from "@/store/student-application-store";
 
 const previewSections: PreviewSection[] = [
 	{
@@ -18,8 +16,6 @@ const previewSections: PreviewSection[] = [
 describe("ApplicationPdfButton", () => {
 	beforeEach(() => {
 		localStorage.clear();
-		useStudentApplicationStore.setState({ hydrated: true, submissionsByProgram: {} });
-		useApplicationWizardStore.setState({ programs: {} });
 
 		Object.defineProperty(globalThis.URL, "createObjectURL", {
 			writable: true,
@@ -31,7 +27,7 @@ describe("ApplicationPdfButton", () => {
 		});
 	});
 
-	it("downloads a PDF using the captured submission snapshot", async () => {
+	it("downloads a PDF using provided preview sections", async () => {
 		const user = userEvent.setup();
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
@@ -41,30 +37,12 @@ describe("ApplicationPdfButton", () => {
 
 		vi.stubGlobal("fetch", fetchMock);
 
-		useStudentApplicationStore.setState({
-			hydrated: true,
-			submissionsByProgram: {
-				"prog-ward-2024": {
-					id: "app-00142",
-					programId: "prog-ward-2024",
-					programName: "2024 Ward Bursary Programme",
-					status: "SUBMITTED",
-					reference: "TRK-2026-00142",
-					requestedKes: 45000,
-					submittedAt: "2026-04-10T11:22:00Z",
-					updatedAt: "2026-04-12T09:18:00Z",
-					previewSections,
-				},
-			},
-		});
-
 		render(
 			<ApplicationPdfButton
-				applicationId="app-00142"
-				programId="prog-ward-2024"
 				programName="2024 Ward Bursary Programme"
 				reference="TRK-2026-00142"
 				generatedAt="2026-04-12T09:18:00Z"
+				sections={previewSections}
 			/>,
 		);
 
