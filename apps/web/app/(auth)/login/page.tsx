@@ -1,9 +1,75 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { login, type AuthUser, setAccessToken } from "@/lib/auth";
+import { ApiClientError } from "@/lib/api-client";
+import { API_ERROR_MESSAGES } from "@/lib/constants";
+import { useAuthStore } from "@/store/auth-store";
+
+function resolvePostLoginRoute(role: AuthUser["role"]): Route {
+	switch (role) {
+		case "WARD_ADMIN":
+			return "/ward/dashboard";
+		case "COUNTY_ADMIN":
+		case "FINANCE_OFFICER":
+			return "/county/dashboard";
+		case "PLATFORM_OPERATOR":
+			return "/tenants";
+		case "STUDENT":
+		default:
+			return "/dashboard";
+	}
+}
 
 export default function LoginPage() {
+	const router = useRouter();
+	const setSession = useAuthStore((state) => state.setSession);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		if (isSubmitting) {
+			return;
+		}
+
+		const formData = new FormData(event.currentTarget);
+		const email = String(formData.get("email") ?? "").trim();
+		const password = String(formData.get("password") ?? "");
+		const countySlug = String(formData.get("county_slug") ?? "").trim().toLowerCase();
+
+		if (!email || !password || !countySlug) {
+			setErrorMessage("Enter your email, password, and county slug to continue.");
+			return;
+		}
+
+		setIsSubmitting(true);
+		setErrorMessage(null);
+
+		try {
+			const response = await login({ email, password, county_slug: countySlug });
+			const { access_token: accessToken, user } = response.data;
+			setAccessToken(accessToken);
+			setSession({ accessToken, user });
+			router.push(resolvePostLoginRoute(user.role));
+			router.refresh();
+		} catch (error: unknown) {
+			if (error instanceof ApiClientError) {
+				setErrorMessage(API_ERROR_MESSAGES[error.code] ?? error.message);
+			} else {
+				setErrorMessage("Unable to sign in right now. Please try again.");
+			}
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
+
 	return (
 		<Card>
 			<CardHeader>
@@ -14,7 +80,7 @@ export default function LoginPage() {
 			</CardHeader>
 
 			<CardContent>
-				<form className="space-y-4">
+				<form className="space-y-4" method="post" onSubmit={handleSubmit}>
 					<div className="space-y-2">
 						<label htmlFor="email" className="text-sm font-medium text-gray-700">
 							Email address
@@ -43,9 +109,15 @@ export default function LoginPage() {
 						<Input id="county" name="county_slug" placeholder="turkana" required />
 					</div>
 
-					<Button type="submit" fullWidth>
-						Sign in
+					<Button type="submit" fullWidth disabled={isSubmitting}>
+						{isSubmitting ? "Signing in..." : "Sign in"}
 					</Button>
+
+					{errorMessage ? (
+						<p role="alert" className="rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+							{errorMessage}
+						</p>
+					) : null}
 				</form>
 			</CardContent>
 

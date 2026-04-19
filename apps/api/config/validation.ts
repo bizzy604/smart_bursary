@@ -9,7 +9,7 @@ const validationSchema = Joi.object({
 	NODE_ENV: Joi.string()
 		.valid('development', 'test', 'production')
 		.default('development'),
-	PORT: Joi.number().port().default(3000),
+	PORT: Joi.number().port().default(3001),
 	API_PREFIX: Joi.string().default('api/v1'),
 	DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
 	JWT_SECRET: Joi.string().min(16).required(),

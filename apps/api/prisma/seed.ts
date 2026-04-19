@@ -1,60 +1,32 @@
 /**
- * Purpose: Seed baseline county and ward records for local development.
- * Why important: Provides deterministic starter data for P1 validation and module development.
- * Used by: Prisma seed command and local setup workflows.
+ * Purpose: Seed comprehensive tenant, workflow, and reporting fixtures for local development.
+ * Why important: Provides end-to-end data required by frontend dashboards and review/disbursement flows.
+ * Used by: Prisma seed command and local full-stack setup workflows.
  */
 import { PrismaClient } from '@prisma/client';
+
+import { seedArtifacts } from './seeds/artifacts.seed';
+import { seedFoundation } from './seeds/foundation.seed';
+import { seedPrograms } from './seeds/programs.seed';
+import { DEV_PASSWORD } from './seeds/seed-types';
+import { seedWorkflow } from './seeds/workflow.seed';
 
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
-  const county = await prisma.county.upsert({
-    where: { slug: 'turkana' },
-    update: {
-      name: 'Turkana County',
-      fundName: 'Turkana County Education Fund',
-      planTier: 'BASIC',
-      isActive: true,
-    },
-    create: {
-      slug: 'turkana',
-      name: 'Turkana County',
-      fundName: 'Turkana County Education Fund',
-      legalReference: 'No. 4 of 2023',
-      planTier: 'BASIC',
-      isActive: true,
-    },
-  });
+  const seed = await seedFoundation(prisma);
+  const programs = await seedPrograms(prisma, seed);
+  const applications = await seedWorkflow(prisma, seed, programs);
+  await seedArtifacts(prisma, seed, programs, applications);
 
-  const wards = [
-    { code: 'TRK-001', name: 'Lodwar Township' },
-    { code: 'TRK-002', name: 'Kanamkemer' },
-    { code: 'TRK-003', name: 'Kakuma' },
-  ];
-
-  for (const ward of wards) {
-    await prisma.ward.upsert({
-      where: {
-        countyId_code: {
-          countyId: county.id,
-          code: ward.code,
-        },
-      },
-      update: {
-        name: ward.name,
-        isActive: true,
-      },
-      create: {
-        countyId: county.id,
-        code: ward.code,
-        name: ward.name,
-        isActive: true,
-      },
-    });
-  }
-
-  // Keep seed output concise for CI and local setup logs.
-  console.log('Seed completed: county turkana with 3 wards');
+  console.log('Seed completed with tenant, users, programs, workflow, and reporting artifacts.');
+  console.log('Login password for seeded users:', DEV_PASSWORD);
+  console.log('Seeded role accounts:');
+  console.log(' - platform.operator@smartbursary.dev (PLATFORM_OPERATOR, county turkana)');
+  console.log(' - county.admin@turkana.go.ke (COUNTY_ADMIN)');
+  console.log(' - finance.officer@turkana.go.ke (FINANCE_OFFICER)');
+  console.log(' - ward.admin@turkana.go.ke (WARD_ADMIN)');
+  console.log(' - aisha.student@turkana.go.ke (STUDENT)');
 }
 
 main()

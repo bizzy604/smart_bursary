@@ -17,7 +17,7 @@ async function bootstrap(): Promise<void> {
 	const app = await NestFactory.create(AppModule);
 	const configService = app.get(ConfigService);
 	const apiPrefix = configService.get<string>('app.apiPrefix', 'api/v1');
-	const port = configService.get<number>('app.port', 3000);
+	const port = configService.get<number>('app.port', 3001);
 
 	app.use(helmet());
 	app.use(compression());
