@@ -15,6 +15,8 @@ interface ApiSuccessEnvelope<TData> {
 	data: TData;
 }
 
+let refreshPromise: Promise<string | null> | null = null;
+
 export class ApiClientError extends Error {
 	code: string;
 	status: number;
@@ -69,22 +71,32 @@ async function readJsonBody<T>(response: Response): Promise<T | null> {
 // Silently refreshes the access token from the httpOnly refresh cookie.
 // Returns the new token on success, null on failure (session expired).
 async function silentRefresh(): Promise<string | null> {
-	try {
-		const response = await fetch(resolveUrl("/auth/refresh"), {
-			method: "POST",
-			credentials: "include",
-			headers: { "Content-Type": "application/json" },
-			cache: "no-store",
-		});
-		if (!response.ok) return null;
-		const body = (await response.json()) as Record<string, unknown>;
-		const raw = (body?.data ?? body) as Record<string, unknown>;
-		const newToken = typeof raw.accessToken === "string" ? raw.accessToken : null;
-		if (newToken) tokenStore.set(newToken);
-		return newToken;
-	} catch {
-		return null;
+	if (refreshPromise) {
+		return refreshPromise;
 	}
+
+	refreshPromise = (async () => {
+		try {
+			const response = await fetch(resolveUrl("/auth/refresh"), {
+				method: "POST",
+				credentials: "include",
+				headers: { "Content-Type": "application/json" },
+				cache: "no-store",
+			});
+			if (!response.ok) return null;
+			const body = (await response.json()) as Record<string, unknown>;
+			const raw = (body?.data ?? body) as Record<string, unknown>;
+			const newToken = typeof raw.accessToken === "string" ? raw.accessToken : null;
+			if (newToken) tokenStore.set(newToken);
+			return newToken;
+		} catch {
+			return null;
+		} finally {
+			refreshPromise = null;
+		}
+	})();
+
+	return refreshPromise;
 }
 
 function parseEnvelope<TData>(body: unknown): ApiSuccessEnvelope<TData> {
@@ -95,7 +107,13 @@ function parseEnvelope<TData>(body: unknown): ApiSuccessEnvelope<TData> {
 }
 
 async function fetchWithAuth(path: string, init: RequestInit = {}): Promise<Response> {
-	const token = tokenStore.get();
+	const authPath = path.startsWith("/auth/");
+	let token = tokenStore.get();
+
+	if (!token && !authPath) {
+		token = await silentRefresh();
+	}
+
 	const response = await fetch(resolveUrl(path), {
 		...init,
 		headers: buildHeaders(init, token),
