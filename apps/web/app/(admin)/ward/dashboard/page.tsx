@@ -3,14 +3,43 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
-import { EmptyState } from "@/components/shared/empty-state";
-import { StatusBadge } from "@/components/application/status-badge";
+import { DataTable } from "@/components/shared/data-table";
+import {
+  buildReviewQueueColumns,
+  reviewQueueStatusOptions,
+} from "@/components/shared/review-queue-columns";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
-import { formatCurrencyKes, formatShortDate } from "@/lib/format";
+import { formatCurrencyKes } from "@/lib/format";
 import { fetchWardSummaryReport } from "@/lib/reporting-api";
 import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
+
+const wardQueueColumns = buildReviewQueueColumns({
+  columns: [
+    "reference",
+    "applicantName",
+    "programName",
+    "educationLevel",
+    "aiScore",
+    "status",
+    "reviewedAt",
+  ],
+  primaryAction: {
+    label: "Review",
+    href: (item) => `/ward/applications/${item.applicationId}` as Route,
+  },
+  menuActions: [
+    {
+      label: "View Documents",
+      href: (item) => `/ward/applications/${item.applicationId}/documents` as Route,
+    },
+    {
+      label: "AI Score",
+      href: (item) => `/ward/applications/${item.applicationId}/score` as Route,
+    },
+  ],
+});
 
 export default function WardDashboardPage() {
   const [queue, setQueue] = useState<ReviewQueueItem[]>([]);
@@ -89,6 +118,11 @@ export default function WardDashboardPage() {
     };
   }, [allRows, queue]);
 
+  const educationLevelOptions = useMemo(() => {
+    const values = Array.from(new Set(queue.map((item) => item.educationLevel))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [queue]);
+
   return (
     <main className="space-y-5">
       <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
@@ -127,52 +161,25 @@ export default function WardDashboardPage() {
           </Link>
         </div>
 
-        {isLoading ? (
-          <p className="mt-4 text-sm text-gray-600">Loading top-priority applications...</p>
-        ) : queue.length === 0 ? (
-          <div className="mt-4">
-            <EmptyState
-              title="No pending ward reviews"
-              description="Applications will appear here once they reach ward committee stage."
-            />
-          </div>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {queue.map((application) => (
-              <article key={application.applicationId} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">{application.reference} • {application.applicantName}</p>
-                  <p className="mt-1 text-sm text-gray-600">
-                      {application.wardName} Ward • {application.programName} • {application.educationLevel}
-                  </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {application.reviewedAt
-                        ? `Last updated ${formatShortDate(application.reviewedAt)}`
-                        : "Awaiting committee decision"}
-                    </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">AI Score</p>
-                  <p className="font-display text-lg font-semibold text-brand-900">{application.aiScore.toFixed(1)} / 100</p>
-                  <div className="mt-1">
-                    <StatusBadge status={application.status} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Link href={`/ward/applications/${application.applicationId}` as Route}>
-                  <Button size="sm">Review</Button>
-                </Link>
-                <Link href={`/ward/applications/${application.applicationId}/documents` as Route}>
-                  <Button variant="outline" size="sm">View Documents</Button>
-                </Link>
-              </div>
-            </article>
-          ))}
+        <div className="mt-3">
+          <DataTable
+            columns={wardQueueColumns}
+            data={queue}
+            isLoading={isLoading}
+            getRowId={(row) => row.applicationId}
+            searchColumnId="applicantName"
+            searchPlaceholder="Search applicant"
+            facetedFilters={[
+              ...(educationLevelOptions.length > 0
+                ? [{ columnId: "educationLevel", title: "Level", options: educationLevelOptions }]
+                : []),
+              { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
+            ]}
+            initialSorting={[{ id: "aiScore", desc: true }]}
+            initialPageSize={10}
+            emptyState="No applications are currently waiting in the ward queue."
+          />
         </div>
-      )}
       </section>
     </main>
   );

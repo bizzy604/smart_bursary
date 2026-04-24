@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useCounty } from "@/hooks/use-county";
-import { fetchAdminSettings } from "@/lib/admin-settings";
+import { fetchCountyBranding } from "@/lib/admin-settings";
 import { hexToHslChannels } from "@/lib/utils";
 
 export function CountyBrandingProvider({ children }: { children: ReactNode }) {
@@ -12,18 +12,18 @@ export function CountyBrandingProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		let mounted = true;
 
-		void fetchAdminSettings()
-			.then((settings) => {
+		void fetchCountyBranding()
+			.then((branding) => {
 				if (!mounted) {
 					return;
 				}
 
 				setCounty({
-					name: settings.branding.countyName,
-					fundName: settings.branding.fundName,
-					logoText: settings.branding.logoText,
-					primaryColor: settings.branding.primaryColor,
-					legalReference: settings.branding.legalReference,
+					name: branding.countyName,
+					fundName: branding.fundName,
+					logoText: branding.logoText,
+					primaryColor: branding.primaryColor,
+					legalReference: branding.legalReference,
 				});
 			})
 			.catch(() => {

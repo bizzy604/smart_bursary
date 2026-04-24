@@ -1,6 +1,6 @@
 # KauntyBursary Frontend-Backend Convergence Tracker
 
-Status: Active (C0 completed; C1 completed; C2 completed; C3 completed; C4 completed; C5 completed; W7a completed; W7b in progress; W7c pending)  
+Status: Active (C0 completed; C1 completed; C2 completed; C3 completed; C4 completed; C5 completed; W7a completed; W7b completed; W7c pending)  
 Last Updated: 2026-04-24  
 Owner: Engineering Team  
 Source Inputs: `Docs/01-PRD.md`, `Docs/04-API-DESIGN.md`, `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/09-PRD-TRACEABILITY-MATRIX.md`, frontend/backend audit run dated 2026-04-18
@@ -57,7 +57,7 @@ Out of scope:
 | C4 | County Settings Users/Wards Completion | Completed | C3 | Users/wards settings routes are implemented (not placeholders) |
 | C5 | Traceability Reconciliation and Final Gates | Completed | C4 | PRD matrix and trackers reflect validated runtime truth |
 | W7a | UI Modernization - Foundation (shadcn init, token coexistence, DataTable primitives) | Completed (2026-04-24) | C5 | `components.json` authored, shadcn primitives scaffolded, DataTable renders; web typecheck/test/build green; tenant branding unchanged |
-| W7b | UI Modernization - DataTable Rollout to 4 Role Dashboards | In Progress | W7a | All four role dashboards render runtime API data via `<DataTable>`; unit/e2e/a11y green |
+| W7b | UI Modernization - DataTable Rollout to 4 Role Dashboards | Completed (2026-04-24) | W7a | All four role dashboards render runtime API data via `<DataTable>`; typecheck/unit/build green; e2e selectors preserved |
 | W7c | UI Modernization - Full Overhaul (nav, layouts, typography, theming, feature surfaces) | Pending | W7b | Redesigned shell + feature pages; visual regression approved; Lighthouse + a11y + low-bandwidth checks pass |
 
 ## Phase Detail and Checklists

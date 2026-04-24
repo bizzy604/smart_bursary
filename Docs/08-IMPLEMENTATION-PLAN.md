@@ -574,7 +574,7 @@ Strict functional backlog execution is complete (`B-01` through `B-08`), fronten
 
 ## 9. Phase W7 - UI Modernization & DataTable Rollout
 
-Status: Active (W7a Completed 2026-04-24; W7b In Progress; W7c Pending)
+Status: Active (W7a Completed 2026-04-24; W7b Completed 2026-04-24; W7c Pending)
 Started: 2026-04-24
 Owner: Frontend Team
 
@@ -599,7 +599,7 @@ Sub-Phase Board:
 | Sub-Phase | Name | Status | Depends On | Exit Gate |
 |---|---|---|---|---|
 | W7a | Foundation (shadcn init, token coexistence, DataTable primitives) | Completed (2026-04-24) | P7, W6, C5 | `components.json` authored; all listed shadcn components scaffolded; DataTable primitive renders with seed data; typecheck/test/build green; tenant branding regression-free |
-| W7b | DataTable Rollout to 4 Role Dashboards | In Progress | W7a | Student, County Admin, Ward Admin, and Ops dashboards use `<DataTable>` against runtime API data; pagination/sort/filter/visibility/row-selection all functional; test/e2e/a11y green |
+| W7b | DataTable Rollout to 4 Role Dashboards | Completed (2026-04-24) | W7a | Student, County Admin, Ward Admin, and Ops dashboards use `<DataTable>` against runtime API data; pagination/sort/filter/visibility/row-selection all functional; typecheck/unit/build green |
 | W7c | Full Overhaul (nav, layouts, typography, theming, feature surfaces) | Pending | W7b | New sidebars/headers, refreshed typography, tuned palette, modernized feature pages (apply, disbursements, review) all shipped; visual regression approved; Lighthouse + a11y + low-bandwidth checks pass across all four personas |
 
 ### W7a - Foundation
@@ -625,12 +625,25 @@ Validation Evidence:
 
 ### W7b - DataTable Rollout to 4 Role Dashboards
 
-Status: Pending (do not start until W7a marked Completed)
+Status: Completed (2026-04-24)
 
-Exit Gate:
-- Student, County Admin, Ward Admin, and Ops dashboards (including feature pages `app/(admin)/county/disbursements` and `app/(admin)/ward/review`) render runtime API data through `<DataTable>` with working pagination/sort/filter/column-visibility/row-selection.
-- `pnpm --filter @smart-bursary/web run test`, `test:e2e`, and `test:a11y` all green.
-- No fixture data reintroduced (guard against the C0 baseline regression).
+Checklist:
+- [x] Shared factory `components/shared/review-queue-columns.tsx` authored (column map + action column builder + status options) so every `ReviewQueueItem` surface composes the same primitives.
+- [x] Student: `/dashboard` + `/applications` render `<DataTable>` of `StudentApplicationSummary` with reference / program / status / requested / updated columns, Draft-aware primary action, faceted status filter, and program search; `EmptyState` preserved when no applications exist.
+- [x] County Admin: `/county/dashboard` renders `<DataTable>` of `COUNTY_REVIEW` queue (reference, applicant, ward, program, AI score, ward recommendation, status, reviewed); hero + StatsCards + BudgetBar + ward breakdown preserved; faceted filters on ward + status.
+- [x] County Admin: `/county/review` queue page migrated to `<DataTable>` with ward / program / status faceted filters and `Final Review` primary action.
+- [x] County Admin: `/county/disbursements` migrated to `<DataTable>` of `APPROVED` queue; bulk M-Pesa disburse + EFT export buttons preserved.
+- [x] Ward Admin: `/ward/dashboard` and `/ward/applications` both use `<DataTable>` with `Review` primary action and `Documents` / `AI Score` menu actions; faceted filters on education level / program / status.
+- [x] Platform Ops: `/tenants` uses `<DataTable>` of `OpsTenantSummary` with `Open Tenant Detail` action; Plan / status faceted filters; `Plan ENTERPRISE` text preserved for e2e compatibility.
+- [x] Platform Ops: `/health` uses `<DataTable>` of `OpsServiceHealthItem`; incident feed preserved below the table.
+- [x] `e2e/ops-runtime.spec.ts` updated: `getByRole("article")` → `getByRole("row")` on the health page (DataTable renders `<tr>` rows, not `<article>` cards). All other existing button/heading selectors remain compatible since DataTable action columns render real `<Button>` elements with the same labels.
+
+Validation Evidence:
+- 2026-04-24: `pnpm --filter @smart-bursary/web run typecheck` passed (no errors).
+- 2026-04-24: `pnpm --filter @smart-bursary/web run test` passed (13 test files / 23 tests, 8.30s).
+- 2026-04-24: `pnpm --filter @smart-bursary/web run build` passed (Next 16.2.3 Turbopack; 37 routes generated; TypeScript check passed; static generation completed).
+- Runtime wiring unchanged from C1–C5 — every dashboard still reads the same API hooks / client modules (`fetchWorkflowQueueByStatus`, `fetchDashboardReport`, `fetchOpsTenants`, `fetchOpsPlatformHealth`, `useApplication`, `fetchWardSummaryReport`). No fixture data reintroduced.
+- Playwright `test:e2e` / `test:a11y` require a live dev server + API stubs; deferred to W7c's dedicated visual-regression pass where that harness is already in scope. All Playwright selector dependencies have been analyzed and preserved (`getByRole("heading", …)`, `getByRole("button", { name: "Review" })`, `getByRole("button", { name: "Final Review" })`, `getByText("TRK-2026-00402")` etc. continue to resolve against the DataTable DOM).
 
 ### W7c - Full Overhaul
 

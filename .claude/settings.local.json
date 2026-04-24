@@ -6,7 +6,8 @@
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('@tanstack/react-table:', p.dependencies['@tanstack/react-table']\\); console.log\\('cmdk:', p.dependencies['cmdk']\\); console.log\\('react-day-picker:', p.dependencies['react-day-picker']\\); console.log\\('tailwindcss-animate:', p.dependencies['tailwindcss-animate']\\); console.log\\('radix dropdown:', p.dependencies['@radix-ui/react-dropdown-menu']\\);\")",
       "Bash(pnpm --filter @smart-bursary/web add @radix-ui/react-select)",
       "Bash(pnpm --filter @smart-bursary/web run typecheck)",
-      "Bash(pnpm --filter @smart-bursary/web run test)"
+      "Bash(pnpm --filter @smart-bursary/web run test)",
+      "Bash(pnpm --filter @smart-bursary/web run build)"
     ]
   }
 }

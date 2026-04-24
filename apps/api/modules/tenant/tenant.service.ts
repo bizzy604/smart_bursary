@@ -35,6 +35,31 @@ type SettingsObject = Record<string, unknown>;
 export class TenantService {
 	constructor(private readonly prisma: PrismaService) {}
 
+	async getBranding(countyId: string) {
+		const county = await this.prisma.county.findUnique({
+			where: { id: countyId },
+			select: {
+				id: true,
+				name: true,
+				fundName: true,
+				legalReference: true,
+				logoS3Key: true,
+				primaryColor: true,
+				settings: true,
+			},
+		});
+
+		if (!county) {
+			throw new NotFoundException('County not found.');
+		}
+
+		const settings = this.asObject(county.settings);
+
+		return {
+			data: this.toBranding(county, settings),
+		};
+	}
+
 	async getSettings(countyId: string) {
 		const county = await this.prisma.county.findUnique({
 			where: { id: countyId },
@@ -61,14 +86,7 @@ export class TenantService {
 		return {
 			data: {
 				countyId: county.id,
-				branding: {
-					countyName: county.name,
-					fundName: county.fundName ?? `${county.name} Education Fund`,
-					legalReference: county.legalReference ?? '',
-					primaryColor: county.primaryColor,
-					logoS3Key: county.logoS3Key ?? '',
-					logoText: this.resolveLogoText(settings, county.name),
-				},
+				branding: this.toBranding(county, settings),
 				formCustomization,
 				scoringWeights,
 				updatedAt: county.updatedAt.toISOString(),
@@ -201,6 +219,26 @@ export class TenantService {
 			.map((part) => part[0]?.toUpperCase() ?? '')
 			.join('');
 		return initials || 'CT';
+	}
+
+	private toBranding(
+		county: {
+			name: string;
+			fundName: string | null;
+			legalReference: string | null;
+			logoS3Key: string | null;
+			primaryColor: string;
+		},
+		settings: SettingsObject,
+	) {
+		return {
+			countyName: county.name,
+			fundName: county.fundName ?? `${county.name} Education Fund`,
+			legalReference: county.legalReference ?? '',
+			primaryColor: county.primaryColor,
+			logoS3Key: county.logoS3Key ?? '',
+			logoText: this.resolveLogoText(settings, county.name),
+		};
 	}
 
 	private normalizeOptionalString(value: string | undefined): string | undefined {

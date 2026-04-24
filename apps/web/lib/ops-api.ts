@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth";
+import { apiRequestJson } from "@/lib/api-client";
 import { API_BASE_URL } from "@/lib/constants";
 
 type OpsServiceStatus = "healthy" | "degraded" | "down";
@@ -77,29 +78,6 @@ export interface OpsPlatformHealthSnapshot {
   services: OpsServiceHealthItem[];
 }
 
-function resolveApiUrl(path: string): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalizedPath}`;
-}
-
-function resolveErrorMessage(payload: unknown): string {
-  if (payload && typeof payload === "object") {
-    const source = payload as Record<string, unknown>;
-    if (typeof source.message === "string" && source.message.length > 0) {
-      return source.message;
-    }
-
-    if (source.error && typeof source.error === "object") {
-      const error = source.error as Record<string, unknown>;
-      if (typeof error.message === "string" && error.message.length > 0) {
-        return error.message;
-      }
-    }
-  }
-
-  return "Request failed. Please try again.";
-}
-
 function normalizePlanTier(value: string | undefined): "BASIC" | "STANDARD" | "ENTERPRISE" {
   const normalized = (value ?? "").toUpperCase();
   if (normalized === "ENTERPRISE") {
@@ -129,23 +107,14 @@ function toServiceStatus(value: string | boolean): OpsServiceStatus {
 
 async function requestJson<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getAccessToken();
-  const response = await fetch(resolveApiUrl(path), {
+  return apiRequestJson<T>(path, {
     ...init,
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.body ? { "Content-Type": "application/json" } : {}),
       ...(init.headers ?? {}),
     },
-    credentials: "include",
-    cache: "no-store",
   });
-
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as unknown;
-    throw new Error(resolveErrorMessage(payload));
-  }
-
-  return (await response.json()) as T;
 }
 
 async function timedRequest<T>(request: () => Promise<T>): Promise<{ data: T; latencyMs: number }> {

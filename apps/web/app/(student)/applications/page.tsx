@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ApplicationCard } from "@/components/application/application-card";
+import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
+import {
+  studentApplicationColumns,
+  studentApplicationStatusOptions,
+} from "../dashboard/columns";
 
 export default function ApplicationsPage() {
   const { applications, isLoading, error } = useApplication();
@@ -18,21 +22,7 @@ export default function ApplicationsPage() {
         </p>
       </section>
 
-      {isLoading ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
-          Loading applications...
-        </section>
-      ) : error ? (
-        <section className="rounded-xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
-          {error}
-        </section>
-      ) : applications.length > 0 ? (
-        <section className="space-y-3">
-          {applications.map((application) => (
-            <ApplicationCard key={application.id} application={application} />
-          ))}
-        </section>
-      ) : (
+      {applications.length === 0 && !isLoading ? (
         <EmptyState
           title="No applications available"
           description="You have not started any bursary application yet."
@@ -42,6 +32,23 @@ export default function ApplicationsPage() {
             </Link>
           }
         />
+      ) : (
+        <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+          <DataTable
+            columns={studentApplicationColumns}
+            data={applications}
+            isLoading={isLoading}
+            error={error}
+            getRowId={(row) => row.id}
+            searchColumnId="programName"
+            searchPlaceholder="Search by program"
+            facetedFilters={[
+              { columnId: "status", title: "Status", options: studentApplicationStatusOptions },
+            ]}
+            initialSorting={[{ id: "updatedAt", desc: true }]}
+            emptyState="No applications match your filters."
+          />
+        </section>
       )}
     </main>
   );

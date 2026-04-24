@@ -121,7 +121,7 @@ test("@critical ops health dashboard renders live platform status", async ({ pag
   await page.goto("/health");
   await expect(page.getByRole("heading", { name: "System Health Dashboard" })).toBeVisible();
   await expect(page.getByText("Service Status")).toBeVisible();
-  await expect(page.getByRole("article").filter({ hasText: "API Gateway" })).toBeVisible();
-  await expect(page.getByRole("article").filter({ hasText: "Tenant Provisioning" })).toBeVisible();
-  await expect(page.getByRole("article").filter({ hasText: "Tenant Registry" })).toBeVisible();
+  await expect(page.getByRole("row").filter({ hasText: "API Gateway" })).toBeVisible();
+  await expect(page.getByRole("row").filter({ hasText: "Tenant Provisioning" })).toBeVisible();
+  await expect(page.getByRole("row").filter({ hasText: "Tenant Registry" })).toBeVisible();
 });

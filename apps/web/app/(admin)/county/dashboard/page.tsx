@@ -4,13 +4,40 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { Route } from "next";
 import { BudgetBar } from "@/components/application/budget-bar";
-import { StatusBadge } from "@/components/application/status-badge";
+import { DataTable } from "@/components/shared/data-table";
+import {
+  buildReviewQueueColumns,
+  reviewQueueStatusOptions,
+} from "@/components/shared/review-queue-columns";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
-import { formatCurrencyKes, formatShortDate } from "@/lib/format";
+import { formatCurrencyKes } from "@/lib/format";
 import { fetchDashboardReport, type DashboardReportData } from "@/lib/reporting-api";
 import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
+
+const countyQueueColumns = buildReviewQueueColumns({
+  columns: [
+    "reference",
+    "applicantName",
+    "wardName",
+    "programName",
+    "aiScore",
+    "wardRecommendationKes",
+    "status",
+    "reviewedAt",
+  ],
+  primaryAction: {
+    label: "Final Review",
+    href: (item) => `/county/review/${item.applicationId}` as Route,
+  },
+  menuActions: [
+    {
+      label: "View application",
+      href: (item) => `/applications/${item.applicationId}` as Route,
+    },
+  ],
+});
 
 export default function CountyDashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardReportData | null>(null);
@@ -93,6 +120,11 @@ export default function CountyDashboardPage() {
     };
   }, [dashboardData]);
 
+  const wardFilterOptions = useMemo(() => {
+    const values = Array.from(new Set(queue.map((item) => item.wardName))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [queue]);
+
   return (
     <main className="space-y-5">
       <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
@@ -161,40 +193,25 @@ export default function CountyDashboardPage() {
           </Link>
         </div>
 
-        {isLoading ? (
-          <p className="mt-4 text-sm text-gray-600">Loading county queue...</p>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {queue.map((application) => (
-              <article key={application.applicationId} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{application.reference} • {application.applicantName}</p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      Ward recommendation: {formatCurrencyKes(application.wardRecommendationKes)}
-                      {application.reviewedAt ? ` • Reviewed ${formatShortDate(application.reviewedAt)}` : ""}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">AI Score</p>
-                    <p className="font-display text-lg font-semibold text-brand-900">{application.aiScore.toFixed(1)}</p>
-                    <div className="mt-1">
-                      <StatusBadge status={application.status} />
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3">
-                  <Link href={`/county/review/${application.applicationId}` as Route}>
-                    <Button size="sm">Final Review</Button>
-                  </Link>
-                </div>
-              </article>
-            ))}
-            {!queue.length ? (
-              <p className="text-sm text-gray-600">No applications are currently waiting at county review stage.</p>
-            ) : null}
-          </div>
-        )}
+        <div className="mt-3">
+          <DataTable
+            columns={countyQueueColumns}
+            data={queue}
+            isLoading={isLoading}
+            getRowId={(row) => row.applicationId}
+            searchColumnId="applicantName"
+            searchPlaceholder="Search applicant"
+            facetedFilters={[
+              ...(wardFilterOptions.length > 0
+                ? [{ columnId: "wardName", title: "Ward", options: wardFilterOptions }]
+                : []),
+              { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
+            ]}
+            initialSorting={[{ id: "aiScore", desc: true }]}
+            initialPageSize={10}
+            emptyState="No applications are currently waiting at county review stage."
+          />
+        </div>
       </section>
     </main>
   );

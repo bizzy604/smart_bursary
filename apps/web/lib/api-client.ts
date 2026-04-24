@@ -49,6 +49,23 @@ function buildHeaders(init: RequestInit, token: string | null): Record<string, s
 	return headers;
 }
 
+async function readJsonBody<T>(response: Response): Promise<T | null> {
+	if (response.status === 204) {
+		return null;
+	}
+
+	const text = await response.text();
+	if (!text) {
+		return null;
+	}
+
+	try {
+		return JSON.parse(text) as T;
+	} catch {
+		return null;
+	}
+}
+
 // Silently refreshes the access token from the httpOnly refresh cookie.
 // Returns the new token on success, null on failure (session expired).
 async function silentRefresh(): Promise<string | null> {
@@ -77,38 +94,35 @@ function parseEnvelope<TData>(body: unknown): ApiSuccessEnvelope<TData> {
 	return { data: body as TData };
 }
 
-export async function apiFetch<TData>(
-	path: string,
-	init: RequestInit = {},
-): Promise<ApiSuccessEnvelope<TData>> {
+async function fetchWithAuth(path: string, init: RequestInit = {}): Promise<Response> {
 	const token = tokenStore.get();
-	const headers = buildHeaders(init, token);
-
 	const response = await fetch(resolveUrl(path), {
 		...init,
-		headers,
+		headers: buildHeaders(init, token),
 		credentials: "include",
 		cache: "no-store",
 	});
 
-	// On 401, attempt a silent token refresh from the httpOnly cookie, then retry once.
 	if (response.status === 401 && !path.includes("/auth/refresh")) {
 		const newToken = await silentRefresh();
 		if (newToken) {
-			const retryResponse = await fetch(resolveUrl(path), {
+			return fetch(resolveUrl(path), {
 				...init,
 				headers: buildHeaders(init, newToken),
 				credentials: "include",
 				cache: "no-store",
 			});
-			if (retryResponse.ok) {
-				return parseEnvelope<TData>(await retryResponse.json());
-			}
 		}
 	}
 
+	return response;
+}
+
+export async function apiRequest(path: string, init: RequestInit = {}): Promise<Response> {
+	const response = await fetchWithAuth(path, init);
+
 	if (!response.ok) {
-		const payload = (await response.json().catch(() => null)) as ApiErrorEnvelope | null;
+		const payload = await readJsonBody<ApiErrorEnvelope>(response);
 		const fallbackError: ApiError = {
 			code: "UNKNOWN_ERROR",
 			message: "An unexpected error occurred.",
@@ -116,5 +130,29 @@ export async function apiFetch<TData>(
 		throw new ApiClientError(response.status, payload?.error ?? fallbackError);
 	}
 
-	return parseEnvelope<TData>(await response.json());
+	return response;
+}
+
+export async function apiRequestJson<TData>(
+	path: string,
+	init: RequestInit = {},
+): Promise<TData> {
+	const response = await apiRequest(path, init);
+	return (await readJsonBody<TData>(response)) as TData;
+}
+
+export async function apiRequestBlob(
+	path: string,
+	init: RequestInit = {},
+): Promise<Blob> {
+	const response = await apiRequest(path, init);
+	return response.blob();
+}
+
+export async function apiFetch<TData>(
+	path: string,
+	init: RequestInit = {},
+): Promise<ApiSuccessEnvelope<TData>> {
+	const response = await apiRequest(path, init);
+	return parseEnvelope<TData>(await readJsonBody<unknown>(response));
 }

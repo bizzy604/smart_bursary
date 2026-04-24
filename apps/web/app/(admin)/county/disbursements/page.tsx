@@ -1,17 +1,40 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BudgetBar } from "@/components/application/budget-bar";
-import { StatusBadge } from "@/components/application/status-badge";
+import { DataTable } from "@/components/shared/data-table";
+import {
+  buildReviewQueueColumns,
+  reviewQueueStatusOptions,
+} from "@/components/shared/review-queue-columns";
 import { Button } from "@/components/ui/button";
-import { formatCurrencyKes, formatShortDate } from "@/lib/format";
+import { formatCurrencyKes } from "@/lib/format";
 import { fetchDashboardReport } from "@/lib/reporting-api";
 import {
   fetchWorkflowQueueByStatus,
   initiateDisbursement,
 } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
+
+const disbursementColumns = buildReviewQueueColumns({
+  columns: [
+    "reference",
+    "applicantName",
+    "wardName",
+    "programName",
+    "countyAllocationKes",
+    "status",
+    "reviewedAt",
+  ],
+  menuActions: [
+    {
+      label: "View application",
+      href: (item) => `/applications/${item.applicationId}` as Route,
+    },
+  ],
+});
 
 export default function CountyDisbursementsPage() {
   const [queue, setQueue] = useState<ReviewQueueItem[]>([]);
@@ -62,6 +85,26 @@ export default function CountyDisbursementsPage() {
     return queue.reduce((sum, application) => sum + application.countyAllocationKes, 0);
   }, [queue]);
 
+  const wardFilterOptions = useMemo(() => {
+    const values = Array.from(new Set(queue.map((item) => item.wardName))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [queue]);
+
+  const handleBulkDisburse = async () => {
+    setIsDisbursing(true);
+    setFeedback(null);
+    const results = await Promise.allSettled(
+      queue.map((application) => initiateDisbursement(application.applicationId)),
+    );
+
+    const succeeded = results.filter((result) => result.status === "fulfilled").length;
+    const failed = results.length - succeeded;
+
+    setFeedback(`Disbursement requests sent. Success: ${succeeded}, failed: ${failed}.`);
+    setIsDisbursing(false);
+    await loadQueue();
+  };
+
   return (
     <main className="space-y-5">
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
@@ -99,20 +142,7 @@ export default function CountyDisbursementsPage() {
             <Button
               size="sm"
               disabled={isLoading || isDisbursing || queue.length === 0}
-              onClick={async () => {
-                setIsDisbursing(true);
-                setFeedback(null);
-                const results = await Promise.allSettled(
-                  queue.map((application) => initiateDisbursement(application.applicationId)),
-                );
-
-                const succeeded = results.filter((result) => result.status === "fulfilled").length;
-                const failed = results.length - succeeded;
-
-                setFeedback(`Disbursement requests sent. Success: ${succeeded}, failed: ${failed}.`);
-                setIsDisbursing(false);
-                await loadQueue();
-              }}
+              onClick={() => void handleBulkDisburse()}
             >
               {isDisbursing ? "Submitting..." : "Disburse via M-Pesa"}
             </Button>
@@ -122,31 +152,25 @@ export default function CountyDisbursementsPage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <p className="mt-4 text-sm text-gray-600">Loading approved applications...</p>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {queue.map((application) => (
-              <article key={application.applicationId} className="rounded-xl border border-gray-200 bg-gray-50 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">{application.reference} • {application.applicantName}</p>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {application.wardName} Ward • Allocation {formatCurrencyKes(application.countyAllocationKes)}
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {application.reviewedAt ? `Approved ${formatShortDate(application.reviewedAt)}` : "Approved"}
-                    </p>
-                  </div>
-                  <StatusBadge status={application.status} />
-                </div>
-              </article>
-            ))}
-            {queue.length === 0 ? (
-              <p className="text-sm text-gray-600">No approved applications are currently waiting for disbursement.</p>
-            ) : null}
-          </div>
-        )}
+        <div className="mt-3">
+          <DataTable
+            columns={disbursementColumns}
+            data={queue}
+            isLoading={isLoading}
+            getRowId={(row) => row.applicationId}
+            searchColumnId="applicantName"
+            searchPlaceholder="Search applicant"
+            facetedFilters={[
+              ...(wardFilterOptions.length > 0
+                ? [{ columnId: "wardName", title: "Ward", options: wardFilterOptions }]
+                : []),
+              { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
+            ]}
+            initialSorting={[{ id: "countyAllocationKes", desc: true }]}
+            initialPageSize={10}
+            emptyState="No approved applications are currently waiting for disbursement."
+          />
+        </div>
       </section>
     </main>
   );

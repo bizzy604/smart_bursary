@@ -21,6 +21,13 @@ import { TenantService } from './tenant.service';
 export class TenantController {
 	constructor(private readonly tenantService: TenantService) {}
 
+	@Get('branding')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@ApiOperation({ summary: 'Get county branding settings for authenticated admin surfaces' })
+	getBranding(@County() countyId: string) {
+		return this.tenantService.getBranding(countyId);
+	}
+
 	@Get()
 	@Roles(UserRole.COUNTY_ADMIN)
 	@PlanTiers('STANDARD', 'ENTERPRISE')

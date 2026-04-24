@@ -1,6 +1,4 @@
-import { API_BASE_URL } from "@/lib/constants";
-
-const ACCESS_TOKEN_KEY = "smart-bursary.access-token";
+import { apiRequestJson } from "@/lib/api-client";
 
 export const FORM_SECTION_ORDER = ["section-a", "section-b", "section-c", "section-d", "section-e", "section-f"] as const;
 
@@ -56,59 +54,8 @@ export const DEFAULT_SCORING_WEIGHTS: ScoringWeights = {
 	integrity: 0.1,
 };
 
-function resolveApiUrl(path: string): string {
-	const normalized = path.startsWith("/") ? path : `/${path}`;
-	return `${API_BASE_URL}${normalized}`;
-}
-
-function getAccessToken(): string | null {
-	if (typeof window === "undefined") {
-		return null;
-	}
-
-	return window.localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-function resolveErrorMessage(payload: unknown): string {
-	if (payload && typeof payload === "object") {
-		const source = payload as Record<string, unknown>;
-		if (typeof source.message === "string" && source.message.length > 0) {
-			return source.message;
-		}
-		if (source.error && typeof source.error === "object") {
-			const errorObject = source.error as Record<string, unknown>;
-			if (typeof errorObject.message === "string" && errorObject.message.length > 0) {
-				return errorObject.message;
-			}
-		}
-	}
-
-	return "Request failed. Please try again.";
-}
-
 async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
-	const token = getAccessToken();
-	const headers: Record<string, string> = {
-		...(token ? { Authorization: `Bearer ${token}` } : {}),
-		...(init.body ? { "Content-Type": "application/json" } : {}),
-	};
-
-	const response = await fetch(resolveApiUrl(path), {
-		...init,
-		headers: {
-			...headers,
-			...(init.headers ?? {}),
-		},
-		credentials: "include",
-		cache: "no-store",
-	});
-
-	if (!response.ok) {
-		const payload = (await response.json().catch(() => null)) as unknown;
-		throw new Error(resolveErrorMessage(payload));
-	}
-
-	return (await response.json()) as T;
+	return apiRequestJson<T>(path, init);
 }
 
 function asSectionOrder(value: unknown): SectionKey[] {
@@ -126,6 +73,13 @@ function asSectionOrder(value: unknown): SectionKey[] {
 
 export async function fetchAdminSettings(): Promise<AdminSettings> {
 	const payload = await requestJson<{ data: AdminSettings }>("/admin/settings", { method: "GET" });
+	return payload.data;
+}
+
+export async function fetchCountyBranding(): Promise<BrandingSettings> {
+	const payload = await requestJson<{ data: BrandingSettings }>("/admin/settings/branding", {
+		method: "GET",
+	});
 	return payload.data;
 }
 

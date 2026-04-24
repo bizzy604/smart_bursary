@@ -10,6 +10,7 @@ import Redis from 'ioredis';
 type RedisLike = {
 	set: (key: string, value: string, ...args: Array<string | number>) => Promise<unknown>;
 	get: (key: string) => Promise<string | null>;
+	getdel: (key: string) => Promise<string | null>;
 	del: (key: string) => Promise<number>;
 	quit: () => Promise<unknown>;
 };
@@ -57,6 +58,20 @@ export class RedisService implements OnModuleDestroy {
 					return null;
 				}
 
+				return entry.value;
+			},
+			getdel: async (key: string) => {
+				const entry = this.memoryStore.get(key);
+				if (!entry) {
+					return null;
+				}
+
+				if (entry.expiresAt && entry.expiresAt < Date.now()) {
+					this.memoryStore.delete(key);
+					return null;
+				}
+
+				this.memoryStore.delete(key);
 				return entry.value;
 			},
 			del: async (key: string) => Number(this.memoryStore.delete(key)),

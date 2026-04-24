@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ApplicationCard } from "@/components/application/application-card";
+import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatPercent, formatShortDate } from "@/lib/format";
 import { useApplication } from "@/hooks/use-application";
 import { useStudentProfile } from "@/hooks/use-student-profile";
+import { studentApplicationColumns, studentApplicationStatusOptions } from "./columns";
 
 export default function DashboardPage() {
   const { programs, applications, isLoading, error } = useApplication();
@@ -53,40 +54,43 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-600">Loading programs...</p>
         ) : (
           programs.map((program) => {
-          const utilization = (program.allocatedKes / program.budgetCeilingKes) * 100;
+            const utilization = (program.allocatedKes / program.budgetCeilingKes) * 100;
 
-          return (
-            <article key={program.id} className="rounded-xl border border-gray-200 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold text-brand-900">{program.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {program.ward} • Closes {formatShortDate(program.closesAt)}
-                  </p>
+            return (
+              <article key={program.id} className="rounded-xl border border-gray-200 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-brand-900">{program.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      {program.ward} • Closes {formatShortDate(program.closesAt)}
+                    </p>
+                  </div>
+                  <Link href={`/programs/${program.id}`}>
+                    <Button size="sm">View Program</Button>
+                  </Link>
                 </div>
-                <Link href={`/programs/${program.id}`}>
-                  <Button size="sm">View Program</Button>
-                </Link>
-              </div>
 
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatPercent(utilization)} allocated</span>
-                  <span>{formatCurrencyKes(program.budgetCeilingKes)} budget</span>
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span>{formatPercent(utilization)} allocated</span>
+                    <span>{formatCurrencyKes(program.budgetCeilingKes)} budget</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-gray-100">
+                    <div className="h-2 rounded-full bg-accent-500" style={{ width: `${Math.min(100, utilization)}%` }} />
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-gray-100">
-                  <div className="h-2 rounded-full bg-accent-500" style={{ width: `${Math.min(100, utilization)}%` }} />
-                </div>
-              </div>
-            </article>
-          );
+              </article>
+            );
           })
         )}
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold text-brand-900">My Applications</h2>
+      <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display text-xl font-semibold text-brand-900">My Applications</h2>
+            <p className="text-sm text-gray-600">Track status, download documents, and continue drafts.</p>
+          </div>
           <Link href="/applications">
             <Button variant="ghost" size="sm">
               See all
@@ -94,15 +98,7 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {isLoading ? (
-          <p className="rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-600">Loading applications...</p>
-        ) : applications.length > 0 ? (
-          <div className="space-y-3">
-            {applications.map((application) => (
-              <ApplicationCard key={application.id} application={application} />
-            ))}
-          </div>
-        ) : (
+        {applications.length === 0 && !isLoading ? (
           <EmptyState
             title="No applications yet"
             description="Start with an open program to create your first bursary application."
@@ -111,6 +107,22 @@ export default function DashboardPage() {
                 <Button>Browse Programs</Button>
               </Link>
             }
+          />
+        ) : (
+          <DataTable
+            columns={studentApplicationColumns}
+            data={applications}
+            isLoading={isLoading}
+            error={error}
+            getRowId={(row) => row.id}
+            searchColumnId="programName"
+            searchPlaceholder="Search by program"
+            facetedFilters={[
+              { columnId: "status", title: "Status", options: studentApplicationStatusOptions },
+            ]}
+            initialPageSize={5}
+            initialSorting={[{ id: "updatedAt", desc: true }]}
+            emptyState="No applications match your filters."
           />
         )}
       </section>

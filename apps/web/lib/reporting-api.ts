@@ -1,6 +1,4 @@
-import { API_BASE_URL } from "@/lib/constants";
-
-const ACCESS_TOKEN_KEY = "smart-bursary.access-token";
+import { apiRequestBlob, apiRequestJson } from "@/lib/api-client";
 
 export interface DashboardProgramSummary {
   id: string;
@@ -81,19 +79,6 @@ type TrendScope = ReportScope & {
   toYear?: number;
 };
 
-function resolveApiUrl(path: string): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalizedPath}`;
-}
-
-function getAccessToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return window.localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
 function buildQuery(params: Record<string, string | number | undefined>): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -105,64 +90,12 @@ function buildQuery(params: Record<string, string | number | undefined>): string
   return text ? `?${text}` : "";
 }
 
-function resolveErrorMessage(payload: unknown): string {
-  if (payload && typeof payload === "object") {
-    const source = payload as Record<string, unknown>;
-    if (typeof source.message === "string" && source.message.length > 0) {
-      return source.message;
-    }
-    if (source.error && typeof source.error === "object") {
-      const error = source.error as Record<string, unknown>;
-      if (typeof error.message === "string" && error.message.length > 0) {
-        return error.message;
-      }
-    }
-  }
-
-  return "Request failed. Please try again.";
-}
-
 async function requestJson<T>(path: string): Promise<T> {
-  const token = getAccessToken();
-  const response = await fetch(resolveApiUrl(path), {
-    method: "GET",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as unknown;
-    throw new Error(resolveErrorMessage(payload));
-  }
-
-  return (await response.json()) as T;
+  return apiRequestJson<T>(path, { method: "GET" });
 }
 
 async function requestFile(path: string): Promise<Blob> {
-  const token = getAccessToken();
-  const response = await fetch(resolveApiUrl(path), {
-    method: "GET",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    let payload: unknown = null;
-    try {
-      payload = await response.json();
-    } catch {
-      payload = null;
-    }
-    throw new Error(resolveErrorMessage(payload));
-  }
-
-  return await response.blob();
+  return apiRequestBlob(path, { method: "GET" });
 }
 
 export async function fetchDashboardReport(): Promise<DashboardReportData> {

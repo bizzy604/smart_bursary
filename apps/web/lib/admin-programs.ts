@@ -1,6 +1,4 @@
-import { API_BASE_URL } from "@/lib/constants";
-
-const ACCESS_TOKEN_KEY = "smart-bursary.access-token";
+import { apiRequestJson } from "@/lib/api-client";
 
 export type ProgramStatus = "DRAFT" | "ACTIVE" | "CLOSED" | "SUSPENDED";
 
@@ -50,19 +48,6 @@ export interface ProgramUpsertPayload {
   academicYear?: string;
 }
 
-function resolveApiUrl(path: string): string {
-  const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${API_BASE_URL}${normalized}`;
-}
-
-function getAccessToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return window.localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
 function buildQuery(params: Record<string, string | undefined>): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
@@ -72,23 +57,6 @@ function buildQuery(params: Record<string, string | undefined>): string {
   }
   const text = query.toString();
   return text.length > 0 ? `?${text}` : "";
-}
-
-function resolveErrorMessage(payload: unknown): string {
-  if (payload && typeof payload === "object") {
-    const source = payload as Record<string, unknown>;
-    if (typeof source.message === "string" && source.message.length > 0) {
-      return source.message;
-    }
-    if (source.error && typeof source.error === "object") {
-      const details = source.error as Record<string, unknown>;
-      if (typeof details.message === "string" && details.message.length > 0) {
-        return details.message;
-      }
-    }
-  }
-
-  return "Request failed. Please try again.";
 }
 
 function toNumber(value: unknown): number {
@@ -126,24 +94,7 @@ function mapProgram(row: ProgramApiShape): ProgramListItem {
 }
 
 async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
-  const token = getAccessToken();
-  const response = await fetch(resolveApiUrl(path), {
-    ...init,
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
-      ...(init.headers ?? {}),
-    },
-    credentials: "include",
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    const payload = (await response.json().catch(() => null)) as unknown;
-    throw new Error(resolveErrorMessage(payload));
-  }
-
-  return (await response.json()) as T;
+  return apiRequestJson<T>(path, init);
 }
 
 export async function fetchAdminPrograms(filters?: {

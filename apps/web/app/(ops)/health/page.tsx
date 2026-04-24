@@ -1,24 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DataTable } from "@/components/shared/data-table";
 import { StatsCard } from "@/components/shared/stats-card";
 import { formatShortDate } from "@/lib/format";
 import {
   fetchOpsPlatformHealth,
   type OpsPlatformHealthSnapshot,
 } from "@/lib/ops-api";
-
-function badge(status: "healthy" | "degraded" | "down"): string {
-  if (status === "healthy") {
-    return "border-success-100 bg-success-50 text-success-700";
-  }
-
-  if (status === "degraded") {
-    return "border-warning-100 bg-warning-50 text-warning-700";
-  }
-
-  return "border-danger-100 bg-danger-50 text-danger-700";
-}
+import { opsHealthColumns, opsHealthStatusOptions } from "./columns";
 
 export default function OpsHealthPage() {
   const [snapshot, setSnapshot] = useState<OpsPlatformHealthSnapshot | null>(null);
@@ -62,14 +52,15 @@ export default function OpsHealthPage() {
     };
   }, []);
 
+  const services = snapshot?.services ?? [];
+
   const stats = useMemo(() => {
-    const services = snapshot?.services ?? [];
     return {
       healthy: services.filter((service) => service.status === "healthy").length,
       degraded: services.filter((service) => service.status === "degraded").length,
       down: services.filter((service) => service.status === "down").length,
     };
-  }, [snapshot]);
+  }, [services]);
 
   return (
     <main className="space-y-5">
@@ -91,34 +82,23 @@ export default function OpsHealthPage() {
         <StatsCard label="Down" value={String(stats.down)} hint="Requires incident response" />
       </section>
 
-      {isLoading ? (
-        <section className="rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
-          Loading platform health metrics...
-        </section>
-      ) : error ? (
-        <section className="rounded-2xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
-          {error}
-        </section>
-      ) : null}
-
       <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
         <h2 className="font-display text-lg font-semibold text-brand-900">Service Status</h2>
-        <div className="mt-4 space-y-3">
-          {(snapshot?.services ?? []).map((service) => (
-            <article key={service.name} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
-              <div>
-                <p className="text-sm font-semibold text-gray-900">{service.name}</p>
-                <p className="mt-1 text-xs text-gray-500">Last update {formatShortDate(service.updatedAt)}</p>
-                <p className="mt-1 text-xs text-gray-600">{service.note}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <p className="text-sm text-gray-700">{service.latencyMs} ms</p>
-                <span className={`inline-flex rounded-full border px-2 py-1 text-xs font-semibold uppercase ${badge(service.status)}`}>
-                  {service.status}
-                </span>
-              </div>
-            </article>
-          ))}
+        <div className="mt-3">
+          <DataTable
+            columns={opsHealthColumns}
+            data={services}
+            isLoading={isLoading}
+            error={error}
+            getRowId={(row) => row.name}
+            searchColumnId="name"
+            searchPlaceholder="Search service"
+            facetedFilters={[{ columnId: "status", title: "Status", options: opsHealthStatusOptions }]}
+            initialSorting={[{ id: "name", desc: false }]}
+            initialPageSize={10}
+            enablePagination={false}
+            emptyState="No services are currently reporting health metrics."
+          />
         </div>
       </section>
 
