@@ -15,8 +15,6 @@ type JwtPayload = {
 	role: UserRole;
 	countyId?: string;
 	wardId?: string | null;
-	county_id?: string;
-	ward_id?: string | null;
 };
 
 @Injectable()
@@ -40,8 +38,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 			userId: payload.sub,
 			email: payload.email,
 			role: payload.role,
-			countyId: payload.countyId ?? payload.county_id ?? '',
-			wardId: payload.wardId ?? payload.ward_id ?? null,
+			countyId: payload.countyId ?? '',
+			wardId: payload.wardId ?? null,
 		};
 	}
 }

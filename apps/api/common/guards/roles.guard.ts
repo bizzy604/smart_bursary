@@ -25,33 +25,11 @@ export class RolesGuard implements CanActivate {
 			return true;
 		}
 
-		const request = context.switchToHttp().getRequest<{ user?: { role?: UserRole }; headers?: Record<string, string | undefined> }>();
-		const userRole = request.user?.role ?? this.resolveRoleFromToken(request.headers?.authorization);
+		// Trust only request.user populated by JwtAuthGuard — never decode token manually.
+		// If required roles are set and JwtAuthGuard hasn't run, deny access.
+		const request = context.switchToHttp().getRequest<{ user?: { role?: UserRole } }>();
+		const userRole = request.user?.role;
 
 		return !!userRole && requiredRoles.includes(userRole);
-	}
-
-	private resolveRoleFromToken(authorizationHeader?: string): UserRole | undefined {
-		if (!authorizationHeader?.startsWith('Bearer ')) {
-			return undefined;
-		}
-
-		const token = authorizationHeader.slice('Bearer '.length).trim();
-		if (!token) {
-			return undefined;
-		}
-
-		try {
-			const payloadPart = token.split('.')[1];
-			if (!payloadPart) {
-				return undefined;
-			}
-			const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
-			const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-			const payload = JSON.parse(Buffer.from(padded, 'base64').toString('utf8')) as { role?: UserRole };
-			return payload.role;
-		} catch {
-			return undefined;
-		}
 	}
 }

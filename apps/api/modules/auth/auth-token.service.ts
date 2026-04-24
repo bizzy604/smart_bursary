@@ -9,8 +9,6 @@ type AccessTokenClaims = {
 	sub: string;
 	email: string;
 	role: UserRole;
-	county_id: string;
-	ward_id: string | null;
 	countyId: string;
 	wardId: string | null;
 };
@@ -95,8 +93,6 @@ export class AuthTokenService {
 			sub: user.userId,
 			email: user.email,
 			role: user.role,
-			county_id: user.countyId,
-			ward_id: user.wardId,
 			countyId: user.countyId,
 			wardId: user.wardId,
 		};

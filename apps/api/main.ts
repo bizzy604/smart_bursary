@@ -18,6 +18,19 @@ async function bootstrap(): Promise<void> {
 	const configService = app.get(ConfigService);
 	const apiPrefix = configService.get<string>('app.apiPrefix', 'api/v1');
 	const port = configService.get<number>('app.port', 3001);
+	const corsAllowedOrigins = configService
+		.get<string>('app.corsAllowedOrigins', 'http://localhost:3000,http://127.0.0.1:3000')
+		.split(',')
+		.map((origin) => origin.trim())
+		.filter((origin) => origin.length > 0);
+
+	app.enableCors({
+		origin: corsAllowedOrigins,
+		credentials: true,
+		methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+		allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+		exposedHeaders: ['X-Request-Id'],
+	});
 
 	app.use(helmet());
 	app.use(compression());

@@ -33,8 +33,9 @@ export class AuthSessionService {
 		return refreshToken;
 	}
 
+	// Atomically reads and deletes the token in one Redis round-trip, preventing replay attacks.
 	async consumeRefreshToken(refreshToken: string): Promise<AuthClaims | null> {
-		const serializedClaims = await this.redisService.getClient().get(this.refreshKey(refreshToken));
+		const serializedClaims = await this.redisService.getClient().getdel(this.refreshKey(refreshToken));
 		if (!serializedClaims) {
 			return null;
 		}

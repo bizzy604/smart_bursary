@@ -48,6 +48,10 @@ pnpm dev
 
 API default URL: `http://localhost:3001` (or your configured `PORT`).
 
+Browser CORS origins are controlled by:
+
+- `CORS_ALLOWED_ORIGINS` (comma-separated, default: `http://localhost:3000,http://127.0.0.1:3000`)
+
 ## Start API (Production Build)
 
 From repo root:

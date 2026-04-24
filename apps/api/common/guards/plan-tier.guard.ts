@@ -20,12 +20,6 @@ type RequestUser = {
 	countyId?: string;
 };
 
-type JwtPlanPayload = {
-	role?: UserRole;
-	countyId?: string;
-	county_id?: string;
-};
-
 @Injectable()
 export class PlanTierGuard implements CanActivate {
 	constructor(
@@ -43,21 +37,17 @@ export class PlanTierGuard implements CanActivate {
 			return true;
 		}
 
-		const request = context
-			.switchToHttp()
-			.getRequest<{ user?: RequestUser; headers?: Record<string, string | undefined> }>();
-		const authorizationHeader = request.headers?.authorization;
-		const tokenPayload = this.decodePayload(authorizationHeader);
-		if (!request.user && !tokenPayload) {
+		// Trust only request.user populated by JwtAuthGuard — never decode token manually.
+		const request = context.switchToHttp().getRequest<{ user?: RequestUser }>();
+		if (!request.user) {
 			return true;
 		}
 
-		const role = request.user?.role ?? tokenPayload?.role;
-		if (role === UserRole.PLATFORM_OPERATOR) {
+		if (request.user.role === UserRole.PLATFORM_OPERATOR) {
 			return true;
 		}
 
-		const countyId = request.user?.countyId ?? tokenPayload?.countyId ?? tokenPayload?.county_id;
+		const countyId = request.user.countyId;
 		if (!countyId) {
 			throw new ForbiddenException('County context is required for this feature.');
 		}
@@ -90,28 +80,5 @@ export class PlanTierGuard implements CanActivate {
 		}
 
 		return 'BASIC';
-	}
-
-	private decodePayload(authorizationHeader?: string): JwtPlanPayload | undefined {
-		if (!authorizationHeader?.startsWith('Bearer ')) {
-			return undefined;
-		}
-
-		const token = authorizationHeader.slice('Bearer '.length).trim();
-		if (!token) {
-			return undefined;
-		}
-
-		try {
-			const payloadPart = token.split('.')[1];
-			if (!payloadPart) {
-				return undefined;
-			}
-			const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
-			const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
-			return JSON.parse(Buffer.from(padded, 'base64').toString('utf8')) as JwtPlanPayload;
-		} catch {
-			return undefined;
-		}
 	}
 }

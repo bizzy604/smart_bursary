@@ -5,6 +5,7 @@
  */
 import { BadRequestException, Body, Controller, Get, HttpCode, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiCookieAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { UserRole } from '@prisma/client';
 import type { Request, Response } from 'express';
 
@@ -29,6 +30,7 @@ export class AuthController {
 	) {}
 
 	@Post('register')
+	@Throttle({ default: { ttl: 60_000, limit: 5 } })
 	@ApiOperation({ summary: 'Register a new student account' })
 	@ApiBody({ type: RegisterDto })
 	@ApiOkResponse({ description: 'Account created and access token issued.' })
@@ -42,6 +44,7 @@ export class AuthController {
 	}
 
 	@Post('login')
+	@Throttle({ default: { ttl: 60_000, limit: 10 } })
 	@ApiOperation({ summary: 'Authenticate and issue access token' })
 	@ApiBody({ type: LoginDto })
 	@ApiOkResponse({ description: 'Access token issued and refresh cookie rotated.' })
@@ -73,6 +76,7 @@ export class AuthController {
 
 	@UseGuards(JwtAuthGuard)
 	@Post('verify-phone-otp')
+	@Throttle({ default: { ttl: 60_000, limit: 5 } })
 	@ApiBearerAuth()
 	@ApiOperation({ summary: 'Verify the phone OTP for the authenticated user' })
 	@ApiBody({ type: VerifyPhoneOtpDto })
@@ -113,6 +117,7 @@ export class AuthController {
 	}
 
 	@Post('request-password-reset')
+	@Throttle({ default: { ttl: 60_000, limit: 5 } })
 	@ApiOperation({ summary: 'Request a password reset OTP' })
 	@ApiBody({ type: RequestPasswordResetDto })
 	requestPasswordReset(
@@ -122,6 +127,7 @@ export class AuthController {
 	}
 
 	@Post('reset-password')
+	@Throttle({ default: { ttl: 60_000, limit: 5 } })
 	@ApiOperation({ summary: 'Reset a password with OTP' })
 	@ApiBody({ type: ResetPasswordDto })
 	resetPassword(@Body() dto: ResetPasswordDto): Promise<{ ok: true }> {
@@ -151,7 +157,7 @@ export class AuthController {
 		return {
 			httpOnly: true,
 			sameSite: 'lax' as const,
-			secure: false,
+			secure: process.env.NODE_ENV === 'production',
 			path: '/api/v1/auth',
 			maxAge: 7 * 24 * 60 * 60 * 1000,
 		};

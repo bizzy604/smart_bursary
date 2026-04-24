@@ -12,6 +12,96 @@ import { ApiClientError } from "@/lib/api-client";
 import { API_ERROR_MESSAGES } from "@/lib/constants";
 import { useAuthStore } from "@/store/auth-store";
 
+function isAuthRole(value: unknown): value is AuthUser["role"] {
+	return (
+		value === "STUDENT" ||
+		value === "WARD_ADMIN" ||
+		value === "FINANCE_OFFICER" ||
+		value === "COUNTY_ADMIN" ||
+		value === "PLATFORM_OPERATOR"
+	);
+}
+
+function decodeJwtClaims(token: string): Record<string, unknown> | null {
+	const parts = token.split(".");
+	if (parts.length < 2) {
+		return null;
+	}
+
+	try {
+		const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+		const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+		const decoded = atob(padded);
+		const payload = JSON.parse(decoded) as unknown;
+		return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
+	} catch {
+		return null;
+	}
+}
+
+function nameFromEmail(email: string): string {
+	const [localPart = "Portal User"] = email.split("@");
+	return localPart.length > 0 ? localPart : "Portal User";
+}
+
+function userFromToken(accessToken: string): AuthUser | null {
+	const claims = decodeJwtClaims(accessToken);
+	if (!claims) {
+		return null;
+	}
+
+	const id = typeof claims.sub === "string" ? claims.sub : null;
+	const email = typeof claims.email === "string" ? claims.email : null;
+	const role = isAuthRole(claims.role) ? claims.role : null;
+	if (!id || !email || !role) {
+		return null;
+	}
+
+	return {
+		id,
+		email,
+		role,
+		full_name: nameFromEmail(email),
+		profile_complete: true,
+	};
+}
+
+function resolveSessionUser(rawUser: unknown, accessToken: string): AuthUser | null {
+	const tokenUser = userFromToken(accessToken);
+	if (!rawUser || typeof rawUser !== "object") {
+		return tokenUser;
+	}
+
+	const source = rawUser as Record<string, unknown>;
+	const id = typeof source.id === "string" ? source.id : tokenUser?.id ?? null;
+	const email = typeof source.email === "string" ? source.email : tokenUser?.email ?? null;
+	const role = isAuthRole(source.role) ? source.role : tokenUser?.role ?? null;
+	if (!id || !email || !role) {
+		return tokenUser;
+	}
+
+	const fullName =
+		typeof source.full_name === "string"
+			? source.full_name
+			: typeof source.fullName === "string"
+				? source.fullName
+				: tokenUser?.full_name ?? nameFromEmail(email);
+	const profileComplete =
+		typeof source.profile_complete === "boolean"
+			? source.profile_complete
+			: typeof source.profileComplete === "boolean"
+				? source.profileComplete
+				: tokenUser?.profile_complete ?? true;
+
+	return {
+		id,
+		email,
+		role,
+		full_name: fullName,
+		profile_complete: profileComplete,
+	};
+}
+
 function resolvePostLoginRoute(role: AuthUser["role"]): Route {
 	switch (role) {
 		case "WARD_ADMIN":
@@ -53,8 +143,23 @@ export default function LoginPage() {
 		setErrorMessage(null);
 
 		try {
-			const response = await login({ email, password, county_slug: countySlug });
-			const { access_token: accessToken, user } = response.data;
+			const response = await login({ email, password, countySlug });
+			const payload = response.data as Record<string, unknown>;
+			const accessToken =
+				typeof payload.accessToken === "string"
+					? payload.accessToken
+					: typeof payload.access_token === "string"
+						? payload.access_token
+						: null;
+			if (!accessToken) {
+				throw new Error("Login response did not include an access token.");
+			}
+
+			const user = resolveSessionUser(payload.user, accessToken);
+			if (!user) {
+				throw new Error("Unable to build a session user from login response.");
+			}
+
 			setAccessToken(accessToken);
 			setSession({ accessToken, user });
 			router.push(resolvePostLoginRoute(user.role));

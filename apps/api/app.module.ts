@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
 import { PlanTierGuard } from './common/guards/plan-tier.guard';
@@ -41,6 +42,8 @@ import { QueueModule } from './queue/queue.module';
 			load: [configuration, databaseConfig],
 			validationSchema,
 		}),
+		// Global default: 60 requests per minute. Auth endpoints apply stricter limits via @Throttle.
+		ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
 		DatabaseModule,
 		RedisModule,
 		QueueModule,
@@ -61,6 +64,7 @@ import { QueueModule } from './queue/queue.module';
 	providers: [
 		{ provide: APP_FILTER, useClass: PrismaExceptionFilter },
 		{ provide: APP_FILTER, useClass: GlobalExceptionFilter },
+		{ provide: APP_GUARD, useClass: ThrottlerGuard },
 		{ provide: APP_GUARD, useClass: RolesGuard },
 		{ provide: APP_GUARD, useClass: PlanTierGuard },
 		{ provide: APP_INTERCEPTOR, useClass: RequestObservabilityInterceptor },

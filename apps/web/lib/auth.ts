@@ -1,6 +1,5 @@
 import { apiFetch } from "@/lib/api-client";
-
-const ACCESS_TOKEN_KEY = "smart-bursary.access-token";
+import { tokenStore } from "@/lib/token-store";
 
 export interface AuthUser {
 	id: string;
@@ -11,10 +10,17 @@ export interface AuthUser {
 }
 
 interface LoginResponse {
-	access_token: string;
-	token_type: "Bearer";
-	expires_in: number;
-	user: AuthUser;
+	accessToken?: string;
+	access_token?: string;
+	user?: {
+		id?: string;
+		email?: string;
+		role?: AuthUser["role"];
+		full_name?: string;
+		fullName?: string;
+		profile_complete?: boolean;
+		profileComplete?: boolean;
+	};
 }
 
 interface RegisterResponse {
@@ -24,34 +30,23 @@ interface RegisterResponse {
 	next_step: string;
 }
 
+// In-memory only — never persisted to localStorage or sessionStorage.
 export function getAccessToken(): string | null {
-	if (typeof window === "undefined") {
-		return null;
-	}
-
-	return window.localStorage.getItem(ACCESS_TOKEN_KEY);
+	return tokenStore.get();
 }
 
 export function setAccessToken(token: string): void {
-	if (typeof window === "undefined") {
-		return;
-	}
-
-	window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
+	tokenStore.set(token);
 }
 
 export function clearAccessToken(): void {
-	if (typeof window === "undefined") {
-		return;
-	}
-
-	window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+	tokenStore.clear();
 }
 
 export async function login(payload: {
 	email: string;
 	password: string;
-	county_slug: string;
+	countySlug: string;
 }) {
 	return apiFetch<LoginResponse>("/auth/login", {
 		method: "POST",
@@ -63,8 +58,8 @@ export async function register(payload: {
 	email: string;
 	password: string;
 	phone: string;
-	county_slug: string;
-	full_name: string;
+	countySlug: string;
+	fullName: string;
 }) {
 	return apiFetch<RegisterResponse>("/auth/register", {
 		method: "POST",
@@ -73,8 +68,8 @@ export async function register(payload: {
 }
 
 export async function logout() {
+	clearAccessToken();
 	await apiFetch<null>("/auth/logout", {
 		method: "POST",
 	});
 }
-

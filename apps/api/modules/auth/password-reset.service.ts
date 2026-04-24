@@ -6,7 +6,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { hash } from 'bcryptjs';
-import { randomInt } from 'crypto';
+import { createHash, randomInt } from 'crypto';
 
 import { PrismaService } from '../../database/prisma.service';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
@@ -39,10 +39,11 @@ export class PasswordResetService {
 		const otp = randomInt(100000, 1000000).toString();
 		const resetExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
+		// Store a SHA-256 hash of the OTP — never the plaintext value.
 		await this.prisma.user.update({
 			where: { id: user.id },
 			data: {
-				resetToken: otp,
+				resetToken: this.hashOtp(otp),
 				resetExpiry,
 			},
 		});
@@ -56,9 +57,11 @@ export class PasswordResetService {
 	}
 
 	async resetPassword(dto: ResetPasswordDto): Promise<{ ok: true }> {
+		const hashedOtp = this.hashOtp(dto.otp);
+
 		const user = await this.prisma.user.findFirst({
 			where: {
-				resetToken: dto.otp,
+				resetToken: hashedOtp,
 				resetExpiry: { gt: new Date() },
 				deletedAt: null,
 				isActive: true,
@@ -81,5 +84,9 @@ export class PasswordResetService {
 		});
 
 		return { ok: true };
+	}
+
+	private hashOtp(otp: string): string {
+		return createHash('sha256').update(otp).digest('hex');
 	}
 }

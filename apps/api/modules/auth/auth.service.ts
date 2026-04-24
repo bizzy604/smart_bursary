@@ -34,7 +34,7 @@ export class AuthService {
 		}
 
 		const passwordHash = await hash(dto.password, 10);
-		const emailVerificationToken = `verify_${randomUUID()}`;
+		const emailVerificationToken = randomUUID();
 		const emailVerifyExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
 		const user = await this.prisma.user.create({
@@ -153,12 +153,11 @@ export class AuthService {
 	}
 
 	async refreshSession(refreshToken: string): Promise<AuthResponse> {
+		// consumeRefreshToken uses GETDEL — atomically reads and removes the token.
 		const claims = await this.authSessionService.consumeRefreshToken(refreshToken);
 		if (!claims) {
 			throw new UnauthorizedException('Invalid refresh token.');
 		}
-
-		await this.authSessionService.revokeRefreshToken(refreshToken);
 
 		const newRefreshToken = await this.authSessionService.createRefreshToken(
 			claims,
