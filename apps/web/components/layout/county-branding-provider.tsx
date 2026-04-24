@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useCounty } from "@/hooks/use-county";
 import { fetchAdminSettings } from "@/lib/admin-settings";
+import { hexToHslChannels } from "@/lib/utils";
 
 export function CountyBrandingProvider({ children }: { children: ReactNode }) {
 	const { county, setCounty } = useCounty();
@@ -35,10 +36,20 @@ export function CountyBrandingProvider({ children }: { children: ReactNode }) {
 	}, [setCounty]);
 
 	useEffect(() => {
-		document.documentElement.style.setProperty("--county-primary", county.primaryColor);
-		document.documentElement.style.setProperty("--county-primary-text", "#FFFFFF");
+		const root = document.documentElement;
+		root.style.setProperty("--county-primary", county.primaryColor);
+		root.style.setProperty("--county-primary-text", "#FFFFFF");
+
+		// Mirror the tenant primary into shadcn's HSL variable so any shadcn-styled
+		// surface (buttons, focus rings, selection chips, chart-1) picks up the brand.
+		const hsl = hexToHslChannels(county.primaryColor);
+		if (hsl) {
+			root.style.setProperty("--primary", hsl);
+			root.style.setProperty("--ring", hsl);
+			root.style.setProperty("--primary-foreground", "0 0% 100%");
+			root.style.setProperty("--chart-1", hsl);
+		}
 	}, [county.primaryColor]);
 
 	return <>{children}</>;
 }
-

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Admin/AppData/Local/Temp/claude/c--Users-Admin-Desktop-Smart-Bursary/61132843-df7d-4899-ad8a-f62460e9b6f6/tasks/**)",
+      "Bash(pnpm --filter @smart-bursary/web add @tanstack/react-table @radix-ui/react-dialog @radix-ui/react-dropdown-menu @radix-ui/react-popover @radix-ui/react-label @radix-ui/react-checkbox @radix-ui/react-tabs @radix-ui/react-tooltip @radix-ui/react-accordion @radix-ui/react-separator @radix-ui/react-scroll-area date-fns react-day-picker cmdk vaul tailwindcss-animate)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\('@tanstack/react-table:', p.dependencies['@tanstack/react-table']\\); console.log\\('cmdk:', p.dependencies['cmdk']\\); console.log\\('react-day-picker:', p.dependencies['react-day-picker']\\); console.log\\('tailwindcss-animate:', p.dependencies['tailwindcss-animate']\\); console.log\\('radix dropdown:', p.dependencies['@radix-ui/react-dropdown-menu']\\);\")",
+      "Bash(pnpm --filter @smart-bursary/web add @radix-ui/react-select)",
+      "Bash(pnpm --filter @smart-bursary/web run typecheck)",
+      "Bash(pnpm --filter @smart-bursary/web run test)"
+    ]
+  }
+}

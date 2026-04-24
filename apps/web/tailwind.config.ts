@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 const config: Config = {
+	darkMode: ["class"],
 	content: [
 		"./app/**/*.{ts,tsx}",
 		"./components/**/*.{ts,tsx}",
@@ -26,6 +28,8 @@ const config: Config = {
 					500: "#C47D00",
 					700: "#8A5700",
 					900: "#5A3600",
+					DEFAULT: "hsl(var(--accent))",
+					foreground: "hsl(var(--accent-foreground))",
 				},
 				success: {
 					50: "#EDFBF4",
@@ -49,6 +53,42 @@ const config: Config = {
 					primary: "var(--county-primary)",
 					"primary-text": "var(--county-primary-text)",
 				},
+				background: "hsl(var(--background))",
+				foreground: "hsl(var(--foreground))",
+				card: {
+					DEFAULT: "hsl(var(--card))",
+					foreground: "hsl(var(--card-foreground))",
+				},
+				popover: {
+					DEFAULT: "hsl(var(--popover))",
+					foreground: "hsl(var(--popover-foreground))",
+				},
+				primary: {
+					DEFAULT: "hsl(var(--primary))",
+					foreground: "hsl(var(--primary-foreground))",
+				},
+				secondary: {
+					DEFAULT: "hsl(var(--secondary))",
+					foreground: "hsl(var(--secondary-foreground))",
+				},
+				muted: {
+					DEFAULT: "hsl(var(--muted))",
+					foreground: "hsl(var(--muted-foreground))",
+				},
+				destructive: {
+					DEFAULT: "hsl(var(--destructive))",
+					foreground: "hsl(var(--destructive-foreground))",
+				},
+				border: "hsl(var(--border))",
+				input: "hsl(var(--input))",
+				ring: "hsl(var(--ring))",
+				chart: {
+					1: "hsl(var(--chart-1))",
+					2: "hsl(var(--chart-2))",
+					3: "hsl(var(--chart-3))",
+					4: "hsl(var(--chart-4))",
+					5: "hsl(var(--chart-5))",
+				},
 			},
 			fontFamily: {
 				display: ["var(--font-display)", "Plus Jakarta Sans", "DM Sans", "sans-serif"],
@@ -56,11 +96,11 @@ const config: Config = {
 				mono: ["var(--font-mono)", "JetBrains Mono", "monospace"],
 			},
 			borderRadius: {
-				sm: "4px",
-				md: "8px",
-				lg: "12px",
-				xl: "16px",
-				"2xl": "24px",
+				sm: "calc(var(--radius) - 6px)",
+				md: "calc(var(--radius) - 4px)",
+				lg: "var(--radius)",
+				xl: "calc(var(--radius) + 4px)",
+				"2xl": "calc(var(--radius) + 12px)",
 			},
 			boxShadow: {
 				xs: "0 1px 2px rgba(0,0,0,0.05)",
@@ -73,6 +113,8 @@ const config: Config = {
 				"pulse-ring": "pulse-ring 2s ease-in-out infinite",
 				"score-fill": "score-fill 1s ease-out forwards",
 				"fade-in-up": "fade-in-up 200ms ease-out",
+				"accordion-down": "accordion-down 200ms ease-out",
+				"accordion-up": "accordion-up 200ms ease-out",
 			},
 			keyframes: {
 				"pulse-ring": {
@@ -87,6 +129,14 @@ const config: Config = {
 					from: { strokeDashoffset: "283" },
 					to: { strokeDashoffset: "var(--target-offset)" },
 				},
+				"accordion-down": {
+					from: { height: "0" },
+					to: { height: "var(--radix-accordion-content-height)" },
+				},
+				"accordion-up": {
+					from: { height: "var(--radix-accordion-content-height)" },
+					to: { height: "0" },
+				},
 			},
 			screens: {
 				xs: "320px",
@@ -98,7 +148,7 @@ const config: Config = {
 			},
 		},
 	},
-	plugins: [],
+	plugins: [tailwindcssAnimate],
 };
 
 export default config;

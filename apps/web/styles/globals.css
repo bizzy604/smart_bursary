@@ -98,6 +98,62 @@
 
 	--county-primary: #1e3a5f;
 	--county-primary-text: #ffffff;
+
+	/*
+	 * Canonical shadcn/ui HSL token layer.
+	 * Values are space-separated HSL channels (no hsl() wrapper) so shadcn components
+	 * can compose them with alpha via `hsl(var(--primary) / 0.5)` etc.
+	 * These aliases read from the same design decisions above; tenant branding still
+	 * flows through --county-primary (hex) while shadcn components consume --primary (HSL).
+	 * The county-branding-provider sets both vars in lockstep.
+	 */
+	--background: 0 0% 100%;
+	--foreground: 0 0% 10%;
+	--card: 0 0% 100%;
+	--card-foreground: 0 0% 10%;
+	--popover: 0 0% 100%;
+	--popover-foreground: 0 0% 10%;
+	--primary: 210 52% 25%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 210 50% 92%;
+	--secondary-foreground: 210 60% 18%;
+	--muted: 220 14% 96%;
+	--muted-foreground: 220 9% 35%;
+	--accent: 36 100% 38%;
+	--accent-foreground: 0 0% 100%;
+	--destructive: 6 63% 46%;
+	--destructive-foreground: 0 0% 100%;
+	--border: 220 13% 91%;
+	--input: 220 13% 91%;
+	--ring: 210 52% 37%;
+	--radius: 0.75rem;
+	--chart-1: 210 52% 37%;
+	--chart-2: 36 100% 38%;
+	--chart-3: 154 64% 33%;
+	--chart-4: 28 100% 36%;
+	--chart-5: 212 75% 30%;
+}
+
+.dark {
+	--background: 220 18% 8%;
+	--foreground: 0 0% 98%;
+	--card: 220 18% 10%;
+	--card-foreground: 0 0% 98%;
+	--popover: 220 18% 10%;
+	--popover-foreground: 0 0% 98%;
+	--primary: 210 60% 65%;
+	--primary-foreground: 220 30% 12%;
+	--secondary: 220 14% 16%;
+	--secondary-foreground: 0 0% 98%;
+	--muted: 220 14% 16%;
+	--muted-foreground: 220 9% 65%;
+	--accent: 36 90% 60%;
+	--accent-foreground: 220 30% 12%;
+	--destructive: 6 63% 56%;
+	--destructive-foreground: 0 0% 98%;
+	--border: 220 14% 20%;
+	--input: 220 14% 20%;
+	--ring: 210 60% 65%;
 }
 
 * {

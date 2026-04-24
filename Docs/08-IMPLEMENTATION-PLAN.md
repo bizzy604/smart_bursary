@@ -568,6 +568,77 @@ Exit Criteria:
 
 ## 8. Immediate Next Action
 
-Transition to release-candidate packaging and deployment readiness handoff using completed P7 evidence.
+Execute Phase `W7a` as the first sub-phase of the `W7 - UI Modernization & DataTable Rollout` track scoped below. Release-candidate packaging is deferred until `W7` closes.
 
 Strict functional backlog execution is complete (`B-01` through `B-08`), frontend hardening (`W6`) is complete, and backend hardening (`P7`) is complete.
+
+## 9. Phase W7 - UI Modernization & DataTable Rollout
+
+Status: Active (W7a Completed 2026-04-24; W7b In Progress; W7c Pending)
+Started: 2026-04-24
+Owner: Frontend Team
+
+Context:
+- `apps/web` currently runs custom `components/ui/` primitives (CVA + bespoke tokens `brand-*`, `accent-*`, `county-primary`) and has never executed `shadcn init` (the `shadcn@4.2.0` devDep is unused, no `components.json`).
+- `@tanstack/react-table` is not installed; `components/shared/data-table.tsx` is an empty stub; `components/ui/table.tsx` is empty.
+- Business requirement is to deliver a modern, professional, consistent UI across all four role dashboards (Student, County Admin, Ward Admin, Platform Ops) using official shadcn/ui components while preserving multi-tenant county branding (`--county-primary` / `--county-primary-text` CSS vars).
+
+Scope:
+- Install and configure canonical shadcn/ui to coexist with existing tokens (no wholesale rewrite of existing custom components; tokens aliased).
+- Install `@tanstack/react-table`, scaffold missing shadcn primitives (table, dropdown-menu, popover, calendar, command, tabs, sheet, tooltip, accordion, separator, scroll-area, label, form), compose a DatePicker.
+- Build a shared `<DataTable>` with pagination, sorting, filtering, column visibility, row selection, faceted filters, toolbar.
+- Roll DataTable into all four role dashboards (W7b) and redesign nav/layouts/typography/theming/feature surfaces (W7c).
+
+Out of Scope:
+- Backend or API contract changes (`apps/api`, `apps/ai-scoring` untouched).
+- New product features beyond UI/UX rendering of existing runtime data.
+- Additional i18n string extractions (follow-on).
+
+Sub-Phase Board:
+
+| Sub-Phase | Name | Status | Depends On | Exit Gate |
+|---|---|---|---|---|
+| W7a | Foundation (shadcn init, token coexistence, DataTable primitives) | Completed (2026-04-24) | P7, W6, C5 | `components.json` authored; all listed shadcn components scaffolded; DataTable primitive renders with seed data; typecheck/test/build green; tenant branding regression-free |
+| W7b | DataTable Rollout to 4 Role Dashboards | In Progress | W7a | Student, County Admin, Ward Admin, and Ops dashboards use `<DataTable>` against runtime API data; pagination/sort/filter/visibility/row-selection all functional; test/e2e/a11y green |
+| W7c | Full Overhaul (nav, layouts, typography, theming, feature surfaces) | Pending | W7b | New sidebars/headers, refreshed typography, tuned palette, modernized feature pages (apply, disbursements, review) all shipped; visual regression approved; Lighthouse + a11y + low-bandwidth checks pass across all four personas |
+
+### W7a - Foundation
+
+Status: Completed (2026-04-24)
+
+Checklist:
+- [x] `apps/web/components.json` authored (no CLI `init` executed).
+- [x] `apps/web/styles/globals.css` extended with canonical shadcn HSL token layer mapped onto existing vars (no existing vars removed; `.dark` class block added for future dark-mode work).
+- [x] `apps/web/tailwind.config.ts` extended with shadcn semantic color aliases, `accordion-down`/`accordion-up` keyframes, `darkMode: ["class"]`, and `tailwindcss-animate` plugin (existing `brand`, `accent`, `county`, `success`, `warning`, `danger`, `info` preserved).
+- [x] `apps/web/components/ui/button.tsx` extended with canonical variants (`default`, `destructive`, `link`), `size="icon"`, and `asChild` prop (existing `primary`, `secondary`, `outline`, `ghost`, `danger`, `sm`/`md`/`lg` sizes preserved).
+- [x] `apps/web/components/ui/badge.tsx` extended with canonical variants (`default`, `secondary`, `destructive`, `outline`) alongside existing (`neutral`, `info`, `success`, `warning`, `danger`).
+- [x] Dependencies installed: `@tanstack/react-table@^8.21.3`, `@radix-ui/react-{dialog,dropdown-menu,popover,label,checkbox,tabs,tooltip,accordion,separator,scroll-area,select}`, `date-fns`, `react-day-picker@^9.14.0`, `cmdk@^1.1.1`, `vaul`, `tailwindcss-animate@^1.0.7`.
+- [x] Shadcn primitives authored under `apps/web/components/ui/`: `table`, `dialog`, `dropdown-menu`, `popover`, `calendar`, `command`, `tabs`, `sheet`, `tooltip`, `accordion`, `separator`, `scroll-area`, `label`, `form`, `date-picker`, `select`, `skeleton`, `checkbox` (existing empty stubs replaced with canonical implementations; no existing populated component overwritten destructively).
+- [x] Shared DataTable pieces authored under `apps/web/components/shared/`: `data-table` (generic with pagination/sort/filter/visibility/row-selection/loading/empty), `data-table-column-header`, `data-table-pagination`, `data-table-view-options`, `data-table-faceted-filter`, `data-table-toolbar`.
+- [x] `components/layout/county-branding-provider.tsx` extended to also set shadcn `--primary`, `--primary-foreground`, `--ring`, and `--chart-1` HSL variables (via new `hexToHslChannels` helper in `lib/utils.ts`) in lockstep with the existing hex `--county-primary`.
+
+Validation Evidence:
+- 2026-04-24: `pnpm --filter @smart-bursary/web run typecheck` passed (no errors).
+- 2026-04-24: `pnpm --filter @smart-bursary/web run test` passed (13 test files / 23 tests, 8.41s).
+- 2026-04-24: `pnpm --filter @smart-bursary/web run build` passed (Next 16.2.3 Turbopack; 37 routes generated; TypeScript check passed; static generation completed).
+- Pre-existing gaps (not introduced by W7a, to address in a follow-on): `next lint` is unavailable because Next 16 removed the command, and `eslint.config.js` flat-config is missing for ESLint 9. Tracked for a separate ESLint modernization task outside W7 scope.
+
+### W7b - DataTable Rollout to 4 Role Dashboards
+
+Status: Pending (do not start until W7a marked Completed)
+
+Exit Gate:
+- Student, County Admin, Ward Admin, and Ops dashboards (including feature pages `app/(admin)/county/disbursements` and `app/(admin)/ward/review`) render runtime API data through `<DataTable>` with working pagination/sort/filter/column-visibility/row-selection.
+- `pnpm --filter @smart-bursary/web run test`, `test:e2e`, and `test:a11y` all green.
+- No fixture data reintroduced (guard against the C0 baseline regression).
+
+### W7c - Full Overhaul
+
+Status: Pending (do not start until W7b marked Completed)
+
+Exit Gate:
+- Redesigned sidebars/headers and bottom nav across admin + student surfaces.
+- Typography scale, palette, shadow scale, and radius tokens refreshed.
+- Feature pages modernized (apply, disbursements, review, settings) using shadcn Tabs/Sheet/Accordion/Form/DatePicker.
+- Visual regression baselines approved, Lighthouse regressions cleared, multi-tenant branding validated under at least two county overrides.
+- `Docs/08-IMPLEMENTATION-PLAN.md`, `Docs/11-FRONTEND-BACKEND-CONVERGENCE-TRACKER.md`, and `Docs/09-PRD-TRACEABILITY-MATRIX.md` all updated.
