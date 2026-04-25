@@ -163,19 +163,13 @@ export default function ProgramSettingsDetailPage() {
       });
       setProgram(updated);
       setFeedback({ type: "success", message: "Draft program updated." });
-      toast({
-        title: "Draft saved",
+      toast.success("Draft saved", {
         description: "Program changes were saved successfully.",
-        variant: "success",
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to update program.";
       setFeedback({ type: "error", message });
-      toast({
-        title: "Save failed",
-        description: message,
-        variant: "error",
-      });
+      toast.error("Save failed", { description: message });
     } finally {
       setPendingAction(null);
       setIsSaving(false);
@@ -193,19 +187,13 @@ export default function ProgramSettingsDetailPage() {
       await publishAdminProgram(programId);
       await reload();
       setFeedback({ type: "success", message: "Program published." });
-      toast({
-        title: "Program published",
+      toast.success("Program published", {
         description: "Students can now see and apply to this program.",
-        variant: "success",
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to publish program.";
       setFeedback({ type: "error", message });
-      toast({
-        title: "Publish failed",
-        description: message,
-        variant: "error",
-      });
+      toast.error("Publish failed", { description: message });
     } finally {
       setPendingAction(null);
       setIsMutating(false);
@@ -223,19 +211,13 @@ export default function ProgramSettingsDetailPage() {
       await closeAdminProgram(programId);
       await reload();
       setFeedback({ type: "success", message: "Program closed." });
-      toast({
-        title: "Program closed",
+      toast.success("Program closed", {
         description: "New submissions are now blocked.",
-        variant: "success",
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Failed to close program.";
       setFeedback({ type: "error", message });
-      toast({
-        title: "Close failed",
-        description: message,
-        variant: "error",
-      });
+      toast.error("Close failed", { description: message });
     } finally {
       setPendingAction(null);
       setIsMutating(false);

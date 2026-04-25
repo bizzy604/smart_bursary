@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,11 +87,11 @@ export default function SettingsHomePage() {
 
       setFormCustomization(updated.formCustomization);
       setFeedback({ type: "success", message: "Form customization settings saved." });
+      toast.success("Settings saved", { description: "Form customization was updated." });
     } catch (error: unknown) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to save form customization settings.",
-      });
+      const message = error instanceof Error ? error.message : "Failed to save form customization settings.";
+      setFeedback({ type: "error", message });
+      toast.error("Save failed", { description: message });
     } finally {
       setIsSaving(false);
     }

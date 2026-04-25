@@ -2,6 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes } from "@/lib/format";
 import {
@@ -15,6 +26,31 @@ export default function CountyDisbursementBatchPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [confirmExport, setConfirmExport] = useState(false);
+
+  const exportBatch = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await exportEftBatch(queue.map((item) => item.applicationId));
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `county-eft-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      toast.success("EFT batch exported", {
+        description: `Generated payout file for ${queue.length} application${queue.length === 1 ? "" : "s"}.`,
+      });
+    } catch (reason: unknown) {
+      const message = reason instanceof Error ? reason.message : "Failed to export EFT batch.";
+      toast.error("Export failed", { description: message });
+    } finally {
+      setIsExporting(false);
+      setConfirmExport(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -110,22 +146,7 @@ export default function CountyDisbursementBatchPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Button
             disabled={isLoading || isExporting || queue.length === 0}
-            onClick={async () => {
-              setIsExporting(true);
-              try {
-                const blob = await exportEftBatch(queue.map((item) => item.applicationId));
-                const url = URL.createObjectURL(blob);
-                const anchor = document.createElement("a");
-                anchor.href = url;
-                anchor.download = `county-eft-${new Date().toISOString().slice(0, 10)}.csv`;
-                document.body.append(anchor);
-                anchor.click();
-                anchor.remove();
-                URL.revokeObjectURL(url);
-              } finally {
-                setIsExporting(false);
-              }
-            }}
+            onClick={() => setConfirmExport(true)}
           >
             {isExporting ? "Generating..." : "Download RTGS File"}
           </Button>
@@ -137,6 +158,36 @@ export default function CountyDisbursementBatchPage() {
           </Link>
         </div>
       </section>
+
+      <AlertDialog
+        open={confirmExport}
+        onOpenChange={(open) => !isExporting && setConfirmExport(open)}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Generate EFT batch file</AlertDialogTitle>
+            <AlertDialogDescription>
+              Download an RTGS payout file for {queue.length} application
+              {queue.length === 1 ? "" : "s"} totalling {formatCurrencyKes(totalKes)}.
+              The file should be uploaded to your bank&apos;s EFT portal to complete payment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isExporting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                disabled={isExporting}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void exportBatch();
+                }}
+              >
+                {isExporting ? "Generating..." : "Download RTGS File"}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

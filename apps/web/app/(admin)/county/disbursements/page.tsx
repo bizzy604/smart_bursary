@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { BudgetBar } from "@/components/application/budget-bar";
 import { DataTable } from "@/components/shared/data-table";
 import { buildReviewQueueColumns } from "@/components/shared/review-queue-columns";
@@ -10,6 +11,16 @@ import {
   BulkActionBar,
   type BulkActionDefinition,
 } from "@/components/shared/bulk-action-bar";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes } from "@/lib/format";
 import { fetchDashboardReport } from "@/lib/reporting-api";
@@ -25,7 +36,7 @@ export default function CountyDisbursementsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDisbursing, setIsDisbursing] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [confirmDisburseAll, setConfirmDisburseAll] = useState(false);
   const [budget, setBudget] = useState({
     programName: "County Bursary Programme",
     ceilingKes: 0,
@@ -106,7 +117,6 @@ export default function CountyDisbursementsPage() {
 
   const handleBulkDisburse = async () => {
     setIsDisbursing(true);
-    setFeedback(null);
     const results = await Promise.allSettled(
       queue.map((application) => initiateDisbursement(application.applicationId)),
     );
@@ -114,8 +124,21 @@ export default function CountyDisbursementsPage() {
     const succeeded = results.filter((result) => result.status === "fulfilled").length;
     const failed = results.length - succeeded;
 
-    setFeedback(`Disbursement requests sent. Success: ${succeeded}, failed: ${failed}.`);
+    if (failed === 0) {
+      toast.success("Disbursement initiated", {
+        description: `${succeeded} disbursement request${succeeded === 1 ? "" : "s"} sent successfully.`,
+      });
+    } else if (succeeded === 0) {
+      toast.error("Disbursement failed", {
+        description: `All ${failed} request${failed === 1 ? "" : "s"} failed. Try again or check service health.`,
+      });
+    } else {
+      toast.warning("Disbursement partially completed", {
+        description: `${succeeded} succeeded, ${failed} failed.`,
+      });
+    }
     setIsDisbursing(false);
+    setConfirmDisburseAll(false);
     await loadQueue();
   };
 
@@ -144,12 +167,9 @@ export default function CountyDisbursementsPage() {
           const succeeded = results.filter((r) => r.status === "fulfilled")
             .length;
           const failed = results.length - succeeded;
-          setFeedback(
-            `Disbursement requests sent. Success: ${succeeded}, failed: ${failed}.`,
-          );
           if (failed > 0) {
             throw new Error(
-              `${failed} disbursement request${failed === 1 ? "" : "s"} failed. Refresh to see updated status.`,
+              `${succeeded} succeeded, ${failed} failed. Refresh to see updated status.`,
             );
           }
         },
@@ -178,11 +198,6 @@ export default function CountyDisbursementsPage() {
           link.click();
           document.body.removeChild(link);
           URL.revokeObjectURL(url);
-          setFeedback(
-            `EFT batch exported for ${selected.length} application${
-              selected.length === 1 ? "" : "s"
-            }.`,
-          );
         },
       },
     ],
@@ -210,11 +225,6 @@ export default function CountyDisbursementsPage() {
           {error}
         </section>
       ) : null}
-      {feedback ? (
-        <section className="rounded-xl border border-info-100 bg-info-50 p-4 text-sm text-info-700">
-          {feedback}
-        </section>
-      ) : null}
 
       <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -226,7 +236,7 @@ export default function CountyDisbursementsPage() {
             <Button
               size="sm"
               disabled={isLoading || isDisbursing || queue.length === 0}
-              onClick={() => void handleBulkDisburse()}
+              onClick={() => setConfirmDisburseAll(true)}
             >
               {isDisbursing ? "Submitting..." : "Disburse all"}
             </Button>
@@ -261,6 +271,36 @@ export default function CountyDisbursementsPage() {
           />
         </div>
       </section>
+
+      <AlertDialog
+        open={confirmDisburseAll}
+        onOpenChange={(open) => !isDisbursing && setConfirmDisburseAll(open)}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disburse all approved applications</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will trigger M-Pesa B2C disbursement for {queue.length} application
+              {queue.length === 1 ? "" : "s"} totalling {formatCurrencyKes(selectedTotal)}. This action
+              cannot be undone — funds will be sent to applicant phone numbers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDisbursing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                disabled={isDisbursing}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleBulkDisburse();
+                }}
+              >
+                {isDisbursing ? "Submitting..." : "Disburse all"}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

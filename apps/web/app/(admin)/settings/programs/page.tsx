@@ -170,25 +170,25 @@ export default function ProgramSettingsListPage() {
               : `${succeeded} programs ${type === "publish" ? "published" : "closed"} successfully.`;
 
           setFeedback({ type: "success", message: successMessage });
-          toast({
-            title:
-              succeeded === 1
-                ? type === "publish"
-                  ? "Program published"
-                  : "Program closed"
-                : type === "publish"
-                  ? "Programs published"
-                  : "Programs closed",
-            description:
-              succeeded === 1
-                ? type === "publish"
-                  ? "The bursary program is now available to students."
-                  : "New submissions are now blocked for this program."
-                : type === "publish"
-                  ? `${succeeded} bursary programs are now available to students.`
-                  : `New submissions are now blocked for ${succeeded} programs.`,
-            variant: "success",
-          });
+          toast.success(
+            succeeded === 1
+              ? type === "publish"
+                ? "Program published"
+                : "Program closed"
+              : type === "publish"
+                ? "Programs published"
+                : "Programs closed",
+            {
+              description:
+                succeeded === 1
+                  ? type === "publish"
+                    ? "The bursary program is now available to students."
+                    : "New submissions are now blocked for this program."
+                  : type === "publish"
+                    ? `${succeeded} bursary programs are now available to students.`
+                    : `New submissions are now blocked for ${succeeded} programs.`,
+            },
+          );
         } else {
           const failureMessage =
             succeeded === 0
@@ -198,14 +198,12 @@ export default function ProgramSettingsListPage() {
               : `${succeeded} ${pluralize(succeeded, "program")} ${type === "publish" ? "published" : "closed"}; ${failed} ${pluralize(failed, "request", "requests")} failed.`;
 
           setFeedback({ type: "error", message: failureMessage });
-          toast({
-            title:
-              type === "publish"
-                ? "Publish completed with errors"
-                : "Close completed with errors",
-            description: failureMessage,
-            variant: "error",
-          });
+          toast.error(
+            type === "publish"
+              ? "Publish completed with errors"
+              : "Close completed with errors",
+            { description: failureMessage },
+          );
         }
       } catch (error: unknown) {
         const message =
@@ -216,11 +214,10 @@ export default function ProgramSettingsListPage() {
               : "Failed to close program.";
 
         setFeedback({ type: "error", message });
-        toast({
-          title: type === "publish" ? "Publish failed" : "Close failed",
-          description: message,
-          variant: "error",
-        });
+        toast.error(
+          type === "publish" ? "Publish failed" : "Close failed",
+          { description: message },
+        );
       } finally {
         setPendingAction(null);
         setMutatingProgramIds([]);
