@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { createAdminProgram } from "@/lib/admin-programs";
+import { DatePicker } from "@/components/ui/date-picker";
 
 type ProgramFormState = {
   name: string;
@@ -27,8 +28,8 @@ type ProgramFormState = {
   academicYear: string;
   wardId: string;
   budgetCeiling: string;
-  opensAt: string;
-  closesAt: string;
+  opensAt?: Date;
+  closesAt?: Date;
 };
 
 const initialState: ProgramFormState = {
@@ -37,12 +38,12 @@ const initialState: ProgramFormState = {
   academicYear: "",
   wardId: "",
   budgetCeiling: "",
-  opensAt: "",
-  closesAt: "",
+  opensAt: undefined,
+  closesAt: undefined,
 };
 
-function toIso(value: string): string {
-  return new Date(value).toISOString();
+function toDateIso(value: Date): string {
+  return value.toISOString();
 }
 
 export default function NewProgramSettingsPage() {
@@ -53,7 +54,7 @@ export default function NewProgramSettingsPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const isValid = useMemo(() => {
-    if (!form.name.trim() || !form.budgetCeiling.trim() || !form.opensAt || !form.closesAt) {
+    if (!form.name.trim() || !form.budgetCeiling.trim() || !form.opensAt?.getTime() || !form.closesAt?.getTime()) {
       return false;
     }
     const budget = Number(form.budgetCeiling);
@@ -61,20 +62,27 @@ export default function NewProgramSettingsPage() {
       return false;
     }
 
-    const opensAt = new Date(form.opensAt).getTime();
-    const closesAt = new Date(form.closesAt).getTime();
+    const opensAt = form.opensAt?.getTime();
+    const closesAt = form.closesAt?.getTime();
     return Number.isFinite(opensAt) && Number.isFinite(closesAt) && closesAt > opensAt;
   }, [form]);
 
   async function submit() {
     if (!isValid) {
-      const message = "Provide all required fields and ensure closing time is after opening.";
+      const message = "Provide all required fields and ensure closing date is after opening date.";
       setFeedback({ type: "error", message });
       toast({
         title: "Create blocked",
         description: message,
         variant: "error",
       });
+      return;
+    }
+
+    const opensAt = form.opensAt;
+    const closesAt = form.closesAt;
+
+    if (!opensAt || !closesAt) {
       return;
     }
 
@@ -87,8 +95,8 @@ export default function NewProgramSettingsPage() {
         academicYear: form.academicYear.trim() || undefined,
         wardId: form.wardId.trim() || undefined,
         budgetCeiling: Number(form.budgetCeiling),
-        opensAt: toIso(form.opensAt),
-        closesAt: toIso(form.closesAt),
+        opensAt: toDateIso(opensAt),
+        closesAt: toDateIso(closesAt),
       });
 
       setFeedback({ type: "success", message: "Program created. Redirecting to details..." });
@@ -187,19 +195,21 @@ export default function NewProgramSettingsPage() {
 
             <label className="space-y-2 text-sm">
               <span className="font-medium text-gray-700">Opens At</span>
-              <Input
-                type="datetime-local"
+              <DatePicker
                 value={form.opensAt}
-                onChange={(event) => setForm((current) => ({ ...current, opensAt: event.target.value }))}
+                onChange={(date) => setForm((current) => ({ ...current, opensAt: date }))}
+                placeholder="Pick opening date"
+                triggerClassName="w-full"
               />
             </label>
 
             <label className="space-y-2 text-sm">
               <span className="font-medium text-gray-700">Closes At</span>
-              <Input
-                type="datetime-local"
+              <DatePicker
                 value={form.closesAt}
-                onChange={(event) => setForm((current) => ({ ...current, closesAt: event.target.value }))}
+                onChange={(date) => setForm((current) => ({ ...current, closesAt: date }))}
+                placeholder="Pick closing date"
+                triggerClassName="w-full"
               />
             </label>
           </div>

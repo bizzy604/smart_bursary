@@ -17,6 +17,24 @@ vi.mock("@/lib/admin-programs", () => ({
 	createAdminProgram: createAdminProgramMock,
 }));
 
+vi.mock("@/components/ui/date-picker", () => ({
+	DatePicker: ({ value, onChange, placeholder }: {
+		value?: Date;
+		onChange?: (date: Date | undefined) => void;
+		placeholder?: string;
+	}) => (
+		<input
+			aria-label={placeholder}
+			type="date"
+			value={value ? value.toISOString().slice(0, 10) : ""}
+			onChange={(event) => {
+				const nextValue = event.target.value;
+				onChange?.(nextValue ? new Date(`${nextValue}T00:00:00`) : undefined);
+			}}
+		/>
+	),
+}));
+
 import NewProgramSettingsPage from "@/app/(admin)/settings/programs/new/page";
 
 describe("NewProgramSettingsPage", () => {
@@ -46,8 +64,8 @@ describe("NewProgramSettingsPage", () => {
 
 		await user.type(screen.getByLabelText("Program Name"), "2026 County Bursary Intake");
 		await user.type(screen.getByLabelText("Budget Ceiling (KES)"), "450000");
-		fireEvent.change(screen.getByLabelText("Opens At"), { target: { value: "2026-04-20T08:00" } });
-		fireEvent.change(screen.getByLabelText("Closes At"), { target: { value: "2026-05-20T17:00" } });
+		fireEvent.change(screen.getByLabelText("Pick opening date"), { target: { value: "2026-04-20" } });
+		fireEvent.change(screen.getByLabelText("Pick closing date"), { target: { value: "2026-05-20" } });
 
 		await user.click(screen.getByRole("button", { name: "Create Program" }));
 		await user.click(screen.getByRole("button", { name: "Confirm Create" }));
