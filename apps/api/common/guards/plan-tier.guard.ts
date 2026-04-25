@@ -40,7 +40,7 @@ export class PlanTierGuard implements CanActivate {
 		// Trust only request.user populated by JwtAuthGuard — never decode token manually.
 		const request = context.switchToHttp().getRequest<{ user?: RequestUser }>();
 		if (!request.user) {
-			return true;
+			throw new ForbiddenException('Authentication required for this resource.');
 		}
 
 		if (request.user.role === UserRole.PLATFORM_OPERATOR) {

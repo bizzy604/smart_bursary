@@ -12,13 +12,14 @@ import { PrismaService } from '../../database/prisma.service';
 import {
 	createActiveProgram,
 	ensureCountyAndWard,
-	registerStudentAndLogin,
+	registerStudentAndLoginDetailed,
 } from './student-application.helpers';
 
 describe('Profile Gating (e2e)', () => {
 	let app: INestApplication;
 	let prisma: PrismaService;
 	let studentToken = '';
+	let emailVerificationToken = '';
 	let countyId = '';
 	let wardId = '';
 	let programId = '';
@@ -43,7 +44,9 @@ describe('Profile Gating (e2e)', () => {
 		wardId = seeded.wardId;
 
 		studentEmail = `profile.gating.${Date.now()}@example.com`;
-		studentToken = await registerStudentAndLogin(app, studentEmail, password, countySlug);
+		const registered = await registerStudentAndLoginDetailed(app, studentEmail, password, countySlug);
+		studentToken = registered.accessToken;
+		emailVerificationToken = registered.emailVerificationToken;
 		programId = (await createActiveProgram(prisma, countyId, wardId, 'Profile Gating Program')).id;
 
 		const draftRes = await request(app.getHttpServer())
@@ -86,14 +89,9 @@ describe('Profile Gating (e2e)', () => {
 	});
 
 	it('accepts profile updates and allows submit after verification and completion', async () => {
-		const student = await prisma.user.findFirstOrThrow({
-			where: { countyId, email: studentEmail },
-			select: { emailVerifyToken: true },
-		});
-
 		await request(app.getHttpServer())
 			.post('/api/v1/auth/verify-email')
-			.send({ token: student.emailVerifyToken })
+			.send({ token: emailVerificationToken })
 			.expect(201);
 
 		const otpRes = await request(app.getHttpServer())

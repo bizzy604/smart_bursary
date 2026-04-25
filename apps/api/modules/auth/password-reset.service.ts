@@ -59,8 +59,12 @@ export class PasswordResetService {
 	async resetPassword(dto: ResetPasswordDto): Promise<{ ok: true }> {
 		const hashedOtp = this.hashOtp(dto.otp);
 
+		// Bind the OTP to the requesting account: an attacker who guesses a 6-digit
+		// OTP must also know the email + county slug for the user it belongs to.
 		const user = await this.prisma.user.findFirst({
 			where: {
+				email: dto.email.toLowerCase(),
+				county: { slug: dto.countySlug },
 				resetToken: hashedOtp,
 				resetExpiry: { gt: new Date() },
 				deletedAt: null,

@@ -7,7 +7,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { compare, hash } from 'bcryptjs';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 import { PrismaService } from '../../database/prisma.service';
 import { AuthSessionService, AuthClaims } from './auth-session.service';
@@ -44,7 +44,7 @@ export class AuthService {
 				phone: dto.phone,
 				passwordHash,
 				role: UserRole.STUDENT,
-				emailVerifyToken: emailVerificationToken,
+				emailVerifyToken: this.hashEmailVerificationToken(emailVerificationToken),
 				emailVerifyExpiry,
 			},
 			select: {
@@ -103,7 +103,7 @@ export class AuthService {
 	async verifyEmail(token: string): Promise<{ verified: true }> {
 		const user = await this.prisma.user.findFirst({
 			where: {
-				emailVerifyToken: token,
+				emailVerifyToken: this.hashEmailVerificationToken(token),
 				emailVerifyExpiry: { gt: new Date() },
 				deletedAt: null,
 				isActive: true,
@@ -121,6 +121,10 @@ export class AuthService {
 		});
 
 		return { verified: true };
+	}
+
+	private hashEmailVerificationToken(token: string): string {
+		return createHash('sha256').update(token).digest('hex');
 	}
 
 	async issuePhoneOtp(userId: string): Promise<{ otp: string }> {

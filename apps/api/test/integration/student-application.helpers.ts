@@ -40,17 +40,32 @@ export async function registerStudentAndLogin(
 	password: string,
 	countySlug: string,
 ) {
-	await request(app.getHttpServer())
+	const result = await registerStudentAndLoginDetailed(app, email, password, countySlug);
+	return result.accessToken;
+}
+
+export async function registerStudentAndLoginDetailed(
+	app: INestApplication,
+	email: string,
+	password: string,
+	countySlug: string,
+): Promise<{ accessToken: string; emailVerificationToken: string }> {
+	const registerRes = await request(app.getHttpServer())
 		.post('/api/v1/auth/register')
 		.send({ email, password, countySlug, fullName: 'Test Student', phone: '+254700000001' })
 		.expect(201);
+
+	const emailVerificationToken = registerRes.body.emailVerificationToken as string;
 
 	const loginRes = await request(app.getHttpServer())
 		.post('/api/v1/auth/login')
 		.send({ email, password, countySlug })
 		.expect(201);
 
-	return loginRes.body.accessToken as string;
+	return {
+		accessToken: loginRes.body.accessToken as string,
+		emailVerificationToken,
+	};
 }
 
 export async function createActiveProgram(

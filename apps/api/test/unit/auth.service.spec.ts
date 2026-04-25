@@ -101,8 +101,9 @@ describe('AuthService', () => {
 
 		const response = await service.refreshSession('refresh-token');
 
+		// consumeRefreshToken atomically reads and deletes the token (Redis GETDEL),
+		// so a separate revokeRefreshToken call is not required.
 		expect(authSessionService.consumeRefreshToken).toHaveBeenCalledWith('refresh-token');
-		expect(authSessionService.revokeRefreshToken).toHaveBeenCalledWith('refresh-token');
 		expect(authSessionService.createRefreshToken).toHaveBeenCalledWith(
 			expect.objectContaining({ userId: 'user-1' }),
 			604800,

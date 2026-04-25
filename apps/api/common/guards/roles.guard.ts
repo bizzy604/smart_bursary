@@ -3,7 +3,7 @@
  * Why important: Prevents cross-role privilege access at controller boundary.
  * Used by: Global guard chain and role-protected endpoints.
  */
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole } from '@prisma/client';
 
@@ -25,13 +25,11 @@ export class RolesGuard implements CanActivate {
 			return true;
 		}
 
-		// Trust only request.user populated by JwtAuthGuard — never decode token manually.
-		// If required roles are set and JwtAuthGuard hasn't run, deny access.
 		const request = context.switchToHttp().getRequest<{ user?: { role?: UserRole } }>();
 		const userRole = request.user?.role;
 
 		if (!userRole) {
-			return true;
+			throw new ForbiddenException('Authentication required for this resource.');
 		}
 
 		return requiredRoles.includes(userRole);

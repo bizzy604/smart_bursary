@@ -141,6 +141,8 @@ describe('Auth and RBAC (e2e)', () => {
     await request(app.getHttpServer())
       .post('/api/v1/auth/reset-password')
       .send({
+        email,
+        countySlug: 'turkana',
         otp: requestResetResponse.body.otp,
         password: newPassword,
       })
