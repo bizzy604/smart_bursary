@@ -286,21 +286,20 @@ function NumberFilter<TData>({
   filter: Extract<ColumnFilterConfig, { type: "number" }>;
   title?: string;
 }) {
-  const current = (column.getFilterValue() as [number?, number?] | undefined) ?? [
-    undefined,
-    undefined,
-  ];
+  const filterTuple = column.getFilterValue() as [number?, number?] | undefined;
+  const currentMin = filterTuple?.[0];
+  const currentMax = filterTuple?.[1];
   const [draftMin, setDraftMin] = React.useState(
-    current[0] === undefined ? "" : String(current[0]),
+    currentMin === undefined ? "" : String(currentMin),
   );
   const [draftMax, setDraftMax] = React.useState(
-    current[1] === undefined ? "" : String(current[1]),
+    currentMax === undefined ? "" : String(currentMax),
   );
 
   React.useEffect(() => {
-    setDraftMin(current[0] === undefined ? "" : String(current[0]));
-    setDraftMax(current[1] === undefined ? "" : String(current[1]));
-  }, [current]);
+    setDraftMin(currentMin === undefined ? "" : String(currentMin));
+    setDraftMax(currentMax === undefined ? "" : String(currentMax));
+  }, [currentMin, currentMax]);
 
   const apply = () => {
     const parsedMin = draftMin.trim() === "" ? undefined : Number(draftMin);
