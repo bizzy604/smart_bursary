@@ -12,26 +12,68 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+	DataTableColumnFilter,
+	type ColumnFilterConfig,
+} from "./data-table-column-filter";
 
-interface DataTableColumnHeaderProps<TData, TValue> extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<TData, TValue>
+	extends React.HTMLAttributes<HTMLDivElement> {
 	column: Column<TData, TValue>;
 	title: string;
+	filter?: ColumnFilterConfig;
+	align?: "start" | "end";
 }
 
 export function DataTableColumnHeader<TData, TValue>({
 	column,
 	title,
+	filter,
+	align = "start",
 	className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-	if (!column.getCanSort()) {
-		return <div className={cn(className)}>{title}</div>;
+	const canSort = column.getCanSort();
+	const filterEl = filter ? (
+		<DataTableColumnFilter
+			column={column as unknown as Column<TData, unknown>}
+			filter={filter}
+			title={title}
+		/>
+	) : null;
+
+	if (!canSort) {
+		return (
+			<div
+				className={cn(
+					"flex items-center gap-1",
+					align === "end" && "justify-end",
+					className,
+				)}
+			>
+				<span>{title}</span>
+				{filterEl}
+			</div>
+		);
 	}
 
 	return (
-		<div className={cn("flex items-center gap-2", className)}>
+		<div
+			className={cn(
+				"flex items-center gap-1",
+				align === "end" && "justify-end",
+				className,
+			)}
+		>
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
-					<Button variant="ghost" size="sm" className="-ml-3 h-8 data-[state=open]:bg-accent">
+					<Button
+						variant="ghost"
+						size="sm"
+						className={cn(
+							"h-8 -ml-3 data-[state=open]:bg-accent",
+							align === "end" && "ml-0 -mr-3",
+						)}
+					>
 						<span>{title}</span>
 						{column.getIsSorted() === "desc" ? (
 							<ArrowDown className="ml-2 h-4 w-4" />
@@ -42,7 +84,7 @@ export function DataTableColumnHeader<TData, TValue>({
 						)}
 					</Button>
 				</DropdownMenuTrigger>
-				<DropdownMenuContent align="start">
+				<DropdownMenuContent align={align}>
 					<DropdownMenuItem onClick={() => column.toggleSorting(false)}>
 						<ArrowUp className="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
 						Asc
@@ -62,6 +104,7 @@ export function DataTableColumnHeader<TData, TValue>({
 					) : null}
 				</DropdownMenuContent>
 			</DropdownMenu>
+			{filterEl}
 		</div>
 	);
 }

@@ -21,11 +21,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { fetchOpsTenants, type OpsTenantSummary } from "@/lib/ops-api";
-import {
-  opsTenantColumns,
-  opsTenantPlanOptions,
-  opsTenantStatusOptions,
-} from "./columns";
+import { opsTenantColumns } from "./columns";
 
 const opsTenantPlanConfig = {
   tenants: {
@@ -329,19 +325,7 @@ export default function OpsTenantsPage() {
             error={error}
             getRowId={(row) => row.id}
             searchColumnId="countyName"
-            searchPlaceholder="Search by county name"
-            facetedFilters={[
-              {
-                columnId: "planTier",
-                title: "Plan",
-                options: opsTenantPlanOptions,
-              },
-              {
-                columnId: "status",
-                title: "Status",
-                options: opsTenantStatusOptions,
-              },
-            ]}
+            searchPlaceholder="Search tenants…"
             initialSorting={[{ id: "countyName", desc: false }]}
             initialPageSize={10}
             emptyState="No tenants match your filters."

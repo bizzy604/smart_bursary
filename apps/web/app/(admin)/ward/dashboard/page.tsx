@@ -13,7 +13,6 @@ import {
 import { DataTable } from "@/components/shared/data-table";
 import {
   buildReviewQueueColumns,
-  reviewQueueStatusOptions,
 } from "@/components/shared/review-queue-columns";
 import { CheckCircle2, ClipboardCheck, Clock, Wallet, XCircle } from "lucide-react";
 
@@ -30,33 +29,6 @@ import { formatCurrencyKes } from "@/lib/format";
 import { fetchWardSummaryReport } from "@/lib/reporting-api";
 import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
-
-const wardQueueColumns = buildReviewQueueColumns({
-  columns: [
-    "reference",
-    "applicantName",
-    "programName",
-    "educationLevel",
-    "aiScore",
-    "status",
-    "reviewedAt",
-  ],
-  primaryAction: {
-    label: "Review",
-    href: (item) => `/ward/applications/${item.applicationId}` as Route,
-  },
-  menuActions: [
-    {
-      label: "View Documents",
-      href: (item) =>
-        `/ward/applications/${item.applicationId}/documents` as Route,
-    },
-    {
-      label: "AI Score",
-      href: (item) => `/ward/applications/${item.applicationId}/score` as Route,
-    },
-  ],
-});
 
 const wardPriorityConfig = {
   applications: {
@@ -163,6 +135,47 @@ export default function WardDashboardPage() {
     ).filter(Boolean);
     return values.map((value) => ({ label: value, value }));
   }, [queue]);
+
+  const programOptions = useMemo(() => {
+    const values = Array.from(
+      new Set(queue.map((item) => item.programName)),
+    ).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [queue]);
+
+  const wardQueueColumns = useMemo(
+    () =>
+      buildReviewQueueColumns({
+        columns: [
+          "reference",
+          "applicantName",
+          "programName",
+          "educationLevel",
+          "aiScore",
+          "status",
+          "reviewedAt",
+        ],
+        primaryAction: {
+          label: "Review",
+          href: (item) => `/ward/applications/${item.applicationId}` as Route,
+        },
+        menuActions: [
+          {
+            label: "View Documents",
+            href: (item) =>
+              `/ward/applications/${item.applicationId}/documents` as Route,
+          },
+          {
+            label: "AI Score",
+            href: (item) =>
+              `/ward/applications/${item.applicationId}/score` as Route,
+          },
+        ],
+        programOptions,
+        educationLevelOptions,
+      }),
+    [programOptions, educationLevelOptions],
+  );
   const priorityBandData = useMemo(
     () => [
       {
@@ -434,23 +447,7 @@ export default function WardDashboardPage() {
             isLoading={isLoading}
             getRowId={(row) => row.applicationId}
             searchColumnId="applicantName"
-            searchPlaceholder="Search applicant"
-            facetedFilters={[
-              ...(educationLevelOptions.length > 0
-                ? [
-                    {
-                      columnId: "educationLevel",
-                      title: "Level",
-                      options: educationLevelOptions,
-                    },
-                  ]
-                : []),
-              {
-                columnId: "status",
-                title: "Status",
-                options: reviewQueueStatusOptions,
-              },
-            ]}
+            searchPlaceholder="Search applications…"
             initialSorting={[{ id: "aiScore", desc: true }]}
             initialPageSize={10}
             emptyState="No applications are currently waiting in the ward queue."

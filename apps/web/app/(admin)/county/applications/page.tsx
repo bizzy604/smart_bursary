@@ -3,10 +3,7 @@
 import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
-import {
-  buildReviewQueueColumns,
-  reviewQueueStatusOptions,
-} from "@/components/shared/review-queue-columns";
+import { buildReviewQueueColumns } from "@/components/shared/review-queue-columns";
 import { fetchWardSummaryReport } from "@/lib/reporting-api";
 import { useAuthStore } from "@/store/auth-store";
 import type { ReviewQueueItem, ReviewQueueStatus } from "@/lib/review-types";
@@ -85,6 +82,21 @@ export default function CountyApplicationsPage() {
     };
   }, []);
 
+  const wardFilterOptions = useMemo(() => {
+    const values = Array.from(new Set(applications.map((item) => item.wardName))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [applications]);
+
+  const programOptions = useMemo(() => {
+    const values = Array.from(new Set(applications.map((item) => item.programName))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [applications]);
+
+  const educationLevelOptions = useMemo(() => {
+    const values = Array.from(new Set(applications.map((item) => item.educationLevel))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [applications]);
+
   const columns = useMemo(() => {
     const menuActions =
       userRole === "FINANCE_OFFICER"
@@ -114,23 +126,11 @@ export default function CountyApplicationsPage() {
         href: (item) => `/county/applications/${item.applicationId}` as Route,
       },
       menuActions,
+      wardOptions: wardFilterOptions,
+      programOptions: programOptions,
+      educationLevelOptions: educationLevelOptions,
     });
-  }, [userRole]);
-
-  const wardFilterOptions = useMemo(() => {
-    const values = Array.from(new Set(applications.map((item) => item.wardName))).filter(Boolean);
-    return values.map((value) => ({ label: value, value }));
-  }, [applications]);
-
-  const programOptions = useMemo(() => {
-    const values = Array.from(new Set(applications.map((item) => item.programName))).filter(Boolean);
-    return values.map((value) => ({ label: value, value }));
-  }, [applications]);
-
-  const educationLevelOptions = useMemo(() => {
-    const values = Array.from(new Set(applications.map((item) => item.educationLevel))).filter(Boolean);
-    return values.map((value) => ({ label: value, value }));
-  }, [applications]);
+  }, [userRole, wardFilterOptions, programOptions, educationLevelOptions]);
 
   return (
     <main className="space-y-5">
@@ -149,19 +149,7 @@ export default function CountyApplicationsPage() {
           error={error}
           getRowId={(row) => row.applicationId}
           searchColumnId="applicantName"
-          searchPlaceholder="Search by applicant"
-          facetedFilters={[
-            ...(wardFilterOptions.length > 0
-              ? [{ columnId: "wardName", title: "Ward", options: wardFilterOptions }]
-              : []),
-            ...(programOptions.length > 0
-              ? [{ columnId: "programName", title: "Program", options: programOptions }]
-              : []),
-            ...(educationLevelOptions.length > 0
-              ? [{ columnId: "educationLevel", title: "Level", options: educationLevelOptions }]
-              : []),
-            { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
-          ]}
+          searchPlaceholder="Search applications…"
           initialSorting={[{ id: "reviewedAt", desc: true }]}
           initialPageSize={10}
           emptyState="No county applications are available yet."

@@ -29,10 +29,7 @@ import {
 } from "@/lib/format";
 import { useApplication } from "@/hooks/use-application";
 import { useStudentProfile } from "@/hooks/use-student-profile";
-import {
-  studentApplicationColumns,
-  studentApplicationStatusOptions,
-} from "./columns";
+import { studentApplicationColumns } from "./columns";
 
 const studentJourneyConfig = {
   applications: {
@@ -434,14 +431,7 @@ export default function DashboardPage() {
             error={error}
             getRowId={(row) => row.id}
             searchColumnId="programName"
-            searchPlaceholder="Search by program"
-            facetedFilters={[
-              {
-                columnId: "status",
-                title: "Status",
-                options: studentApplicationStatusOptions,
-              },
-            ]}
+            searchPlaceholder="Search applications…"
             initialPageSize={5}
             initialSorting={[{ id: "updatedAt", desc: true }]}
             emptyState="No applications match your filters."

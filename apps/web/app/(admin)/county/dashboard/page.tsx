@@ -14,7 +14,6 @@ import {
 import { DataTable } from "@/components/shared/data-table";
 import {
   buildReviewQueueColumns,
-  reviewQueueStatusOptions,
 } from "@/components/shared/review-queue-columns";
 import { Banknote, CheckCircle2, Send, Wallet } from "lucide-react";
 
@@ -36,29 +35,6 @@ import {
 } from "@/lib/reporting-api";
 import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
-
-const countyQueueColumns = buildReviewQueueColumns({
-  columns: [
-    "reference",
-    "applicantName",
-    "wardName",
-    "programName",
-    "aiScore",
-    "wardRecommendationKes",
-    "status",
-    "reviewedAt",
-  ],
-  primaryAction: {
-    label: "Final Review",
-    href: (item) => `/county/review/${item.applicationId}` as Route,
-  },
-  menuActions: [
-    {
-      label: "View application",
-      href: (item) => `/county/applications/${item.applicationId}` as Route,
-    },
-  ],
-});
 
 const countyProgramUtilizationConfig = {
   utilization: {
@@ -174,6 +150,43 @@ export default function CountyDashboardPage() {
     ).filter(Boolean);
     return values.map((value) => ({ label: value, value }));
   }, [queue]);
+
+  const programOptions = useMemo(() => {
+    const values = Array.from(
+      new Set(queue.map((item) => item.programName)),
+    ).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [queue]);
+
+  const countyQueueColumns = useMemo(
+    () =>
+      buildReviewQueueColumns({
+        columns: [
+          "reference",
+          "applicantName",
+          "wardName",
+          "programName",
+          "aiScore",
+          "wardRecommendationKes",
+          "status",
+          "reviewedAt",
+        ],
+        primaryAction: {
+          label: "Final Review",
+          href: (item) => `/county/review/${item.applicationId}` as Route,
+        },
+        menuActions: [
+          {
+            label: "View application",
+            href: (item) =>
+              `/county/applications/${item.applicationId}` as Route,
+          },
+        ],
+        wardOptions: wardFilterOptions,
+        programOptions,
+      }),
+    [wardFilterOptions, programOptions],
+  );
   const programUtilizationData = useMemo(
     () =>
       (dashboardData?.programs ?? [])
@@ -492,23 +505,7 @@ export default function CountyDashboardPage() {
             isLoading={isLoading}
             getRowId={(row) => row.applicationId}
             searchColumnId="applicantName"
-            searchPlaceholder="Search applicant"
-            facetedFilters={[
-              ...(wardFilterOptions.length > 0
-                ? [
-                    {
-                      columnId: "wardName",
-                      title: "Ward",
-                      options: wardFilterOptions,
-                    },
-                  ]
-                : []),
-              {
-                columnId: "status",
-                title: "Status",
-                options: reviewQueueStatusOptions,
-              },
-            ]}
+            searchPlaceholder="Search applications…"
             initialSorting={[{ id: "aiScore", desc: true }]}
             initialPageSize={10}
             emptyState="No applications are currently waiting at county review stage."
