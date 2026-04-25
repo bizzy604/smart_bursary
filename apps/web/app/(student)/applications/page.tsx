@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { FileText } from "lucide-react";
+
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
 import {
@@ -15,17 +18,19 @@ export default function ApplicationsPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
-        <h1 className="font-display text-2xl font-bold text-brand-900">My Applications</h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Review status, open details, and download your submitted bursary forms.
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="My applications"
+        title="Application timeline"
+        description="Review status, open details, and download your submitted bursary forms."
+        icon={FileText}
+      />
 
       {applications.length === 0 && !isLoading ? (
         <EmptyState
-          title="No applications available"
-          description="You have not started any bursary application yet."
+          tone="brand"
+          icon={FileText}
+          title="No applications yet"
+          description="You haven't started a bursary application. Browse open programs to begin."
           action={
             <Link href="/programs">
               <Button>Find Open Programs</Button>
@@ -33,7 +38,7 @@ export default function ApplicationsPage() {
           }
         />
       ) : (
-        <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <DataTable
             columns={studentApplicationColumns}
             data={applications}

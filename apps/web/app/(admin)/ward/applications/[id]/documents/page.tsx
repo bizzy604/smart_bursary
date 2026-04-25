@@ -90,7 +90,7 @@ export default function WardApplicationDocumentsPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <h1 className="font-display text-2xl font-semibold text-brand-900">Document Review • {application.reference}</h1>
         <p className="mt-1 text-sm text-gray-600">Verify all mandatory uploads before submitting a ward decision.</p>
         <div className="mt-3">

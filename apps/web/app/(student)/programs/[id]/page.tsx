@@ -44,7 +44,7 @@ export default function ProgramDetailPage() {
 
   return (
     <main className="space-y-6">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
         <p className="text-xs uppercase tracking-wide text-gray-500">Program Detail</p>
         <h1 className="mt-2 font-display text-3xl font-bold text-brand-900">{program.name}</h1>
         <p className="mt-2 text-sm text-gray-600">{program.summary}</p>

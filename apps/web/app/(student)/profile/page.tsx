@@ -25,7 +25,7 @@ export default function ProfileOverviewPage() {
 
   return (
     <main className="space-y-6">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
         <h1 className="font-display text-2xl font-bold text-brand-900">Profile Overview</h1>
         <p className="mt-2 text-sm text-gray-600">
           Keep your profile details accurate to improve eligibility checks and speed up review.

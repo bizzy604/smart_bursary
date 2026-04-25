@@ -5,6 +5,9 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from 
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
 import { shouldUsePieChart } from "@/components/dashboard/chart-utils";
 import { DataTable } from "@/components/shared/data-table";
+import { Activity, AlertTriangle, CheckCircle2, XOctagon } from "lucide-react";
+
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import {
   ChartContainer,
@@ -102,37 +105,40 @@ export default function OpsHealthPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">
-          System Health Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Platform-wide service visibility across API, tenant provisioning, and
-          tenant registry pipelines.
+      <PageHeader
+        eyebrow="Operations"
+        title="System Health Dashboard"
+        description="Platform-wide service visibility across API, tenant provisioning, and tenant registry pipelines."
+        icon={Activity}
+      />
+      {snapshot ? (
+        <p className="-mt-2 text-xs text-gray-500">
+          Last refresh {formatShortDate(snapshot.refreshedAt)} •{" "}
+          {snapshot.totalTenants} tenants tracked
         </p>
-        {snapshot ? (
-          <p className="mt-2 text-xs text-gray-500">
-            Last refresh {formatShortDate(snapshot.refreshedAt)} •{" "}
-            {snapshot.totalTenants} tenants tracked
-          </p>
-        ) : null}
-      </section>
+      ) : null}
 
       <section className="grid gap-4 sm:grid-cols-3">
         <StatsCard
           label="Healthy Services"
           value={String(stats.healthy)}
           hint="All checks green"
+          icon={CheckCircle2}
+          intent="success"
         />
         <StatsCard
           label="Degraded"
           value={String(stats.degraded)}
           hint="Performance or latency risk"
+          icon={AlertTriangle}
+          intent="warning"
         />
         <StatsCard
           label="Down"
           value={String(stats.down)}
           hint="Requires incident response"
+          icon={XOctagon}
+          intent="danger"
         />
       </section>
 
@@ -214,7 +220,7 @@ export default function OpsHealthPage() {
         )}
       </DashboardChartCard>
 
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <h2 className="font-display text-lg font-semibold text-brand-900">
           Service Status
         </h2>
