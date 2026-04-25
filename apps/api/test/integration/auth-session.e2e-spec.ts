@@ -50,7 +50,7 @@ describe('Auth session lifecycle (e2e)', () => {
     const email = `student.${suffix}@example.com`;
     const password = 'StrongPass123!';
 
-    await request(app.getHttpServer())
+    const registerResponse = await request(app.getHttpServer())
       .post('/api/v1/auth/register')
       .send({
         email,
@@ -61,16 +61,19 @@ describe('Auth session lifecycle (e2e)', () => {
       })
       .expect(201);
 
-    const verificationRecord = await prisma.user.findFirst({
+    const emailVerificationToken = registerResponse.body.emailVerificationToken as string | undefined;
+    expect(typeof emailVerificationToken).toBe('string');
+
+    const persistedRecord = await prisma.user.findFirst({
       where: { email },
       select: { emailVerifyToken: true },
     });
-
-    expect(typeof verificationRecord?.emailVerifyToken).toBe('string');
+    expect(persistedRecord?.emailVerifyToken).not.toBe(emailVerificationToken);
+    expect(typeof persistedRecord?.emailVerifyToken).toBe('string');
 
     await request(app.getHttpServer())
       .post('/api/v1/auth/verify-email')
-      .send({ token: verificationRecord?.emailVerifyToken })
+      .send({ token: emailVerificationToken })
       .expect(201);
 
     const loginResponse = await request(app.getHttpServer())

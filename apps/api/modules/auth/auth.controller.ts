@@ -37,10 +37,15 @@ export class AuthController {
 	async register(
 		@Body() dto: RegisterDto,
 		@Res({ passthrough: true }) response: Response,
-	): Promise<{ accessToken: string }> {
+	): Promise<{ accessToken: string; emailVerificationToken?: string }> {
 		const result = await this.authService.register(dto);
 		this.setRefreshCookie(response, result.refreshToken);
-		return { accessToken: result.accessToken };
+		return {
+			accessToken: result.accessToken,
+			...(result.emailVerificationToken
+				? { emailVerificationToken: result.emailVerificationToken }
+				: {}),
+		};
 	}
 
 	@Post('login')

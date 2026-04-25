@@ -4,9 +4,18 @@
  * Used by: AuthController reset-password endpoint.
  */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 
 export class ResetPasswordDto {
+	@ApiProperty({ example: 'aisha.lokiru@example.com' })
+	@IsEmail()
+	email!: string;
+
+	@ApiProperty({ example: 'turkana' })
+	@IsString()
+	@IsNotEmpty()
+	countySlug!: string;
+
 	@ApiProperty({ example: '847291' })
 	@IsString()
 	@IsNotEmpty()
