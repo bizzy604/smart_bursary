@@ -1,7 +1,11 @@
 import type { Route } from "next";
-import type { AuthUser } from "@/lib/auth";
 
-export type AppRole = AuthUser["role"];
+export type AppRole =
+	| "STUDENT"
+	| "WARD_ADMIN"
+	| "FINANCE_OFFICER"
+	| "COUNTY_ADMIN"
+	| "PLATFORM_OPERATOR";
 
 type RoleAccessPolicy = {
 	home: Route;

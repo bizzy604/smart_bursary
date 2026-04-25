@@ -1,4 +1,12 @@
-import { apiFetch } from "@/lib/api-client";
+/**
+ * Purpose: Lightweight client-side helpers that surface the NextAuth-managed
+ *          access token to the legacy api-client without changing every fetch site.
+ * Why important: The session is now owned by NextAuth (see `auth.ts`) and mirrored
+ *                into `tokenStore` by `components/providers/session-provider.tsx`.
+ *                These helpers preserve the existing import surface used by
+ *                `lib/api-client.ts`, `lib/student-api.ts`, and `lib/ops-api.ts`.
+ * Used by: api-client, student-api, ops-api, layout role-display helpers.
+ */
 import { tokenStore } from "@/lib/token-store";
 
 export interface AuthUser {
@@ -9,28 +17,6 @@ export interface AuthUser {
 	profile_complete: boolean;
 }
 
-interface LoginResponse {
-	accessToken?: string;
-	access_token?: string;
-	user?: {
-		id?: string;
-		email?: string;
-		role?: AuthUser["role"];
-		full_name?: string;
-		fullName?: string;
-		profile_complete?: boolean;
-		profileComplete?: boolean;
-	};
-}
-
-interface RegisterResponse {
-	user_id: string;
-	email: string;
-	email_verification_sent: boolean;
-	next_step: string;
-}
-
-// In-memory only — never persisted to localStorage or sessionStorage.
 export function getAccessToken(): string | null {
 	return tokenStore.get();
 }
@@ -41,35 +27,4 @@ export function setAccessToken(token: string): void {
 
 export function clearAccessToken(): void {
 	tokenStore.clear();
-}
-
-export async function login(payload: {
-	email: string;
-	password: string;
-	countySlug: string;
-}) {
-	return apiFetch<LoginResponse>("/auth/login", {
-		method: "POST",
-		body: JSON.stringify(payload),
-	});
-}
-
-export async function register(payload: {
-	email: string;
-	password: string;
-	phone: string;
-	countySlug: string;
-	fullName: string;
-}) {
-	return apiFetch<RegisterResponse>("/auth/register", {
-		method: "POST",
-		body: JSON.stringify(payload),
-	});
-}
-
-export async function logout() {
-	clearAccessToken();
-	await apiFetch<null>("/auth/logout", {
-		method: "POST",
-	});
 }

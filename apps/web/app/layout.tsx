@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Noto_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import { AppSessionProvider } from "@/components/providers/session-provider";
 import { Toaster } from "@/components/ui/toast";
 import "../styles/globals.css";
 
@@ -31,9 +32,11 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
 			<body className="font-body text-gray-900 antialiased">
-        {children}
-        <Toaster />
-      </body>
+				<AppSessionProvider>
+					{children}
+					<Toaster />
+				</AppSessionProvider>
+			</body>
 		</html>
 	);
 }
