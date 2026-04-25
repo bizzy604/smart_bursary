@@ -23,7 +23,7 @@ function SessionSync({ children }: { children: ReactNode }) {
 		if (status === "loading") {
 			return;
 		}
-		if (session?.user && session.accessToken) {
+		if (session?.user && session.accessToken && !session.error) {
 			tokenStore.set(session.accessToken);
 			setSession({
 				accessToken: session.accessToken,

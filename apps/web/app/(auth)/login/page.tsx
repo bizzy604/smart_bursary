@@ -54,7 +54,14 @@ function LoginForm() {
 			}
 
 			const fromParam = searchParams?.get("from");
-			const destination = (fromParam && fromParam.startsWith("/") ? fromParam : "/") as Route;
+			// Reject protocol-relative URLs ("//evil.com") which pass startsWith("/")
+			// but navigate cross-origin — only accept same-site absolute paths.
+			const isSafeFrom =
+				typeof fromParam === "string" &&
+				fromParam.startsWith("/") &&
+				!fromParam.startsWith("//") &&
+				!fromParam.startsWith("/\\");
+			const destination = (isSafeFrom ? fromParam : "/") as Route;
 			// The middleware will redirect "/" to the role-appropriate home so we
 			// don't have to decode the JWT here.
 			router.push(destination);
