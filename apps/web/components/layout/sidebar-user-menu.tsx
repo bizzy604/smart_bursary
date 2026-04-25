@@ -7,8 +7,10 @@
  *                real account surface and wires Logout to NextAuth signOut.
  * Used by: StudentSidebar, AdminSidebar, OpsSidebar.
  */
+import Link from "next/link";
+import type { Route } from "next";
 import { useSession, signOut } from "next-auth/react";
-import { ChevronUp, LogOut, UserRound } from "lucide-react";
+import { ChevronUp, LogOut, Settings, UserRound, type LucideIcon } from "lucide-react";
 
 import {
 	DropdownMenu,
@@ -32,6 +34,17 @@ const ROLE_LABELS: Record<string, string> = {
 	PLATFORM_OPERATOR: "Platform Operator",
 };
 
+// Role -> account/profile destination. Each entry must be reachable by that
+// role per ROLE_ACCESS_POLICY in lib/role-routing.ts; otherwise the middleware
+// will silently redirect the user to their home. Roles with no per-account
+// surface are intentionally absent — the menu item is hidden for them.
+const ACCOUNT_LINK_BY_ROLE: Partial<
+	Record<string, { href: Route; label: string; icon: LucideIcon }>
+> = {
+	STUDENT: { href: "/profile", label: "Profile", icon: UserRound },
+	COUNTY_ADMIN: { href: "/settings", label: "Settings", icon: Settings },
+};
+
 function initialsFor(name: string | null | undefined, email: string | null | undefined): string {
 	const source = (name && name.trim()) || (email && email.split("@")[0]) || "";
 	if (!source) return "U";
@@ -48,6 +61,7 @@ export function SidebarUserMenu() {
 	const email = user?.email ?? "";
 	const role = user?.role ? ROLE_LABELS[user.role] ?? user.role : "";
 	const isLoading = status === "loading";
+	const accountLink = user?.role ? ACCOUNT_LINK_BY_ROLE[user.role] : undefined;
 
 	return (
 		<SidebarMenu>
@@ -102,17 +116,23 @@ export function SidebarUserMenu() {
 
 						<DropdownMenuSeparator />
 
-						<DropdownMenuItem
-							className="gap-2 rounded-md px-2 py-2 text-sm text-brand-900 focus:bg-brand-50 focus:text-brand-900"
-							asChild
-						>
-							<a href="/profile">
-								<UserRound className="h-4 w-4" />
-								<span>Profile</span>
-							</a>
-						</DropdownMenuItem>
-
-						<DropdownMenuSeparator />
+						{accountLink ? (() => {
+							const AccountIcon = accountLink.icon;
+							return (
+								<>
+									<DropdownMenuItem
+										className="gap-2 rounded-md px-2 py-2 text-sm text-brand-900 focus:bg-brand-50 focus:text-brand-900"
+										asChild
+									>
+										<Link href={accountLink.href}>
+											<AccountIcon className="h-4 w-4" />
+											<span>{accountLink.label}</span>
+										</Link>
+									</DropdownMenuItem>
+									<DropdownMenuSeparator />
+								</>
+							);
+						})() : null}
 
 						<DropdownMenuItem
 							className="gap-2 rounded-md px-2 py-2 text-sm text-danger-700 focus:bg-danger-50 focus:text-danger-700"
