@@ -69,9 +69,12 @@ export default auth((request) => {
 
 export const config = {
 	matcher: [
-		// Run on all paths except Next.js internals, the NextAuth handlers themselves,
-		// and asset extensions. The matcher is intentionally inclusive so the login/auth
-		// pages also redirect already-authenticated users back to their home route.
-		"/((?!_next/static|_next/image|favicon.ico|api/auth|.*\\.[^/]+$).*)",
+		// Run on all page paths except Next.js internals, the entire /api/* surface,
+		// and asset extensions. /api routes are excluded because each route handler
+		// performs its own session check via auth() — the middleware's role-policy
+		// in lib/role-routing has no /api prefix, so leaving them in the matcher
+		// would (incorrectly) redirect authenticated users away from API endpoints
+		// like /api/applications/[id]/pdf.
+		"/((?!_next/static|_next/image|favicon.ico|api/|.*\\.[^/]+$).*)",
 	],
 };
