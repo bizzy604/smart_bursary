@@ -16,13 +16,13 @@ const statusBadgeClass: Record<ProgramStatus, string> = {
 };
 
 type ProgramListColumnsOptions = {
-  isMutating: string | null;
+  mutatingProgramIds: Set<string>;
   onRequestPublish: (program: ProgramListItem) => void;
   onRequestClose: (program: ProgramListItem) => void;
 };
 
 export function buildProgramListColumns({
-  isMutating,
+  mutatingProgramIds,
   onRequestPublish,
   onRequestClose,
 }: ProgramListColumnsOptions): ColumnDef<ProgramListItem>[] {
@@ -30,37 +30,60 @@ export function buildProgramListColumns({
     {
       id: "name",
       accessorKey: "name",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Program" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Program" />
+      ),
       cell: ({ row }) => (
         <div className="space-y-1">
           <p className="font-medium text-brand-900">{row.original.name}</p>
-          <p className="text-xs text-gray-600">Year: {row.original.academicYear ?? "-"}</p>
-          <p className="text-xs text-gray-600">Ward: {row.original.wardId ?? "County-wide"}</p>
+          <p className="text-xs text-gray-600">
+            Year: {row.original.academicYear ?? "-"}
+          </p>
+          <p className="text-xs text-gray-600">
+            Ward: {row.original.wardId ?? "County-wide"}
+          </p>
         </div>
       ),
     },
     {
       id: "status",
       accessorKey: "status",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Status" />
+      ),
       cell: ({ row }) => (
-        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusBadgeClass[row.original.status]}`}>
+        <span
+          className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusBadgeClass[row.original.status]}`}
+        >
           {row.original.status}
         </span>
       ),
-      filterFn: (row, _id, value: string[]) => value.includes(row.original.status),
+      filterFn: (row, _id, value: string[]) =>
+        value.includes(row.original.status),
     },
     {
       id: "opensAt",
       accessorKey: "opensAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Opens" />,
-      cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatShortDate(row.original.opensAt)}</span>,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Opens" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {formatShortDate(row.original.opensAt)}
+        </span>
+      ),
     },
     {
       id: "closesAt",
       accessorKey: "closesAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Closes" />,
-      cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatShortDate(row.original.closesAt)}</span>,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Closes" />
+      ),
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">
+          {formatShortDate(row.original.closesAt)}
+        </span>
+      ),
     },
     {
       id: "budgetCeiling",
@@ -110,26 +133,30 @@ export function buildProgramListColumns({
       cell: ({ row }) => (
         <div className="flex flex-wrap justify-end gap-2">
           <Link href={`/county/programs/${row.original.id}` as Route}>
-            <Button variant="outline" size="sm">Open</Button>
+            <Button variant="outline" size="sm">
+              Open
+            </Button>
           </Link>
           {row.original.status === "DRAFT" ? (
             <Button
               variant="secondary"
               size="sm"
               onClick={() => onRequestPublish(row.original)}
-              disabled={isMutating === row.original.id}
+              disabled={mutatingProgramIds.has(row.original.id)}
             >
-              {isMutating === row.original.id ? "Publishing..." : "Publish"}
+              {mutatingProgramIds.has(row.original.id)
+                ? "Publishing..."
+                : "Publish"}
             </Button>
           ) : null}
           {row.original.status === "ACTIVE" ? (
             <Button
-              variant="danger"
+              variant="destructive"
               size="sm"
               onClick={() => onRequestClose(row.original)}
-              disabled={isMutating === row.original.id}
+              disabled={mutatingProgramIds.has(row.original.id)}
             >
-              {isMutating === row.original.id ? "Closing..." : "Close"}
+              {mutatingProgramIds.has(row.original.id) ? "Closing..." : "Close"}
             </Button>
           ) : null}
         </div>

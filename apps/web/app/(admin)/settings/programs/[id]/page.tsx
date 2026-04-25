@@ -372,7 +372,7 @@ export default function ProgramSettingsDetailPage() {
                   </Button>
                 ) : null}
                 {program.status === "ACTIVE" ? (
-                  <Button variant="danger" onClick={() => setPendingAction("close")} disabled={isMutating}>
+                  <Button variant="destructive" onClick={() => setPendingAction("close")} disabled={isMutating}>
                     {isMutating ? "Closing..." : "Close Program"}
                   </Button>
                 ) : null}

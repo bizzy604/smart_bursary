@@ -162,7 +162,7 @@ export default function TenantDetailPage() {
         <div className="mt-3 flex flex-wrap gap-2">
           <Button size="sm" disabled>Recompute Tenant Metrics</Button>
           <Button variant="outline" size="sm" disabled>View Audit Log</Button>
-          <Button variant="danger" size="sm" disabled>Suspend Tenant</Button>
+          <Button variant="destructive" size="sm" disabled>Suspend Tenant</Button>
           <Link href="/tenants">
             <Button variant="ghost" size="sm">Back to Tenants</Button>
           </Link>

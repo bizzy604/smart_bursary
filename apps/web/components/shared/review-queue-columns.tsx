@@ -35,7 +35,7 @@ interface RowAction {
 	label: string;
 	href?: (row: ReviewQueueItem) => Route;
 	onClick?: (row: ReviewQueueItem) => void;
-	variant?: "primary" | "outline" | "ghost";
+	variant?: "default" | "outline" | "ghost";
 	primary?: boolean;
 }
 
@@ -186,13 +186,13 @@ function buildActionColumn(
 				<div className="flex items-center justify-end gap-2">
 					{primary ? (
 						primary.href ? (
-							<Button asChild size="sm" variant={primary.variant ?? "primary"}>
+							<Button asChild size="sm" variant={primary.variant ?? "default"}>
 								<Link href={primary.href(item)}>{primary.label}</Link>
 							</Button>
 						) : (
 							<Button
 								size="sm"
-								variant={primary.variant ?? "primary"}
+								variant={primary.variant ?? "default"}
 								onClick={() => primary.onClick?.(item)}
 							>
 								{primary.label}

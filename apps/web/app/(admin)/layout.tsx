@@ -8,6 +8,7 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { CountyBrandingProvider } from "@/components/layout/county-branding-provider";
 import { canAccessPathForRole, resolvePostLoginRoute } from "@/lib/role-routing";
 import { useAuthStore } from "@/store/auth-store";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 const ROLE_LABELS = {
   WARD_ADMIN: "Ward Administrator",
@@ -63,21 +64,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <CountyBrandingProvider>
-      <div className="page-shell county-pattern bg-transparent pb-6">
-        <AdminHeader
-          homeHref={resolvePostLoginRoute(adminRole)}
-          portalLabel={portalLabel}
-          userName={userName}
-          roleLabel={roleLabel}
-        />
+      <SidebarProvider defaultOpen>
+        <AdminSidebar role={adminRole} />
+        <SidebarInset>
+          <div className="page-shell county-pattern bg-transparent pb-6">
+            <AdminHeader
+              homeHref={resolvePostLoginRoute(adminRole)}
+              portalLabel={portalLabel}
+              userName={userName}
+              roleLabel={roleLabel}
+            />
 
-        <div className="w-full px-4 pb-6 pt-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6 md:grid-cols-[240px_minmax(0,1fr)] md:items-start">
-            <AdminSidebar role={adminRole} />
-            <main className="min-w-0 space-y-5">{children}</main>
+            <div className="w-full px-4 pb-6 pt-4 sm:px-6 lg:px-8">
+              <main className="min-w-0 space-y-5">{children}</main>
+            </div>
           </div>
-        </div>
-      </div>
+        </SidebarInset>
+      </SidebarProvider>
     </CountyBrandingProvider>
   );
 }
