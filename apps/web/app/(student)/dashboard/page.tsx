@@ -9,8 +9,11 @@ import {
   dashboardChartColor,
   shouldUsePieChart,
 } from "@/components/dashboard/chart-utils";
+import { ClipboardList, FileSearch, GraduationCap } from "lucide-react";
+
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,34 +131,34 @@ export default function DashboardPage() {
 
   return (
     <main className="space-y-6">
-      <section className="rounded-2xl bg-gradient-to-r from-brand-900 to-brand-700 p-6 text-white shadow-lg">
-        <p className="text-sm uppercase tracking-wider text-brand-100">
-          Student Dashboard
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-bold">
-          Welcome back, {studentName}
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-brand-50">
-          Track your bursary journey, check open county programs, and review
-          your application progress in one place.
-        </p>
-      </section>
+      <PageHeader
+        tone="branded"
+        eyebrow="Student dashboard"
+        title={`Welcome back, ${studentName}`}
+        description="Track your bursary journey, check open county programs, and review your application progress in one place."
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           label="Open Programs"
           value={String(activePrograms)}
           hint="Currently accepting applications"
+          icon={GraduationCap}
+          intent="brand"
         />
         <StatsCard
           label="Submitted"
           value={String(submittedApplications)}
           hint="Applications sent for review"
+          icon={ClipboardList}
+          intent="success"
         />
         <StatsCard
           label="In Review"
           value={String(inReview)}
           hint="Ward or county committee stage"
+          icon={FileSearch}
+          intent="warning"
         />
       </section>
 

@@ -107,7 +107,7 @@ export default function ApplicationDetailPage() {
 
   return (
     <main className="space-y-6">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="font-mono text-xs uppercase tracking-wide text-gray-500">{application.reference}</p>

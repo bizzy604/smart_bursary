@@ -15,6 +15,9 @@ import {
   buildReviewQueueColumns,
   reviewQueueStatusOptions,
 } from "@/components/shared/review-queue-columns";
+import { CheckCircle2, ClipboardCheck, Clock, Wallet, XCircle } from "lucide-react";
+
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -212,39 +215,41 @@ export default function WardDashboardPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">
-          Ward Dashboard
-        </p>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-brand-900">
-          Application Review Command Center
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Applications are ranked by AI score to help committee members
-          prioritize high-need cases quickly.
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="Ward dashboard"
+        title="Application Review Command Center"
+        description="Applications are ranked by AI score to help committee members prioritize high-need cases quickly."
+        icon={ClipboardCheck}
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatsCard
           label="Pending Review"
           value={String(stats.pending)}
           hint="Waiting in ward queue"
+          icon={Clock}
+          intent="warning"
         />
         <StatsCard
           label="Reviewed Today"
           value={String(stats.reviewedToday)}
           hint="Committee decisions logged"
+          icon={CheckCircle2}
+          intent="success"
         />
         <StatsCard
           label="Rejected"
           value={String(stats.rejected)}
           hint="This cycle so far"
+          icon={XCircle}
+          intent="danger"
         />
         <StatsCard
           label="Recommended Amount"
           value={formatCurrencyKes(stats.recommendedKes)}
           hint="Total proposed to county"
+          icon={Wallet}
+          intent="brand"
         />
       </section>
 
@@ -405,7 +410,7 @@ export default function WardDashboardPage() {
         </DashboardChartCard>
       </section>
 
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-xl font-semibold text-brand-900">

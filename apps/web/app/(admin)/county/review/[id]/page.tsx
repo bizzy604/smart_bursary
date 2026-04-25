@@ -123,7 +123,7 @@ export default function CountyReviewDetailPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">Final Allocation Review</p>

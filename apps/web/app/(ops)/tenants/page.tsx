@@ -10,6 +10,9 @@ import {
 } from "@/components/dashboard/chart-utils";
 import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
+import { Building2, PauseCircle, Sparkles } from "lucide-react";
+
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import {
   ChartContainer,
@@ -134,31 +137,34 @@ export default function OpsTenantsPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">
-          Tenant Registry
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Monitor county tenants, subscription tiers, and onboarding posture
-          from one operations console.
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="Operations"
+        title="Tenant Registry"
+        description="Monitor county tenants, subscription tiers, and onboarding posture from one operations console."
+        icon={Building2}
+      />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <StatsCard
           label="Active Tenants"
           value={String(stats.active)}
           hint="Counties currently enabled"
+          icon={Building2}
+          intent="success"
         />
         <StatsCard
           label="Inactive"
           value={String(stats.inactive)}
           hint="Suspended or disabled counties"
+          icon={PauseCircle}
+          intent="warning"
         />
         <StatsCard
           label="Enterprise"
           value={String(stats.enterprise)}
           hint="Top-tier subscriptions"
+          icon={Sparkles}
+          intent="brand"
         />
       </section>
 
@@ -315,7 +321,7 @@ export default function OpsTenantsPage() {
           description="No county tenants are currently provisioned in this environment."
         />
       ) : (
-        <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <DataTable
             columns={opsTenantColumns}
             data={tenants}

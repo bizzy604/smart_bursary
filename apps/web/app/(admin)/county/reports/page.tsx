@@ -56,7 +56,7 @@ export default function CountyReportsPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <h1 className="font-display text-2xl font-semibold text-brand-900">County Reports Hub</h1>
         <p className="mt-1 text-sm text-gray-600">
           Generate OCOB-ready exports and ward performance summaries for finance and audit workflows.
@@ -64,7 +64,7 @@ export default function CountyReportsPage() {
       </section>
 
       <section className="grid gap-4 md:grid-cols-2">
-        <article className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <article className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">Finance Compliance</p>
           <h2 className="mt-1 font-display text-xl font-semibold text-brand-900">OCOB Report</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -77,7 +77,7 @@ export default function CountyReportsPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <article className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">Ward Operations</p>
           <h2 className="mt-1 font-display text-xl font-semibold text-brand-900">Ward Summary Exports</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -91,7 +91,7 @@ export default function CountyReportsPage() {
         </article>
       </section>
 
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-xl font-semibold text-brand-900">Historical Trend Analysis</h2>
@@ -183,7 +183,7 @@ export default function CountyReportsPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <h3 className="font-display text-lg font-semibold text-brand-900">Latest Generated Report Snapshot</h3>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
           <div>

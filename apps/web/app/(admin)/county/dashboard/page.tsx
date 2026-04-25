@@ -16,6 +16,9 @@ import {
   buildReviewQueueColumns,
   reviewQueueStatusOptions,
 } from "@/components/shared/review-queue-columns";
+import { Banknote, CheckCircle2, Send, Wallet } from "lucide-react";
+
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -208,18 +211,12 @@ export default function CountyDashboardPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-brand-100 bg-white p-6 shadow-xs">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">
-          County Dashboard
-        </p>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-brand-900">
-          Finance Officer Review Portal
-        </h1>
-        <p className="mt-2 text-sm text-gray-600">
-          Monitor county allocations, track review throughput, and push approved
-          records to disbursement.
-        </p>
-      </section>
+      <PageHeader
+        eyebrow="County dashboard"
+        title="Finance Officer Review Portal"
+        description="Monitor county allocations, track review throughput, and push approved records to disbursement."
+        icon={Banknote}
+      />
 
       {dashboardError ? (
         <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">
@@ -232,21 +229,29 @@ export default function CountyDashboardPage() {
           label="Approved"
           value={String(stats.approved)}
           hint="Approved applications this cycle"
+          icon={CheckCircle2}
+          intent="success"
         />
         <StatsCard
           label="Allocated"
           value={formatCurrencyKes(stats.allocatedKes)}
           hint="Total allocated amount"
+          icon={Wallet}
+          intent="brand"
         />
         <StatsCard
           label="Remaining"
           value={formatCurrencyKes(stats.remainingKes)}
           hint="Budget still available"
+          icon={Banknote}
+          intent="warning"
         />
         <StatsCard
           label="Disbursed"
           value={String(stats.disbursed)}
           hint={isLoading ? "Refreshing..." : "Applications already paid"}
+          icon={Send}
+          intent="success"
         />
       </section>
 
@@ -424,7 +429,7 @@ export default function CountyDashboardPage() {
       </section>
 
       {dashboardData?.ward_breakdown?.length ? (
-        <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <h2 className="font-display text-xl font-semibold text-brand-900">
             Ward Breakdown
           </h2>
@@ -462,7 +467,7 @@ export default function CountyDashboardPage() {
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="font-display text-xl font-semibold text-brand-900">
