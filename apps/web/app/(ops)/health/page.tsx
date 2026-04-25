@@ -20,7 +20,7 @@ import {
   fetchOpsPlatformHealth,
   type OpsPlatformHealthSnapshot,
 } from "@/lib/ops-api";
-import { opsHealthColumns, opsHealthStatusOptions } from "./columns";
+import { opsHealthColumns } from "./columns";
 
 const opsHealthLatencyConfig = {
   latency: {
@@ -234,14 +234,7 @@ export default function OpsHealthPage() {
             error={error}
             getRowId={(row) => row.name}
             searchColumnId="name"
-            searchPlaceholder="Search service"
-            facetedFilters={[
-              {
-                columnId: "status",
-                title: "Status",
-                options: opsHealthStatusOptions,
-              },
-            ]}
+            searchPlaceholder="Search services…"
             initialSorting={[{ id: "name", desc: false }]}
             initialPageSize={10}
             enablePagination={false}

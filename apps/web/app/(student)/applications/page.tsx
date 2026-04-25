@@ -8,10 +8,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
-import {
-  studentApplicationColumns,
-  studentApplicationStatusOptions,
-} from "../dashboard/columns";
+import { studentApplicationColumns } from "../dashboard/columns";
 
 export default function ApplicationsPage() {
   const { applications, isLoading, error } = useApplication();
@@ -46,10 +43,7 @@ export default function ApplicationsPage() {
             error={error}
             getRowId={(row) => row.id}
             searchColumnId="programName"
-            searchPlaceholder="Search by program"
-            facetedFilters={[
-              { columnId: "status", title: "Status", options: studentApplicationStatusOptions },
-            ]}
+            searchPlaceholder="Search applications…"
             initialSorting={[{ id: "updatedAt", desc: true }]}
             emptyState="No applications match your filters."
           />

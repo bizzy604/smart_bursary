@@ -211,7 +211,7 @@ export function DataTable<TData, TValue>({
         </DataTableToolbar>
       ) : null}
 
-      <div className="overflow-hidden rounded-md border bg-card">
+      <div className="overflow-x-auto rounded-md border bg-card">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

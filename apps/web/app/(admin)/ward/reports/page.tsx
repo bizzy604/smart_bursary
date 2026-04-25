@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { reviewQueueStatusOptions } from "@/components/shared/review-queue-columns";
 import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
@@ -244,10 +243,7 @@ export default function WardReportsPage() {
             error={rows.length === 0 ? error : null}
             getRowId={(row) => row.applicationId}
             searchColumnId="applicantName"
-            searchPlaceholder="Search applicant"
-            facetedFilters={[
-              { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
-            ]}
+            searchPlaceholder="Search applications…"
             initialSorting={[{ id: "reviewedAt", desc: true }]}
             initialColumnVisibility={{ reviewerStage: false, academicYear: false }}
             initialPageSize={10}
