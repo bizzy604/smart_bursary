@@ -1,6 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrencyKes } from "@/lib/format";
@@ -19,16 +31,16 @@ interface ReviewPanelProps {
 	}) => Promise<string | void>;
 }
 
-const decisionOptions: Record<ReviewMode, Array<{ value: string; label: string }>> = {
+const decisionOptions: Record<ReviewMode, Array<{ value: string; label: string; tone: "default" | "destructive" }>> = {
 	ward: [
-		{ value: "recommend", label: "Recommend for County Review" },
-		{ value: "return", label: "Return to Applicant" },
-		{ value: "reject", label: "Reject" },
+		{ value: "recommend", label: "Recommend for County Review", tone: "default" },
+		{ value: "return", label: "Return to Applicant", tone: "default" },
+		{ value: "reject", label: "Reject", tone: "destructive" },
 	],
 	county: [
-		{ value: "approve", label: "Approve Allocation" },
-		{ value: "waitlist", label: "Waitlist" },
-		{ value: "reject", label: "Reject" },
+		{ value: "approve", label: "Approve Allocation", tone: "default" },
+		{ value: "waitlist", label: "Waitlist", tone: "default" },
+		{ value: "reject", label: "Reject", tone: "destructive" },
 	],
 };
 
@@ -43,7 +55,7 @@ export function ReviewPanel({
 	const [recommendedAmount, setRecommendedAmount] = useState(String(defaultAmountKes));
 	const [reviewNote, setReviewNote] = useState(existingNote ?? "");
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [feedback, setFeedback] = useState<string | null>(null);
+	const [confirmOpen, setConfirmOpen] = useState(false);
 
 	const amount = Number(recommendedAmount || 0);
 	const decisionNeedsAmount =
@@ -51,13 +63,49 @@ export function ReviewPanel({
 		(mode === "county" && decision === "approve");
 	const amountIsValid = !decisionNeedsAmount || (amount > 0 && amount <= maxAmountKes);
 
+	const activeOption = decisionOptions[mode].find((option) => option.value === decision);
+	const isDestructive = activeOption?.tone === "destructive";
+
+	const submit = async () => {
+		if (!onSubmit) {
+			toast.info("Demo mode", {
+				description:
+					"Review captured locally. Backend wiring will persist this in a later phase.",
+			});
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const customMessage = await onSubmit({
+				decision,
+				recommendedAmount: amount,
+				note: reviewNote,
+			});
+			toast.success("Review submitted", {
+				description: customMessage ?? "Review decision recorded successfully.",
+			});
+		} catch (reason: unknown) {
+			const message =
+				reason instanceof Error
+					? reason.message
+					: "Failed to submit review decision.";
+			toast.error("Submit failed", { description: message });
+		} finally {
+			setIsSubmitting(false);
+			setConfirmOpen(false);
+		}
+	};
+
 	return (
 		<section className="space-y-4 rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
 			<div>
 				<h3 className="font-display text-lg font-semibold text-brand-900">
 					{mode === "ward" ? "Ward Review Decision" : "County Final Decision"}
 				</h3>
-				<p className="mt-1 text-sm text-gray-600">Maximum allowed by program rules: {formatCurrencyKes(maxAmountKes)}</p>
+				<p className="mt-1 text-sm text-gray-600">
+					Maximum allowed by program rules: {formatCurrencyKes(maxAmountKes)}
+				</p>
 			</div>
 
 			<div className="space-y-2 text-sm text-gray-700">
@@ -86,7 +134,9 @@ export function ReviewPanel({
 					onChange={(event) => setRecommendedAmount(event.target.value)}
 				/>
 				{!amountIsValid ? (
-					<p className="text-xs text-danger-700">Enter an amount between 1 and {formatCurrencyKes(maxAmountKes)}.</p>
+					<p className="text-xs text-danger-700">
+						Enter an amount between 1 and {formatCurrencyKes(maxAmountKes)}.
+					</p>
 				) : null}
 			</div>
 
@@ -105,39 +155,51 @@ export function ReviewPanel({
 
 			<div className="flex flex-wrap items-center gap-3">
 				<Button
+					variant={isDestructive ? "destructive" : "default"}
 					disabled={isSubmitting}
-					onClick={async () => {
+					onClick={() => {
 						if (!amountIsValid) {
-							setFeedback("Correct the recommended amount before submitting.");
-							return;
-						}
-
-						if (!onSubmit) {
-							setFeedback("Review captured in this demo flow. Backend workflow wiring will persist in a later backend-integrated phase.");
-							return;
-						}
-
-						setIsSubmitting(true);
-						setFeedback(null);
-						try {
-							const customMessage = await onSubmit({
-								decision,
-								recommendedAmount: amount,
-								note: reviewNote,
+							toast.error("Adjust the recommended amount", {
+								description: `Enter an amount between 1 and ${formatCurrencyKes(maxAmountKes)}.`,
 							});
-							setFeedback(customMessage ?? "Review decision submitted successfully.");
-						} catch (reason: unknown) {
-							const message = reason instanceof Error ? reason.message : "Failed to submit review decision.";
-							setFeedback(message);
-						} finally {
-							setIsSubmitting(false);
+							return;
 						}
+						setConfirmOpen(true);
 					}}
 				>
 					{isSubmitting ? "Submitting..." : "Submit Review"}
 				</Button>
-				{feedback ? <p className="text-xs text-info-700">{feedback}</p> : null}
 			</div>
+
+			<AlertDialog open={confirmOpen} onOpenChange={(open) => !isSubmitting && setConfirmOpen(open)}>
+				<AlertDialogContent size="sm">
+					<AlertDialogHeader>
+						<AlertDialogTitle>
+							Confirm {activeOption?.label.toLowerCase() ?? "this decision"}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{decisionNeedsAmount
+								? `This will record a decision of "${activeOption?.label}" with an amount of ${formatCurrencyKes(amount)}. The applicant timeline will reflect this immediately.`
+								: `This will record a decision of "${activeOption?.label}". The applicant timeline will reflect this immediately.`}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+						<AlertDialogAction asChild>
+							<Button
+								variant={isDestructive ? "destructive" : "default"}
+								disabled={isSubmitting}
+								onClick={(event) => {
+									event.preventDefault();
+									void submit();
+								}}
+							>
+								{isSubmitting ? "Submitting..." : "Confirm"}
+							</Button>
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</section>
 	);
 }

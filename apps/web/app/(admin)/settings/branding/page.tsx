@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,11 +74,11 @@ export default function BrandingSettingsPage() {
         legalReference: updated.branding.legalReference,
       });
       setFeedback({ type: "success", message: "Branding settings saved." });
+      toast.success("Branding saved", { description: "Your county branding settings were updated." });
     } catch (error: unknown) {
-      setFeedback({
-        type: "error",
-        message: error instanceof Error ? error.message : "Failed to save branding settings.",
-      });
+      const message = error instanceof Error ? error.message : "Failed to save branding settings.";
+      setFeedback({ type: "error", message });
+      toast.error("Save failed", { description: message });
     } finally {
       setIsSaving(false);
     }

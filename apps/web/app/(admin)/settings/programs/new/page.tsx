@@ -71,11 +71,7 @@ export default function NewProgramSettingsPage() {
     if (!isValid) {
       const message = "Provide all required fields and ensure closing date is after opening date.";
       setFeedback({ type: "error", message });
-      toast({
-        title: "Create blocked",
-        description: message,
-        variant: "error",
-      });
+      toast.error("Create blocked", { description: message });
       return;
     }
 
@@ -100,10 +96,8 @@ export default function NewProgramSettingsPage() {
       });
 
       setFeedback({ type: "success", message: "Program created. Redirecting to details..." });
-      toast({
-        title: "Program created",
+      toast.success("Program created", {
         description: "Opening the new program details page.",
-        variant: "success",
       });
       router.push(`/county/programs/${created.id}` as Route);
     } catch (error: unknown) {
@@ -112,11 +106,7 @@ export default function NewProgramSettingsPage() {
         type: "error",
         message,
       });
-      toast({
-        title: "Create failed",
-        description: message,
-        variant: "error",
-      });
+      toast.error("Create failed", { description: message });
     } finally {
       setIsCreateDialogOpen(false);
       setIsSaving(false);

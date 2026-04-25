@@ -3,6 +3,7 @@
 import * as React from "react";
 import { type Row, type Table } from "@tanstack/react-table";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -101,18 +102,24 @@ export function BulkActionBar<TData>({
 		}
 		setIsMutating(true);
 		setError(null);
+		const count = selectedRows.length;
+		const actionLabel = pending.label;
 		try {
 			await pending.onRun(selectedRows, values);
 			setPending(null);
 			setValues({});
 			clearSelection();
 			onSuccess?.();
+			toast.success(`${actionLabel} applied`, {
+				description: `${count} ${count === 1 ? "row" : "rows"} updated successfully.`,
+			});
 		} catch (reason: unknown) {
-			setError(
+			const message =
 				reason instanceof Error
 					? reason.message
-					: "Bulk action failed. Try again.",
-			);
+					: "Bulk action failed. Try again.";
+			setError(message);
+			toast.error(`${actionLabel} failed`, { description: message });
 		} finally {
 			setIsMutating(false);
 		}

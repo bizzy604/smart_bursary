@@ -5,6 +5,18 @@ import type { Route } from "next";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { toast } from "sonner";
+
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
 import { useCounty } from "@/hooks/use-county";
@@ -37,6 +49,31 @@ export default function PreviewAndSubmitPage() {
 	const [isDownloading, setIsDownloading] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submissionError, setSubmissionError] = useState<string | null>(null);
+	const [confirmSubmit, setConfirmSubmit] = useState(false);
+
+	const submitApplication = async () => {
+		setSubmissionError(null);
+		setIsSubmitting(true);
+		try {
+			const result = await submitDraftApplication({
+				programId: params.programId,
+				programName: program?.name ?? "",
+				requestedKes,
+				sectionData: programState?.sectionData as Record<string, unknown>,
+			});
+			toast.success("Application submitted", {
+				description: "You'll be redirected to your application status page.",
+			});
+			router.push(`/applications/${result.id}?submitted=1` as Route);
+		} catch (reason: unknown) {
+			const message = reason instanceof Error ? reason.message : "Failed to submit application.";
+			setSubmissionError(message);
+			toast.error("Submission failed", { description: message });
+		} finally {
+			setIsSubmitting(false);
+			setConfirmSubmit(false);
+		}
+	};
 
 	useEffect(() => {
 		hydrateProgram(params.programId);
@@ -288,28 +325,9 @@ export default function PreviewAndSubmitPage() {
 						<Button
 							className="w-full"
 							disabled={!canSubmit}
-							onClick={async () => {
-								if (!canSubmit) {
-									return;
-								}
-
-								setSubmissionError(null);
-								setIsSubmitting(true);
-
-								try {
-									const result = await submitDraftApplication({
-										programId: params.programId,
-										programName: program.name,
-										requestedKes,
-										sectionData: programState.sectionData as Record<string, unknown>,
-									});
-									router.push(`/applications/${result.id}?submitted=1` as Route);
-								} catch (reason: unknown) {
-									const message = reason instanceof Error ? reason.message : "Failed to submit application.";
-									setSubmissionError(message);
-								} finally {
-									setIsSubmitting(false);
-								}
+							onClick={() => {
+								if (!canSubmit) return;
+								setConfirmSubmit(true);
 							}}
 						>
 							{isSubmitting ? "Submitting..." : "Submit Application"}
@@ -327,6 +345,35 @@ export default function PreviewAndSubmitPage() {
 					</Link>
 				</aside>
 			</section>
+
+			<AlertDialog
+				open={confirmSubmit}
+				onOpenChange={(open) => !isSubmitting && setConfirmSubmit(open)}
+			>
+				<AlertDialogContent size="sm">
+					<AlertDialogHeader>
+						<AlertDialogTitle>Submit your application?</AlertDialogTitle>
+						<AlertDialogDescription>
+							Once submitted you cannot edit your application. Make sure all sections,
+							documents, and the requested amount of {formatCurrencyKes(requestedKes)} are correct.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
+						<AlertDialogAction asChild>
+							<Button
+								disabled={isSubmitting}
+								onClick={(event) => {
+									event.preventDefault();
+									void submitApplication();
+								}}
+							>
+								{isSubmitting ? "Submitting..." : "Confirm submit"}
+							</Button>
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</main>
 	);
 }
