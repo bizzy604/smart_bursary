@@ -72,6 +72,7 @@ export function ReviewPanel({
 				description:
 					"Review captured locally. Backend wiring will persist this in a later phase.",
 			});
+			setConfirmOpen(false);
 			return;
 		}
 
