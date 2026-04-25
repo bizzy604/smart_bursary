@@ -17,6 +17,7 @@ import {
   fetchWorkflowApplicationById,
   submitCountyReview,
 } from "@/lib/review-workflow-api";
+import { useAuthStore } from "@/store/auth-store";
 import type {
   CountyReviewDecision,
   ReviewNoteEntry,
@@ -33,6 +34,7 @@ const COUNTY_DECISION_MAP: Record<string, CountyReviewDecision> = {
 
 export default function CountyReviewDetailPage() {
   const params = useParams<{ id: string }>();
+  const userRole = useAuthStore((state) => state.user?.role);
   const [application, setApplication] = useState<ReviewQueueItem | null>(null);
   const [scoreCard, setScoreCard] = useState<ReviewScoreCard | null>(null);
   const [reviewNotes, setReviewNotes] = useState<ReviewNoteEntry[]>([]);
@@ -117,6 +119,7 @@ export default function CountyReviewDetailPage() {
     application.wardRecommendationKes,
   );
   const maxAmountKes = Math.max(defaultAmountKes, 5000000);
+  const canSubmitCountyDecision = userRole === "FINANCE_OFFICER";
 
   return (
     <main className="space-y-5">
@@ -180,22 +183,28 @@ export default function CountyReviewDetailPage() {
       ) : null}
       <DocumentViewer documents={documents} />
 
-      <ReviewPanel
-        mode="county"
-        maxAmountKes={maxAmountKes}
-        defaultAmountKes={defaultAmountKes}
-        existingNote={latestNote}
-        onSubmit={async (payload) => {
-          const mappedDecision = COUNTY_DECISION_MAP[payload.decision];
-          if (!mappedDecision) {
-            throw new Error("Unsupported county decision.");
-          }
+      {canSubmitCountyDecision ? (
+        <ReviewPanel
+          mode="county"
+          maxAmountKes={maxAmountKes}
+          defaultAmountKes={defaultAmountKes}
+          existingNote={latestNote}
+          onSubmit={async (payload) => {
+            const mappedDecision = COUNTY_DECISION_MAP[payload.decision];
+            if (!mappedDecision) {
+              throw new Error("Unsupported county decision.");
+            }
 
-          await submitCountyReview(params.id, mappedDecision, payload.recommendedAmount, payload.note);
-          await loadApplication();
-          return "County review submitted successfully.";
-        }}
-      />
+            await submitCountyReview(params.id, mappedDecision, payload.recommendedAmount, payload.note);
+            await loadApplication();
+            return "County review submitted successfully.";
+          }}
+        />
+      ) : (
+        <section className="rounded-xl border border-info-100 bg-info-50 p-4 text-sm text-info-700">
+          Read-only access: county administrators can view application review details, while only finance officers can submit county decisions.
+        </section>
+      )}
     </main>
   );
 }

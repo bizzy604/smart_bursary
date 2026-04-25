@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono, Noto_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/toast";
 import "../styles/globals.css";
 
 const display = Plus_Jakarta_Sans({
@@ -29,7 +30,10 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-			<body className="font-body text-gray-900 antialiased">{children}</body>
+			<body className="font-body text-gray-900 antialiased">
+        {children}
+        <Toaster />
+      </body>
 		</html>
 	);
 }

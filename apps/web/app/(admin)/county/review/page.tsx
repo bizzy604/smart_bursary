@@ -29,7 +29,7 @@ const countyReviewColumns = buildReviewQueueColumns({
   menuActions: [
     {
       label: "View application",
-      href: (item) => `/applications/${item.applicationId}` as Route,
+      href: (item) => `/county/applications/${item.applicationId}` as Route,
     },
   ],
 });

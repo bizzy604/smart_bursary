@@ -1,12 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import { createAdminProgram } from "@/lib/admin-programs";
 
 type ProgramFormState = {
@@ -38,6 +50,7 @@ export default function NewProgramSettingsPage() {
   const [form, setForm] = useState<ProgramFormState>(initialState);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   const isValid = useMemo(() => {
     if (!form.name.trim() || !form.budgetCeiling.trim() || !form.opensAt || !form.closesAt) {
@@ -55,7 +68,13 @@ export default function NewProgramSettingsPage() {
 
   async function submit() {
     if (!isValid) {
-      setFeedback({ type: "error", message: "Provide all required fields and ensure closing time is after opening." });
+      const message = "Provide all required fields and ensure closing time is after opening.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Create blocked",
+        description: message,
+        variant: "error",
+      });
       return;
     }
 
@@ -73,13 +92,25 @@ export default function NewProgramSettingsPage() {
       });
 
       setFeedback({ type: "success", message: "Program created. Redirecting to details..." });
-      router.push(`/settings/programs/${created.id}`);
+      toast({
+        title: "Program created",
+        description: "Opening the new program details page.",
+        variant: "success",
+      });
+      router.push(`/county/programs/${created.id}` as Route);
     } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to create program.";
       setFeedback({
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to create program.",
+        message,
+      });
+      toast({
+        title: "Create failed",
+        description: message,
+        variant: "error",
       });
     } finally {
+      setIsCreateDialogOpen(false);
       setIsSaving(false);
     }
   }
@@ -174,15 +205,32 @@ export default function NewProgramSettingsPage() {
           </div>
 
           <div className="flex flex-wrap justify-end gap-2">
-            <Link href="/settings/programs">
+            <Link href={"/county/programs" as Route}>
               <Button variant="outline">Cancel</Button>
             </Link>
-            <Button onClick={() => void submit()} disabled={isSaving || !isValid}>
+            <Button onClick={() => setIsCreateDialogOpen(true)} disabled={isSaving || !isValid}>
               {isSaving ? "Creating..." : "Create Program"}
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create this program?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The new bursary program will be saved as a draft. Students will not see it until you publish it.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSaving}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void submit()} disabled={isSaving}>
+              {isSaving ? "Creating..." : "Confirm Create"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

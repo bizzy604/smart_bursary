@@ -1,33 +1,44 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 
+import { DataTable } from "@/components/shared/data-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "@/components/ui/toast";
 import {
   closeAdminProgram,
   fetchAdminPrograms,
-  ProgramListItem,
+  type ProgramListItem,
   ProgramStatus,
   publishAdminProgram,
 } from "@/lib/admin-programs";
 import { formatCurrencyKes } from "@/lib/format";
-
-const statusBadgeClass: Record<ProgramStatus, string> = {
-  DRAFT: "bg-gray-100 text-gray-700 border border-gray-200",
-  ACTIVE: "bg-success-50 text-success-700 border border-success-200",
-  CLOSED: "bg-warning-50 text-warning-700 border border-warning-200",
-  SUSPENDED: "bg-danger-50 text-danger-700 border border-danger-200",
-};
+import { buildProgramListColumns } from "./columns";
 
 export default function ProgramSettingsListPage() {
-  const [programs, setPrograms] = useState<ProgramListItem[]>([]);
+  const [programs, setPrograms] = useState<Awaited<ReturnType<typeof fetchAdminPrograms>>>([]);
   const [status, setStatus] = useState<"ALL" | ProgramStatus>("ALL");
   const [academicYear, setAcademicYear] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isMutating, setIsMutating] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{
+    type: "publish" | "close";
+    program: ProgramListItem;
+  } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -83,42 +94,68 @@ export default function ProgramSettingsListPage() {
   }
 
   async function publishProgram(programId: string) {
-    const proceed = window.confirm("Publish this draft program? This will make it available to students.");
-    if (!proceed) {
-      return;
-    }
-
     setIsMutating(programId);
     setFeedback(null);
     try {
       await publishAdminProgram(programId);
       await refreshPrograms();
       setFeedback({ type: "success", message: "Program published successfully." });
+      toast({
+        title: "Program published",
+        description: "The bursary program is now available to students.",
+        variant: "success",
+      });
     } catch (error: unknown) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to publish program." });
+      const message = error instanceof Error ? error.message : "Failed to publish program.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Publish failed",
+        description: message,
+        variant: "error",
+      });
     } finally {
+      setPendingAction(null);
       setIsMutating(null);
     }
   }
 
   async function closeProgram(programId: string) {
-    const proceed = window.confirm("Close this active program? New submissions will be blocked.");
-    if (!proceed) {
-      return;
-    }
-
     setIsMutating(programId);
     setFeedback(null);
     try {
       await closeAdminProgram(programId);
       await refreshPrograms();
       setFeedback({ type: "success", message: "Program closed successfully." });
+      toast({
+        title: "Program closed",
+        description: "New submissions are now blocked for this program.",
+        variant: "success",
+      });
     } catch (error: unknown) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to close program." });
+      const message = error instanceof Error ? error.message : "Failed to close program.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Close failed",
+        description: message,
+        variant: "error",
+      });
     } finally {
+      setPendingAction(null);
       setIsMutating(null);
     }
   }
+
+  const columns = useMemo(() => {
+    return buildProgramListColumns({
+      isMutating,
+      onRequestPublish: (program) => {
+        setPendingAction({ type: "publish", program });
+      },
+      onRequestClose: (program) => {
+        setPendingAction({ type: "close", program });
+      },
+    });
+  }, [isMutating]);
 
   return (
     <main className="space-y-5">
@@ -129,7 +166,7 @@ export default function ProgramSettingsListPage() {
               <CardTitle>Program Management</CardTitle>
               <CardDescription>Create, edit, publish, and close county bursary programs.</CardDescription>
             </div>
-            <Link href="/settings/programs/new">
+            <Link href={"/county/programs/new" as Route}>
               <Button size="sm">New Program</Button>
             </Link>
           </div>
@@ -195,81 +232,68 @@ export default function ProgramSettingsListPage() {
             </label>
           </div>
 
-          {isLoading ? (
-            <p className="text-sm text-gray-600">Loading programs...</p>
-          ) : programs.length === 0 ? (
-            <p className="rounded-md border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-600">
-              No programs matched the selected filters.
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-                    <th className="px-2 py-2">Program</th>
-                    <th className="px-2 py-2">Status</th>
-                    <th className="px-2 py-2">Window</th>
-                    <th className="px-2 py-2">Budget</th>
-                    <th className="px-2 py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {programs.map((program) => (
-                    <tr key={program.id} className="border-b border-gray-100 align-top">
-                      <td className="px-2 py-2">
-                        <p className="font-medium text-brand-900">{program.name}</p>
-                        <p className="mt-1 text-xs text-gray-600">Year: {program.academicYear ?? "-"}</p>
-                        <p className="text-xs text-gray-600">Ward: {program.wardId ?? "County-wide"}</p>
-                      </td>
-                      <td className="px-2 py-2">
-                        <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusBadgeClass[program.status]}`}>
-                          {program.status}
-                        </span>
-                      </td>
-                      <td className="px-2 py-2 text-xs text-gray-700">
-                        <p>Opens: {new Date(program.opensAt).toLocaleString()}</p>
-                        <p className="mt-1">Closes: {new Date(program.closesAt).toLocaleString()}</p>
-                      </td>
-                      <td className="px-2 py-2 text-xs text-gray-700">
-                        <p>Ceiling: {formatCurrencyKes(program.budgetCeiling)}</p>
-                        <p className="mt-1">Allocated: {formatCurrencyKes(program.allocatedTotal)}</p>
-                        <p className="mt-1">Disbursed: {formatCurrencyKes(program.disbursedTotal)}</p>
-                      </td>
-                      <td className="px-2 py-2">
-                        <div className="flex flex-wrap gap-2">
-                          <Link href={`/settings/programs/${program.id}`}>
-                            <Button variant="outline" size="sm">Open</Button>
-                          </Link>
-                          {program.status === "DRAFT" ? (
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              onClick={() => void publishProgram(program.id)}
-                              disabled={isMutating === program.id}
-                            >
-                              {isMutating === program.id ? "Publishing..." : "Publish"}
-                            </Button>
-                          ) : null}
-                          {program.status === "ACTIVE" ? (
-                            <Button
-                              variant="danger"
-                              size="sm"
-                              onClick={() => void closeProgram(program.id)}
-                              disabled={isMutating === program.id}
-                            >
-                              {isMutating === program.id ? "Closing..." : "Close"}
-                            </Button>
-                          ) : null}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <DataTable
+            columns={columns}
+            data={programs}
+            isLoading={isLoading}
+            error={programs.length === 0 && feedback?.type === "error" ? feedback.message : null}
+            getRowId={(row) => row.id}
+            searchColumnId="name"
+            searchPlaceholder="Search program"
+            initialSorting={[{ id: "closesAt", desc: false }]}
+            initialPageSize={10}
+            emptyState="No programs matched the selected filters."
+          />
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => {
+          if (!open && !isMutating) {
+            setPendingAction(null);
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingAction?.type === "publish" ? "Publish program?" : "Close program?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingAction?.type === "publish"
+                ? `This will make ${pendingAction.program.name} visible to students for applications.`
+                : `This will stop new submissions for ${pendingAction?.program.name}. Existing records will remain accessible.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={Boolean(isMutating)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={pendingAction?.type === "close" ? "bg-danger-500 hover:bg-danger-700" : undefined}
+              onClick={() => {
+                if (!pendingAction) {
+                  return;
+                }
+
+                if (pendingAction.type === "publish") {
+                  void publishProgram(pendingAction.program.id);
+                  return;
+                }
+
+                void closeProgram(pendingAction.program.id);
+              }}
+            >
+              {pendingAction?.type === "publish"
+                ? isMutating
+                  ? "Publishing..."
+                  : "Confirm Publish"
+                : isMutating
+                  ? "Closing..."
+                  : "Confirm Close"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

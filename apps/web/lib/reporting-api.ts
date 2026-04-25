@@ -43,6 +43,8 @@ export interface OcobRow {
 
 export interface WardSummaryRow {
   applicationId: string;
+  programId: string;
+  wardId: string;
   reference: string;
   applicantName: string;
   wardName: string;

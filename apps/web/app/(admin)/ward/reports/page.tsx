@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { reviewQueueStatusOptions } from "@/components/shared/review-queue-columns";
+import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import {
   downloadWardSummaryExport,
-  fetchDashboardReport,
   fetchWardSummaryReport,
-  type DashboardReportData,
   type WardSummaryRow,
 } from "@/lib/reporting-api";
+import { wardReportColumns } from "./columns";
 
 type WardFilters = {
   programId: string;
@@ -34,7 +35,7 @@ function saveBlob(blob: Blob, filename: string): void {
 }
 
 export default function WardReportsPage() {
-  const [dashboard, setDashboard] = useState<DashboardReportData | null>(null);
+  const [catalogRows, setCatalogRows] = useState<WardSummaryRow[]>([]);
   const [rows, setRows] = useState<WardSummaryRow[]>([]);
   const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const [filters, setFilters] = useState<WardFilters>({
@@ -50,8 +51,15 @@ export default function WardReportsPage() {
   const loadReport = async (scope: WardFilters = filters) => {
     try {
       setIsLoading(true);
-      const [dashboardData, wardReport] = await Promise.all([
-        fetchDashboardReport(),
+      const shouldRefreshCatalog =
+        catalogRows.length === 0
+        && !scope.programId
+        && !scope.wardId
+        && !scope.academicYear
+        && !scope.educationLevel;
+
+      const [catalogReport, wardReport] = await Promise.all([
+        shouldRefreshCatalog ? fetchWardSummaryReport({}) : Promise.resolve(null),
         fetchWardSummaryReport({
           programId: scope.programId || undefined,
           wardId: scope.wardId || undefined,
@@ -59,7 +67,10 @@ export default function WardReportsPage() {
           educationLevel: scope.educationLevel || undefined,
         }),
       ]);
-      setDashboard(dashboardData);
+
+      if (catalogReport) {
+        setCatalogRows(catalogReport.rows);
+      }
       setRows(wardReport.rows);
       setGeneratedAt(wardReport.generatedAt);
       setError(null);
@@ -91,13 +102,41 @@ export default function WardReportsPage() {
     [rows],
   );
 
+  const filterSourceRows = catalogRows.length > 0 ? catalogRows : rows;
+
+  const programOptions = useMemo(() => {
+    const values = new Map<string, string>();
+    for (const row of filterSourceRows) {
+      if (!values.has(row.programId)) {
+        values.set(row.programId, row.programName);
+      }
+    }
+
+    return Array.from(values.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+  }, [filterSourceRows]);
+
   const academicYearOptions = useMemo(() => {
     const values = new Set<string>();
-    for (const row of rows) {
+    for (const row of filterSourceRows) {
       values.add(row.academicYear);
     }
     return Array.from(values).sort();
-  }, [rows]);
+  }, [filterSourceRows]);
+
+  const wardOptions = useMemo(() => {
+    const entries = new Map<string, string>();
+    for (const row of filterSourceRows) {
+      if (!entries.has(row.wardId)) {
+        entries.set(row.wardId, row.wardName);
+      }
+    }
+
+    return Array.from(entries.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((left, right) => left.name.localeCompare(right.name));
+  }, [filterSourceRows]);
 
   const exportReport = async (format: "csv" | "pdf") => {
     try {
@@ -137,7 +176,7 @@ export default function WardReportsPage() {
             onChange={(event) => setFilters((current) => ({ ...current, programId: event.target.value }))}
           >
             <option value="">All Programs</option>
-            {(dashboard?.programs ?? []).map((program) => (
+            {programOptions.map((program) => (
               <option key={program.id} value={program.id}>{program.name}</option>
             ))}
           </select>
@@ -161,8 +200,8 @@ export default function WardReportsPage() {
             onChange={(event) => setFilters((current) => ({ ...current, wardId: event.target.value }))}
           >
             <option value="">All Wards</option>
-            {(dashboard?.ward_breakdown ?? []).map((ward) => (
-              <option key={ward.ward_id} value={ward.ward_id}>{ward.ward_name}</option>
+            {wardOptions.map((ward) => (
+              <option key={ward.id} value={ward.id}>{ward.name}</option>
             ))}
           </select>
 
@@ -188,54 +227,42 @@ export default function WardReportsPage() {
           <p className="mt-3 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
         ) : null}
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-                <th className="px-2 py-2">Reference</th>
-                <th className="px-2 py-2">Applicant</th>
-                <th className="px-2 py-2">Ward</th>
-                <th className="px-2 py-2">Status</th>
-                <th className="px-2 py-2">AI Score</th>
-                <th className="px-2 py-2">Recommended</th>
-                <th className="px-2 py-2">Allocated</th>
-                <th className="px-2 py-2">Reviewer Stage</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.applicationId} className="border-b border-gray-100">
-                  <td className="px-2 py-2 font-medium text-brand-900">{row.reference}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.applicantName}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.wardName}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.status}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.aiScore.toFixed(1)}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.wardRecommendationKes)}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.countyAllocationKes)}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.reviewerStage}</td>
-                </tr>
-              ))}
-              <tr className="bg-gray-50 text-gray-900">
-                <td className="px-2 py-2 font-semibold">Total</td>
-                <td className="px-2 py-2 font-semibold">-</td>
-                <td className="px-2 py-2 font-semibold">-</td>
-                <td className="px-2 py-2 font-semibold">-</td>
-                <td className="px-2 py-2 font-semibold">-</td>
-                <td className="px-2 py-2 font-semibold">{formatCurrencyKes(totals.recommendedKes)}</td>
-                <td className="px-2 py-2 font-semibold">{formatCurrencyKes(totals.allocatedKes)}</td>
-                <td className="px-2 py-2 font-semibold">{totals.approved} approved / {totals.rejected} rejected</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">
+          <span className="font-medium text-brand-900">{totals.applications} applications</span>
+          <span>{totals.approved} approved</span>
+          <span>{totals.rejected} rejected</span>
+          <span>Recommended {formatCurrencyKes(totals.recommendedKes)}</span>
+          <span>Allocated {formatCurrencyKes(totals.allocatedKes)}</span>
+          <span>Disbursed {formatCurrencyKes(totals.disbursedKes)}</span>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button onClick={() => void exportReport("csv")} disabled={exporting !== null || isLoading}>
-            {exporting === "csv" ? "Exporting CSV..." : "Download Excel (CSV)"}
-          </Button>
-          <Button variant="outline" onClick={() => void exportReport("pdf")} disabled={exporting !== null || isLoading}>
-            {exporting === "pdf" ? "Exporting PDF..." : "Download PDF Summary"}
-          </Button>
+        <div className="mt-4">
+          <DataTable
+            columns={wardReportColumns}
+            data={rows}
+            isLoading={isLoading}
+            error={rows.length === 0 ? error : null}
+            getRowId={(row) => row.applicationId}
+            searchColumnId="applicantName"
+            searchPlaceholder="Search applicant"
+            facetedFilters={[
+              { columnId: "status", title: "Status", options: reviewQueueStatusOptions },
+            ]}
+            initialSorting={[{ id: "reviewedAt", desc: true }]}
+            initialColumnVisibility={{ reviewerStage: false, academicYear: false }}
+            initialPageSize={10}
+            toolbar={(
+              <>
+                <Button onClick={() => void exportReport("csv")} disabled={exporting !== null || isLoading}>
+                  {exporting === "csv" ? "Exporting CSV..." : "Download Excel (CSV)"}
+                </Button>
+                <Button variant="outline" onClick={() => void exportReport("pdf")} disabled={exporting !== null || isLoading}>
+                  {exporting === "pdf" ? "Exporting PDF..." : "Download PDF Summary"}
+                </Button>
+              </>
+            )}
+            emptyState="No ward report rows match the current scope."
+          />
         </div>
       </section>
     </main>

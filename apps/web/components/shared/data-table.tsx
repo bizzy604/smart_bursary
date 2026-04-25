@@ -18,6 +18,7 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -71,7 +72,7 @@ export function DataTable<TData, TValue>({
 	initialPageSize = 10,
 	initialSorting = [],
 	initialColumnVisibility = {},
-	enableRowSelection = false,
+	enableRowSelection = true,
 	enablePagination = true,
 	enableToolbar = true,
 	getRowId,
@@ -84,9 +85,45 @@ export function DataTable<TData, TValue>({
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility);
 	const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
+  const resolvedColumns = React.useMemo<ColumnDef<TData, TValue>[]>(() => {
+    if (!enableRowSelection) {
+      return columns;
+    }
+
+    const selectionColumn: ColumnDef<TData, TValue> = {
+      id: "select",
+      header: ({ table }) => (
+        <div className="flex items-center justify-center" onClick={(event) => event.stopPropagation()}>
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected()
+              || (table.getIsSomePageRowsSelected() ? "indeterminate" : false)
+            }
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(Boolean(value))}
+            aria-label="Select all rows"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center justify-center" onClick={(event) => event.stopPropagation()}>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
+            disabled={!row.getCanSelect()}
+            aria-label={`Select row ${row.id}`}
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    };
+
+    return [selectionColumn, ...columns];
+  }, [columns, enableRowSelection]);
+
 	const table = useReactTable({
 		data,
-		columns,
+		columns: resolvedColumns,
 		getRowId,
 		state: { sorting, columnFilters, columnVisibility, rowSelection },
 		enableRowSelection,
@@ -159,7 +196,7 @@ export function DataTable<TData, TValue>({
 						) : error ? (
 							<TableRow>
 								<TableCell
-									colSpan={columns.length}
+									colSpan={resolvedColumns.length}
 									className="h-24 text-center text-sm text-destructive"
 								>
 									{error}
@@ -183,7 +220,7 @@ export function DataTable<TData, TValue>({
 						) : (
 							<TableRow>
 								<TableCell
-									colSpan={columns.length}
+									colSpan={resolvedColumns.length}
 									className="h-24 text-center text-sm text-muted-foreground"
 								>
 									{emptyState ?? "No results."}

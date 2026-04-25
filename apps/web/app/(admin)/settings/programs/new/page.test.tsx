@@ -50,6 +50,7 @@ describe("NewProgramSettingsPage", () => {
 		fireEvent.change(screen.getByLabelText("Closes At"), { target: { value: "2026-05-20T17:00" } });
 
 		await user.click(screen.getByRole("button", { name: "Create Program" }));
+		await user.click(screen.getByRole("button", { name: "Confirm Create" }));
 
 		await waitFor(() => {
 			expect(createAdminProgramMock).toHaveBeenCalledTimes(1);
@@ -66,7 +67,7 @@ describe("NewProgramSettingsPage", () => {
 		expect(Date.parse(payload.closesAt)).toBeGreaterThan(Date.parse(payload.opensAt));
 
 		await waitFor(() => {
-			expect(pushMock).toHaveBeenCalledWith("/settings/programs/prog-created-1");
+			expect(pushMock).toHaveBeenCalledWith("/county/programs/prog-created-1");
 		});
 	});
 });

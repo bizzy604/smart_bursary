@@ -55,6 +55,8 @@ test("@critical low-bandwidth mode keeps key journeys usable", async ({ page }) 
 						rows: [
 							{
 								applicationId: "app-low-bandwidth-1",
+								programId: "prog-low-bandwidth-1",
+								wardId: "ward-kalokol",
 								reference: "TRK-2026-00990",
 								applicantName: "Aisha Lokiru",
 								wardName: "Kalokol",

@@ -97,32 +97,53 @@ async function requestJson<T>(path: string, init: RequestInit): Promise<T> {
   return apiRequestJson<T>(path, init);
 }
 
+function unwrapData<T>(payload: unknown): T {
+  if (payload && typeof payload === "object" && "data" in (payload as object)) {
+    return (payload as { data: T }).data;
+  }
+
+  return payload as T;
+}
+
+function unwrapProgramList(payload: unknown): ProgramApiShape[] {
+  const rows = unwrapData<unknown>(payload);
+  return Array.isArray(rows) ? (rows as ProgramApiShape[]) : [];
+}
+
+function unwrapProgramDetail(
+  payload: unknown,
+): ProgramApiShape & { eligibilityRules?: Array<{ id: string; ruleType: string; parameters: unknown }> } {
+  return unwrapData<ProgramApiShape & { eligibilityRules?: Array<{ id: string; ruleType: string; parameters: unknown }> }>(payload);
+}
+
 export async function fetchAdminPrograms(filters?: {
   status?: ProgramStatus;
   academicYear?: string;
 }): Promise<ProgramListItem[]> {
-  const payload = await requestJson<{ data: ProgramApiShape[] }>(
+  const payload = await requestJson<unknown>(
     `/programs${buildQuery({ status: filters?.status, academicYear: filters?.academicYear })}`,
     { method: "GET" },
   );
 
-  return payload.data.map(mapProgram);
+  return unwrapProgramList(payload).map(mapProgram);
 }
 
 export async function fetchAdminProgramById(programId: string): Promise<ProgramDetail> {
-  const payload = await requestJson<{ data: ProgramApiShape & { eligibilityRules?: Array<{ id: string; ruleType: string; parameters: unknown }> } }>(
+  const payload = await requestJson<unknown>(
     `/programs/${programId}`,
     { method: "GET" },
   );
 
+  const detail = unwrapProgramDetail(payload);
+
   return {
-    ...mapProgram(payload.data),
-    eligibilityRules: payload.data.eligibilityRules ?? [],
+    ...mapProgram(detail),
+    eligibilityRules: detail.eligibilityRules ?? [],
   };
 }
 
 export async function createAdminProgram(input: ProgramUpsertPayload): Promise<ProgramDetail> {
-  const payload = await requestJson<{ data: ProgramApiShape & { eligibilityRules?: Array<{ id: string; ruleType: string; parameters: unknown }> } }>(
+  const payload = await requestJson<unknown>(
     "/programs",
     {
       method: "POST",
@@ -130,14 +151,16 @@ export async function createAdminProgram(input: ProgramUpsertPayload): Promise<P
     },
   );
 
+  const detail = unwrapProgramDetail(payload);
+
   return {
-    ...mapProgram(payload.data),
-    eligibilityRules: payload.data.eligibilityRules ?? [],
+    ...mapProgram(detail),
+    eligibilityRules: detail.eligibilityRules ?? [],
   };
 }
 
 export async function updateAdminProgram(programId: string, input: ProgramUpsertPayload): Promise<ProgramDetail> {
-  const payload = await requestJson<{ data: ProgramApiShape & { eligibilityRules?: Array<{ id: string; ruleType: string; parameters: unknown }> } }>(
+  const payload = await requestJson<unknown>(
     `/programs/${programId}`,
     {
       method: "PATCH",
@@ -145,24 +168,26 @@ export async function updateAdminProgram(programId: string, input: ProgramUpsert
     },
   );
 
+  const detail = unwrapProgramDetail(payload);
+
   return {
-    ...mapProgram(payload.data),
-    eligibilityRules: payload.data.eligibilityRules ?? [],
+    ...mapProgram(detail),
+    eligibilityRules: detail.eligibilityRules ?? [],
   };
 }
 
 export async function publishAdminProgram(programId: string): Promise<{ id: string; status: ProgramStatus }> {
-  const payload = await requestJson<{ id: string; status: ProgramStatus }>(`/programs/${programId}/publish`, {
+  const payload = await requestJson<unknown>(`/programs/${programId}/publish`, {
     method: "POST",
   });
 
-  return payload;
+  return unwrapData<{ id: string; status: ProgramStatus }>(payload);
 }
 
 export async function closeAdminProgram(programId: string): Promise<{ id: string; status: ProgramStatus; closesAt: string }> {
-  const payload = await requestJson<{ id: string; status: ProgramStatus; closesAt: string }>(`/programs/${programId}/close`, {
+  const payload = await requestJson<unknown>(`/programs/${programId}/close`, {
     method: "POST",
   });
 
-  return payload;
+  return unwrapData<{ id: string; status: ProgramStatus; closesAt: string }>(payload);
 }

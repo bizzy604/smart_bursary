@@ -88,6 +88,8 @@ async function mockReportingApis(page: Page): Promise<void> {
 				generatedAt,
 				rows: [{
 					applicationId: "app-00142",
+					programId: "prog-ward-2024",
+					wardId: "ward-kalokol",
 					reference: "TRK-2026-00142",
 					applicantName: "Aisha Lokiru",
 					wardName: "Kalokol",

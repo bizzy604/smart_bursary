@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { login, type AuthUser, setAccessToken } from "@/lib/auth";
 import { ApiClientError } from "@/lib/api-client";
 import { API_ERROR_MESSAGES } from "@/lib/constants";
+import { resolvePostLoginRoute } from "@/lib/role-routing";
 import { useAuthStore } from "@/store/auth-store";
 
 function isAuthRole(value: unknown): value is AuthUser["role"] {
@@ -100,21 +100,6 @@ function resolveSessionUser(rawUser: unknown, accessToken: string): AuthUser | n
 		full_name: fullName,
 		profile_complete: profileComplete,
 	};
-}
-
-function resolvePostLoginRoute(role: AuthUser["role"]): Route {
-	switch (role) {
-		case "WARD_ADMIN":
-			return "/ward/dashboard";
-		case "COUNTY_ADMIN":
-		case "FINANCE_OFFICER":
-			return "/county/dashboard";
-		case "PLATFORM_OPERATOR":
-			return "/tenants";
-		case "STUDENT":
-		default:
-			return "/dashboard";
-	}
 }
 
 export default function LoginPage() {

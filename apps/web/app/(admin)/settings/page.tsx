@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -105,7 +106,7 @@ export default function SettingsHomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
-          <Link href="/settings/programs" className="rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
+          <Link href={"/county/programs" as Route} className="rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
             <p className="font-semibold">Program Management</p>
             <p className="mt-1 text-brand-700">Create, edit, publish, and close bursary intake programs.</p>
           </Link>

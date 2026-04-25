@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { CountyLogo } from "@/components/shared/county-logo";
 import { Button } from "@/components/ui/button";
 import { useCounty } from "@/hooks/use-county";
 
 interface AdminHeaderProps {
+	homeHref: Route;
 	portalLabel: string;
 	userName: string;
 	roleLabel: string;
 	wardBadge?: string;
 }
 
-export function AdminHeader({ portalLabel, userName, roleLabel, wardBadge }: AdminHeaderProps) {
+export function AdminHeader({ homeHref, portalLabel, userName, roleLabel, wardBadge }: AdminHeaderProps) {
 	const { county } = useCounty();
 
 	return (
 		<header className="sticky top-0 z-40 border-b border-brand-100 bg-white/95 backdrop-blur-sm">
 			<div className="flex w-full flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-				<Link href="/ward/dashboard" className="flex items-center gap-3">
+				<Link href={homeHref} className="flex items-center gap-3">
 					<CountyLogo label={county.logoText} />
 					<div>
 						<p className="font-display text-sm font-bold text-brand-900 sm:text-base">{county.name}</p>

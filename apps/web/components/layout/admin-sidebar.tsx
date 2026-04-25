@@ -2,23 +2,28 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { countyNavigationItems, wardNavigationItems } from "@/lib/admin-navigation";
+import type { AuthUser } from "@/lib/auth";
+import { getAdminNavigationItems } from "@/lib/admin-navigation";
 import { cn } from "@/lib/utils";
 
 interface AdminSidebarProps {
-	variant: "ward" | "county";
+	role: Extract<AuthUser["role"], "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN">;
 }
 
-export function AdminSidebar({ variant }: AdminSidebarProps) {
+const PORTAL_LABEL_BY_ROLE: Record<AdminSidebarProps["role"], string> = {
+	WARD_ADMIN: "Ward Portal",
+	FINANCE_OFFICER: "County Finance Portal",
+	COUNTY_ADMIN: "County Admin Portal",
+};
+
+export function AdminSidebar({ role }: AdminSidebarProps) {
 	const pathname = usePathname();
-	const navigationItems = variant === "ward" ? wardNavigationItems : countyNavigationItems;
+	const navigationItems = getAdminNavigationItems(role);
 
 	return (
 		<aside className="hidden md:sticky md:top-[74px] md:block md:h-[calc(100dvh-74px)] md:self-start">
 			<div className="flex h-full min-h-full w-[240px] flex-col rounded-2xl border border-brand-100 bg-white/95 p-4 shadow-xs">
-				<p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">
-					{variant === "ward" ? "Ward Portal" : "County Portal"}
-				</p>
+				<p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">{PORTAL_LABEL_BY_ROLE[role]}</p>
 				<nav className="mt-4 flex-1 overflow-y-auto pr-1">
 					<ul className="space-y-1">
 						{navigationItems.map((item) => {

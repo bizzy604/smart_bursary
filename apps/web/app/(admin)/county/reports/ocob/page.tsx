@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import {
@@ -10,6 +11,7 @@ import {
   type DashboardReportData,
   type OcobRow,
 } from "@/lib/reporting-api";
+import { ocobReportColumns } from "./columns";
 
 type OcobFilters = {
   programId: string;
@@ -171,51 +173,37 @@ export default function CountyOcobReportsPage() {
           <p className="mt-3 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
         ) : null}
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-                <th className="px-2 py-2">Program</th>
-                <th className="px-2 py-2">Academic Year</th>
-                <th className="px-2 py-2">Applications</th>
-                <th className="px-2 py-2">Approved</th>
-                <th className="px-2 py-2">Allocated</th>
-                <th className="px-2 py-2">Disbursed</th>
-                <th className="px-2 py-2">Balance</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={`${row.programId}-${row.academicYear}`} className="border-b border-gray-100">
-                  <td className="px-2 py-2 font-medium text-brand-900">{row.programName}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.academicYear}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.applications}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.approved}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.allocatedKes)}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.disbursedKes)}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.balanceKes)}</td>
-                </tr>
-              ))}
-              <tr className="bg-gray-50 text-gray-900">
-                <td className="px-2 py-2 font-semibold">Total</td>
-                <td className="px-2 py-2 font-semibold">-</td>
-                <td className="px-2 py-2 font-semibold">{totals.applications}</td>
-                <td className="px-2 py-2 font-semibold">{totals.approved}</td>
-                <td className="px-2 py-2 font-semibold">{formatCurrencyKes(totals.allocatedKes)}</td>
-                <td className="px-2 py-2 font-semibold">{formatCurrencyKes(totals.disbursedKes)}</td>
-                <td className="px-2 py-2 font-semibold">{formatCurrencyKes(totals.balanceKes)}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">
+          <span className="font-medium text-brand-900">{totals.applications} applications</span>
+          <span>{totals.approved} approved</span>
+          <span>Allocated {formatCurrencyKes(totals.allocatedKes)}</span>
+          <span>Disbursed {formatCurrencyKes(totals.disbursedKes)}</span>
+          <span>Balance {formatCurrencyKes(totals.balanceKes)}</span>
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button onClick={() => void exportReport("csv")} disabled={exporting !== null || isLoading}>
-            {exporting === "csv" ? "Exporting CSV..." : "Download Excel (CSV)"}
-          </Button>
-          <Button variant="outline" onClick={() => void exportReport("pdf")} disabled={exporting !== null || isLoading}>
-            {exporting === "pdf" ? "Exporting PDF..." : "Download PDF Summary"}
-          </Button>
+        <div className="mt-4">
+          <DataTable
+            columns={ocobReportColumns}
+            data={rows}
+            isLoading={isLoading}
+            error={rows.length === 0 ? error : null}
+            getRowId={(row) => `${row.programId}-${row.academicYear}`}
+            searchColumnId="programName"
+            searchPlaceholder="Search program"
+            initialSorting={[{ id: "allocatedKes", desc: true }]}
+            initialPageSize={10}
+            toolbar={(
+              <>
+                <Button onClick={() => void exportReport("csv")} disabled={exporting !== null || isLoading}>
+                  {exporting === "csv" ? "Exporting CSV..." : "Download Excel (CSV)"}
+                </Button>
+                <Button variant="outline" onClick={() => void exportReport("pdf")} disabled={exporting !== null || isLoading}>
+                  {exporting === "pdf" ? "Exporting PDF..." : "Download PDF Summary"}
+                </Button>
+              </>
+            )}
+            emptyState="No OCOB report rows match the current scope."
+          />
         </div>
       </section>
     </main>

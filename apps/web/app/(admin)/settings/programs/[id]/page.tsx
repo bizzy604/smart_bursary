@@ -1,12 +1,24 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/toast";
 import {
   closeAdminProgram,
   fetchAdminProgramById,
@@ -66,6 +78,7 @@ export default function ProgramSettingsDetailPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isMutating, setIsMutating] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [pendingAction, setPendingAction] = useState<"save" | "publish" | "close" | null>(null);
 
   const isEditable = program?.status === "DRAFT";
   const isValid = useMemo(() => {
@@ -99,8 +112,8 @@ export default function ProgramSettingsDetailPage() {
           budgetCeiling: String(detail.budgetCeiling),
           opensAt: toDateTimeLocal(detail.opensAt),
           closesAt: toDateTimeLocal(detail.closesAt),
-        });
-      } catch (error: unknown) {
+      });
+    } catch (error: unknown) {
         if (mounted) {
           setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to load program." });
         }
@@ -150,19 +163,27 @@ export default function ProgramSettingsDetailPage() {
       });
       setProgram(updated);
       setFeedback({ type: "success", message: "Draft program updated." });
+      toast({
+        title: "Draft saved",
+        description: "Program changes were saved successfully.",
+        variant: "success",
+      });
     } catch (error: unknown) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to update program." });
+      const message = error instanceof Error ? error.message : "Failed to update program.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Save failed",
+        description: message,
+        variant: "error",
+      });
     } finally {
+      setPendingAction(null);
       setIsSaving(false);
     }
   }
 
   async function publishProgram() {
     if (program?.status !== "DRAFT") {
-      return;
-    }
-    const proceed = window.confirm("Publish this draft program now?");
-    if (!proceed) {
       return;
     }
 
@@ -172,19 +193,27 @@ export default function ProgramSettingsDetailPage() {
       await publishAdminProgram(programId);
       await reload();
       setFeedback({ type: "success", message: "Program published." });
+      toast({
+        title: "Program published",
+        description: "Students can now see and apply to this program.",
+        variant: "success",
+      });
     } catch (error: unknown) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to publish program." });
+      const message = error instanceof Error ? error.message : "Failed to publish program.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Publish failed",
+        description: message,
+        variant: "error",
+      });
     } finally {
+      setPendingAction(null);
       setIsMutating(false);
     }
   }
 
   async function closeProgram() {
     if (program?.status !== "ACTIVE") {
-      return;
-    }
-    const proceed = window.confirm("Close this active program? New submissions will stop immediately.");
-    if (!proceed) {
       return;
     }
 
@@ -194,9 +223,21 @@ export default function ProgramSettingsDetailPage() {
       await closeAdminProgram(programId);
       await reload();
       setFeedback({ type: "success", message: "Program closed." });
+      toast({
+        title: "Program closed",
+        description: "New submissions are now blocked.",
+        variant: "success",
+      });
     } catch (error: unknown) {
-      setFeedback({ type: "error", message: error instanceof Error ? error.message : "Failed to close program." });
+      const message = error instanceof Error ? error.message : "Failed to close program.";
+      setFeedback({ type: "error", message });
+      toast({
+        title: "Close failed",
+        description: message,
+        variant: "error",
+      });
     } finally {
+      setPendingAction(null);
       setIsMutating(false);
     }
   }
@@ -210,7 +251,7 @@ export default function ProgramSettingsDetailPage() {
               <CardTitle>Program Details</CardTitle>
               <CardDescription>Review lifecycle state and update draft configuration.</CardDescription>
             </div>
-            <Link href="/settings/programs">
+            <Link href={"/county/programs" as Route}>
               <Button variant="outline" size="sm">Back to Programs</Button>
             </Link>
           </div>
@@ -321,17 +362,17 @@ export default function ProgramSettingsDetailPage() {
 
               <div className="flex flex-wrap justify-end gap-2">
                 {isEditable ? (
-                  <Button onClick={() => void saveDraftChanges()} disabled={isSaving || !isValid}>
+                  <Button onClick={() => setPendingAction("save")} disabled={isSaving || !isValid}>
                     {isSaving ? "Saving..." : "Save Draft"}
                   </Button>
                 ) : null}
                 {program.status === "DRAFT" ? (
-                  <Button variant="secondary" onClick={() => void publishProgram()} disabled={isMutating}>
+                  <Button variant="secondary" onClick={() => setPendingAction("publish")} disabled={isMutating}>
                     {isMutating ? "Publishing..." : "Publish"}
                   </Button>
                 ) : null}
                 {program.status === "ACTIVE" ? (
-                  <Button variant="danger" onClick={() => void closeProgram()} disabled={isMutating}>
+                  <Button variant="danger" onClick={() => setPendingAction("close")} disabled={isMutating}>
                     {isMutating ? "Closing..." : "Close Program"}
                   </Button>
                 ) : null}
@@ -340,6 +381,68 @@ export default function ProgramSettingsDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => {
+          if (!open && !isSaving && !isMutating) {
+            setPendingAction(null);
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingAction === "save"
+                ? "Save draft changes?"
+                : pendingAction === "publish"
+                  ? "Publish program?"
+                  : "Close program?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingAction === "save"
+                ? "This will update the current draft configuration for the program."
+                : pendingAction === "publish"
+                  ? "Publishing makes the program visible to students for applications."
+                  : "Closing immediately blocks new submissions while preserving existing records."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSaving || isMutating}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className={pendingAction === "close" ? "bg-danger-500 hover:bg-danger-700" : undefined}
+              onClick={() => {
+                if (pendingAction === "save") {
+                  void saveDraftChanges();
+                  return;
+                }
+
+                if (pendingAction === "publish") {
+                  void publishProgram();
+                  return;
+                }
+
+                if (pendingAction === "close") {
+                  void closeProgram();
+                }
+              }}
+              disabled={isSaving || isMutating}
+            >
+              {pendingAction === "save"
+                ? isSaving
+                  ? "Saving..."
+                  : "Confirm Save"
+                : pendingAction === "publish"
+                  ? isMutating
+                    ? "Publishing..."
+                    : "Confirm Publish"
+                  : isMutating
+                    ? "Closing..."
+                    : "Confirm Close"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

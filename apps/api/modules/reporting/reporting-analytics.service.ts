@@ -134,6 +134,8 @@ export class ReportingAnalyticsService {
 				const finalReview = countyReview ?? wardReview;
 				return {
 					applicationId: application.id,
+					programId: application.programId,
+					wardId: application.wardId,
 					reference: application.submissionReference ?? application.id,
 					applicantName: application.applicant.profile?.fullName ?? 'Unknown Applicant',
 					wardName: application.ward.name,

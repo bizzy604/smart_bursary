@@ -47,7 +47,6 @@ describe("ProgramSettingsListPage", () => {
 
 	it("publishes a draft program and refreshes list data", async () => {
 		const user = userEvent.setup();
-		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
 
 		fetchAdminProgramsMock
 			.mockResolvedValueOnce([draftProgram])
@@ -60,6 +59,7 @@ describe("ProgramSettingsListPage", () => {
 		});
 
 		await user.click(await screen.findByRole("button", { name: "Publish" }));
+		await user.click(await screen.findByRole("button", { name: "Confirm Publish" }));
 
 		await waitFor(() => {
 			expect(publishAdminProgramMock).toHaveBeenCalledWith("prog-2026");
@@ -69,6 +69,5 @@ describe("ProgramSettingsListPage", () => {
 		});
 
 		expect(await screen.findByText("Program published successfully.")).toBeInTheDocument();
-		confirmSpy.mockRestore();
 	});
 });

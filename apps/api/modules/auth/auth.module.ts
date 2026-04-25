@@ -32,6 +32,6 @@ import { RedisModule } from '../../redis/redis.module';
 	],
 	controllers: [AuthController],
 	providers: [AuthService, AuthSessionService, AuthTokenService, PasswordResetService, JwtStrategy],
-	exports: [AuthService],
+	exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

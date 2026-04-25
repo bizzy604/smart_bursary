@@ -28,6 +28,8 @@ async function mockWardReviewApis(page: Page): Promise<void> {
           rows: [
             {
               applicationId,
+              programId: "prog-ward-2024",
+              wardId: "ward-kalokol",
               reference: "TRK-2026-00142",
               applicantName: "Aisha Lokiru",
               wardName: "Kalokol",

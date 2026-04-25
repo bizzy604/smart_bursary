@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { DataTable } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatShortDate } from "@/lib/format";
 import { fetchDashboardReport, fetchTrendReport, type DashboardReportData, type TrendRow } from "@/lib/reporting-api";
+import { countyTrendColumns } from "./columns";
 
 export default function CountyReportsPage() {
   const [dashboard, setDashboard] = useState<DashboardReportData | null>(null);
@@ -165,31 +167,19 @@ export default function CountyReportsPage() {
           </Button>
         </div>
 
-        <div className="mt-4 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
-                <th className="px-2 py-2">Academic Year</th>
-                <th className="px-2 py-2">Applications</th>
-                <th className="px-2 py-2">Approved</th>
-                <th className="px-2 py-2">Disbursed</th>
-                <th className="px-2 py-2">Allocated</th>
-                <th className="px-2 py-2">Disbursed Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {trends.map((row) => (
-                <tr key={row.academicYear} className="border-b border-gray-100">
-                  <td className="px-2 py-2 font-medium text-brand-900">{row.academicYear}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.totalApplications}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.approvedApplications}</td>
-                  <td className="px-2 py-2 text-gray-700">{row.disbursedApplications}</td>
-                  <td className="px-2 py-2 text-gray-700">KES {row.allocatedKes.toLocaleString()}</td>
-                  <td className="px-2 py-2 text-gray-700">KES {row.disbursedKes.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="mt-4">
+          <DataTable
+            columns={countyTrendColumns}
+            data={trends}
+            isLoading={isLoading}
+            error={trends.length === 0 ? error : null}
+            getRowId={(row) => row.academicYear}
+            searchColumnId="academicYear"
+            searchPlaceholder="Search year"
+            initialSorting={[{ id: "academicYear", desc: true }]}
+            initialPageSize={10}
+            emptyState="No historical trends match the current filters."
+          />
         </div>
       </section>
 

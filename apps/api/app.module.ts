@@ -9,6 +9,7 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 import { AppController } from './app.controller';
+import { JwtRequestContextGuard } from './common/guards/jwt-request-context.guard';
 import { PlanTierGuard } from './common/guards/plan-tier.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { RequestObservabilityInterceptor } from './common/interceptors/request-observability.interceptor';
@@ -65,6 +66,7 @@ import { QueueModule } from './queue/queue.module';
 		{ provide: APP_FILTER, useClass: PrismaExceptionFilter },
 		{ provide: APP_FILTER, useClass: GlobalExceptionFilter },
 		{ provide: APP_GUARD, useClass: ThrottlerGuard },
+		{ provide: APP_GUARD, useClass: JwtRequestContextGuard },
 		{ provide: APP_GUARD, useClass: RolesGuard },
 		{ provide: APP_GUARD, useClass: PlanTierGuard },
 		{ provide: APP_INTERCEPTOR, useClass: RequestObservabilityInterceptor },

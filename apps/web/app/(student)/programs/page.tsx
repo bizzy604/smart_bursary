@@ -1,13 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
+import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
-import { formatCurrencyKes, formatPercent, formatShortDate } from "@/lib/format";
 import { useApplication } from "@/hooks/use-application";
+import { studentProgramColumns } from "./columns";
 
 export default function ProgramsPage() {
 	const { programs, isLoading, error } = useApplication();
+  const wardOptions = useMemo(() => {
+    const values = Array.from(new Set(programs.map((program) => program.ward))).filter(Boolean);
+    return values.map((value) => ({ label: value, value }));
+  }, [programs]);
 
   return (
     <main className="space-y-6">
@@ -18,65 +22,30 @@ export default function ProgramsPage() {
         </p>
       </section>
 
-      {isLoading ? (
-        <section className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
-          Loading programs...
-        </section>
-      ) : error ? (
-        <section className="rounded-xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
-          {error}
-        </section>
-      ) : programs.length === 0 ? (
-        <EmptyState
-          title="No eligible programs"
-          description="There are no open programs matching your current profile at the moment."
+      <section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+        <DataTable
+          columns={studentProgramColumns}
+          data={programs}
+          isLoading={isLoading}
+          error={error}
+          getRowId={(row) => row.id}
+          searchColumnId="name"
+          searchPlaceholder="Search program"
+          facetedFilters={[
+            ...(wardOptions.length > 0
+              ? [{ columnId: "ward", title: "Ward Scope", options: wardOptions }]
+              : []),
+          ]}
+          initialSorting={[{ id: "closesAt", desc: false }]}
+          initialPageSize={10}
+          emptyState={(
+            <EmptyState
+              title="No eligible programs"
+              description="There are no open programs matching your current profile at the moment."
+            />
+          )}
         />
-      ) : (
-      <section className="grid gap-4">
-        {programs.map((program) => {
-          const utilization = (program.allocatedKes / program.budgetCeilingKes) * 100;
-
-          return (
-            <article key={program.id} className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-display text-xl font-semibold text-brand-900">{program.name}</h2>
-                  <p className="text-sm text-gray-600">{program.summary}</p>
-                </div>
-                <Link href={`/programs/${program.id}`}>
-                  <Button size="sm">Open</Button>
-                </Link>
-              </div>
-
-              <dl className="mt-4 grid gap-2 text-sm text-gray-600 sm:grid-cols-3">
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-gray-500">Ward Scope</dt>
-                  <dd className="mt-1 font-medium text-gray-800">{program.ward}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-gray-500">Deadline</dt>
-                  <dd className="mt-1 font-medium text-gray-800">{formatShortDate(program.closesAt)}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs uppercase tracking-wide text-gray-500">Budget Ceiling</dt>
-                  <dd className="mt-1 font-medium text-gray-800">{formatCurrencyKes(program.budgetCeilingKes)}</dd>
-                </div>
-              </dl>
-
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{formatPercent(utilization)} allocated</span>
-                  <span>{formatCurrencyKes(program.allocatedKes)} committed</span>
-                </div>
-                <div className="h-2 rounded-full bg-gray-100">
-                  <div className="h-2 rounded-full bg-brand-500" style={{ width: `${Math.min(100, utilization)}%` }} />
-                </div>
-              </div>
-            </article>
-          );
-        })}
       </section>
-      )}
     </main>
   );
 }

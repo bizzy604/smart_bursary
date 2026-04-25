@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CountyBrandingProvider } from "@/components/layout/county-branding-provider";
 import { Button } from "@/components/ui/button";
+import { canAccessPathForRole, resolvePostLoginRoute } from "@/lib/role-routing";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth-store";
 
 const opsNavItems = [
   { href: "/tenants", label: "Tenants" },
@@ -13,7 +16,25 @@ const opsNavItems = [
 ] as const;
 
 export default function OpsLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
+  const user = useAuthStore((state) => state.user);
+  const hasRouteAccess = user ? canAccessPathForRole(user.role, pathname) : false;
+
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!canAccessPathForRole(user.role, pathname)) {
+      router.replace(resolvePostLoginRoute(user.role));
+    }
+  }, [pathname, router, user]);
+
+  if (!user || !hasRouteAccess) {
+    return null;
+  }
 
   return (
     <CountyBrandingProvider>
