@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { auth } from "@/auth";
 import { renderApplicationPdf } from "@/lib/application-pdf";
 import { buildApplicationPreviewHtml } from "@/lib/application-preview";
 import type { PreviewSection } from "@/lib/application-preview";
@@ -23,6 +24,11 @@ type PreviewPdfPayload = {
 };
 
 export async function POST(request: Request) {
+	const session = await auth();
+	if (!session?.user) {
+		return NextResponse.json({ message: "Authentication required" }, { status: 401 });
+	}
+
 	const body = (await request.json().catch(() => null)) as PreviewPdfPayload | null;
 
 	if (!body?.programName || !body?.reference || !Array.isArray(body.sections)) {

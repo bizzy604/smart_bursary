@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
+/**
+ * Purpose: Expose NextAuth (Auth.js v5) endpoint handlers under /api/auth/*.
+ * Why important: Required by NextAuth to handle sign-in, callback, session, and CSRF flows.
+ * Used by: Browser-side and server-side NextAuth client calls.
+ */
+import { handlers } from "@/auth";
 
-export async function GET() {
-  return NextResponse.json({ message: "Not implemented yet" }, { status: 501 });
-}
-
-export async function POST() {
-  return NextResponse.json({ message: "Not implemented yet" }, { status: 501 });
-}
+export const { GET, POST } = handlers;

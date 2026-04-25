@@ -15,8 +15,6 @@ interface ApiSuccessEnvelope<TData> {
 	data: TData;
 }
 
-let refreshPromise: Promise<string | null> | null = null;
-
 export class ApiClientError extends Error {
 	code: string;
 	status: number;
@@ -68,35 +66,24 @@ async function readJsonBody<T>(response: Response): Promise<T | null> {
 	}
 }
 
-// Silently refreshes the access token from the httpOnly refresh cookie.
-// Returns the new token on success, null on failure (session expired).
-async function silentRefresh(): Promise<string | null> {
-	if (refreshPromise) {
-		return refreshPromise;
+// Read the access token from the in-memory store. The token is populated by
+// `components/providers/session-provider.tsx` whenever the NextAuth session
+// loads or refreshes. If it isn't present (e.g. the page was opened in a tab
+// before the provider mounted), we wait briefly for it to appear before giving
+// up.
+async function waitForToken(): Promise<string | null> {
+	const immediate = tokenStore.get();
+	if (immediate) {
+		return immediate;
 	}
-
-	refreshPromise = (async () => {
-		try {
-			const response = await fetch(resolveUrl("/auth/refresh"), {
-				method: "POST",
-				credentials: "include",
-				headers: { "Content-Type": "application/json" },
-				cache: "no-store",
-			});
-			if (!response.ok) return null;
-			const body = (await response.json()) as Record<string, unknown>;
-			const raw = (body?.data ?? body) as Record<string, unknown>;
-			const newToken = typeof raw.accessToken === "string" ? raw.accessToken : null;
-			if (newToken) tokenStore.set(newToken);
-			return newToken;
-		} catch {
-			return null;
-		} finally {
-			refreshPromise = null;
+	for (let i = 0; i < 5; i++) {
+		await new Promise((resolve) => setTimeout(resolve, 50));
+		const token = tokenStore.get();
+		if (token) {
+			return token;
 		}
-	})();
-
-	return refreshPromise;
+	}
+	return null;
 }
 
 function parseEnvelope<TData>(body: unknown): ApiSuccessEnvelope<TData> {
@@ -108,36 +95,41 @@ function parseEnvelope<TData>(body: unknown): ApiSuccessEnvelope<TData> {
 
 async function fetchWithAuth(path: string, init: RequestInit = {}): Promise<Response> {
 	const authPath = path.startsWith("/auth/");
-	let token = tokenStore.get();
+	const token = authPath ? null : await waitForToken();
 
-	if (!token && !authPath) {
-		token = await silentRefresh();
-	}
-
-	const response = await fetch(resolveUrl(path), {
+	return fetch(resolveUrl(path), {
 		...init,
 		headers: buildHeaders(init, token),
-		credentials: "include",
 		cache: "no-store",
 	});
+}
 
-	if (response.status === 401 && !path.includes("/auth/refresh")) {
-		const newToken = await silentRefresh();
-		if (newToken) {
-			return fetch(resolveUrl(path), {
-				...init,
-				headers: buildHeaders(init, newToken),
-				credentials: "include",
-				cache: "no-store",
-			});
+async function handleUnauthenticated(): Promise<void> {
+	tokenStore.clear();
+	if (typeof window !== "undefined") {
+		try {
+			const { signOut } = await import("next-auth/react");
+			await signOut({ redirect: true, callbackUrl: "/login?reason=expired" });
+		} catch {
+			window.location.assign("/login?reason=expired");
 		}
 	}
-
-	return response;
 }
 
 export async function apiRequest(path: string, init: RequestInit = {}): Promise<Response> {
 	const response = await fetchWithAuth(path, init);
+
+	if (response.status === 401 && !path.startsWith("/auth/")) {
+		await handleUnauthenticated();
+		// signOut() above kicked off a navigation to /login, but we still need
+		// to short-circuit the rest of this request so callers don't see a
+		// generic ApiClientError or try to render error UI on components that
+		// are about to unmount.
+		throw new ApiClientError(response.status, {
+			code: "UNAUTHENTICATED",
+			message: "Session expired. Please sign in again.",
+		});
+	}
 
 	if (!response.ok) {
 		const payload = await readJsonBody<ApiErrorEnvelope>(response);
