@@ -105,18 +105,20 @@ export default function OpsHealthPage() {
 
   return (
     <main className="space-y-5">
-      <PageHeader
-        eyebrow="Operations"
-        title="System Health Dashboard"
-        description="Platform-wide service visibility across API, tenant provisioning, and tenant registry pipelines."
-        icon={Activity}
-      />
-      {snapshot ? (
-        <p className="-mt-2 text-xs text-gray-500">
-          Last refresh {formatShortDate(snapshot.refreshedAt)} •{" "}
-          {snapshot.totalTenants} tenants tracked
-        </p>
-      ) : null}
+      <div>
+        <PageHeader
+          eyebrow="Operations"
+          title="System Health Dashboard"
+          description="Platform-wide service visibility across API, tenant provisioning, and tenant registry pipelines."
+          icon={Activity}
+        />
+        {snapshot ? (
+          <p className="mt-2 text-xs text-gray-500">
+            Last refresh {formatShortDate(snapshot.refreshedAt)} •{" "}
+            {snapshot.totalTenants} tenants tracked
+          </p>
+        ) : null}
+      </div>
 
       <section className="grid gap-4 sm:grid-cols-3">
         <StatsCard
