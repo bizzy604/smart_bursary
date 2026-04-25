@@ -49,6 +49,14 @@ export default auth((request) => {
 	}
 
 	if (isPublicPath(pathname)) {
+		// "/" is public so unauthenticated users can hit the marketing/redirect
+		// shell, but authenticated users should jump straight to their role home
+		// instead of going / -> /login -> home.
+		if (pathname === "/" && session?.user) {
+			return NextResponse.redirect(
+				new URL(resolvePostLoginRoute(session.user.role as AppRole), nextUrl),
+			);
+		}
 		return NextResponse.next();
 	}
 

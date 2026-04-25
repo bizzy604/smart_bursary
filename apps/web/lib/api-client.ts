@@ -121,6 +121,14 @@ export async function apiRequest(path: string, init: RequestInit = {}): Promise<
 
 	if (response.status === 401 && !path.startsWith("/auth/")) {
 		await handleUnauthenticated();
+		// signOut() above kicked off a navigation to /login, but we still need
+		// to short-circuit the rest of this request so callers don't see a
+		// generic ApiClientError or try to render error UI on components that
+		// are about to unmount.
+		throw new ApiClientError(response.status, {
+			code: "UNAUTHENTICATED",
+			message: "Session expired. Please sign in again.",
+		});
 	}
 
 	if (!response.ok) {
