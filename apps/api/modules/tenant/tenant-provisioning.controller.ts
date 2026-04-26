@@ -3,7 +3,18 @@
  * Why important: Allows SaaS operators to bootstrap and manage tenant subscriptions safely.
  * Used by: B-04 tenant provisioning workflows and operations tooling.
  */
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	HttpCode,
+	HttpStatus,
+	Param,
+	Patch,
+	Post,
+	UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -57,5 +68,32 @@ export class TenantProvisioningController {
 	@ApiBody({ type: UpdateCountyPlanDto })
 	updateCountyPlanTier(@Param('id') countyId: string, @Body() dto: UpdateCountyPlanDto) {
 		return this.provisioningService.updateCountyPlanTier(countyId, dto);
+	}
+
+	@Post(':id/deactivate')
+	@HttpCode(HttpStatus.OK)
+	@Roles(UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Deactivate a county tenant (suspends access)' })
+	@ApiParam({ name: 'id', description: 'County identifier' })
+	deactivateCounty(@Param('id') countyId: string) {
+		return this.provisioningService.deactivateCounty(countyId);
+	}
+
+	@Post(':id/reactivate')
+	@HttpCode(HttpStatus.OK)
+	@Roles(UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Reactivate a previously deactivated county tenant' })
+	@ApiParam({ name: 'id', description: 'County identifier' })
+	reactivateCounty(@Param('id') countyId: string) {
+		return this.provisioningService.reactivateCounty(countyId);
+	}
+
+	@Delete(':id')
+	@HttpCode(HttpStatus.OK)
+	@Roles(UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Soft-delete a county tenant (removes from registry)' })
+	@ApiParam({ name: 'id', description: 'County identifier' })
+	softDeleteCounty(@Param('id') countyId: string) {
+		return this.provisioningService.softDeleteCounty(countyId);
 	}
 }
