@@ -89,7 +89,7 @@ export function DataTableToolbar<TData>({
           <div className="flex flex-wrap items-center justify-end gap-2 rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2">
             <Badge
               variant="info"
-              className="border-info-200 bg-info-50 text-info-700"
+              className="border-sky-200 bg-sky-50 text-sky-700"
             >
               {selectedCount} selected
             </Badge>

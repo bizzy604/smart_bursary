@@ -152,9 +152,9 @@ export default function ApplicationDetailPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-info-100 bg-info-50 p-5">
-        <h2 className="font-serif text-lg font-semibold text-info-700">Current Status</h2>
-        <p className="mt-2 text-sm text-info-700">
+      <section className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
+        <h2 className="font-serif text-lg font-semibold text-sky-700">Current Status</h2>
+        <p className="mt-2 text-sm text-sky-700">
           {application.status === "DRAFT"
             ? "Your application is still in draft. Complete all sections and submit to move into committee review."
             : application.status === "SUBMITTED"

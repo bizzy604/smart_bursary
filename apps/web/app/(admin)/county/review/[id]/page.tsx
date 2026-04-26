@@ -163,7 +163,7 @@ export default function CountyReviewDetailPage() {
               <dd className="font-medium text-foreground">{application.educationLevel}</dd>
             </div>
           </dl>
-          <p className="mt-4 rounded-lg border border-info-100 bg-info-50 p-3 text-sm text-info-700">
+          <p className="mt-4 rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm text-sky-700">
             Ward note: {latestNote ?? "No additional note provided."}
           </p>
         </article>
@@ -201,7 +201,7 @@ export default function CountyReviewDetailPage() {
           }}
         />
       ) : (
-        <section className="rounded-xl border border-info-100 bg-info-50 p-4 text-sm text-info-700">
+        <section className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-700">
           Read-only access: county administrators can view application review details, while only finance officers can submit county decisions.
         </section>
       )}

@@ -188,7 +188,7 @@ export default function WardApplicationDetailPage() {
               </dd>
             </div>
           </dl>
-          <p className="rounded-lg border border-info-100 bg-info-50 p-3 text-sm text-info-700">
+          <p className="rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm text-sky-700">
             Latest note: {latestNote ?? "No review notes recorded yet for this application."}
           </p>
         </article>

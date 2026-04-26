@@ -204,7 +204,7 @@ export default function CountyApplicationDetailPage() {
               </dd>
             </div>
           </dl>
-          <p className="mt-4 rounded-lg border border-info-100 bg-info-50 p-3 text-sm text-info-700">
+          <p className="mt-4 rounded-lg border border-sky-100 bg-sky-50 p-3 text-sm text-sky-700">
             Latest note: {latestNote ?? "No review notes recorded yet for this application."}
           </p>
         </article>
