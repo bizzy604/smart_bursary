@@ -35,6 +35,7 @@ import { TenantModule } from './modules/tenant/tenant.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { DisbursementModule } from './modules/disbursement/disbursement.module';
 import { ReportingModule } from './modules/reporting/reporting.module';
+import { UserModule } from './modules/user/user.module';
 import { UssdModule } from './modules/ussd/ussd.module';
 import { QueueModule } from './queue/queue.module';
 
@@ -65,6 +66,7 @@ import { QueueModule } from './queue/queue.module';
 		NotificationModule,
 		DisbursementModule,
 		ReportingModule,
+		UserModule,
 		UssdModule,
 	],
 	controllers: [AppController],
