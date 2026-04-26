@@ -29,7 +29,6 @@ const INVITABLE_ROLES: { value: AdminUserRole; label: string; wardScoped: boolea
   { value: "FINANCE_OFFICER", label: "Finance Officer", wardScoped: false },
   { value: "WARD_ADMIN", label: "Ward Admin", wardScoped: true },
   { value: "VILLAGE_ADMIN", label: "Village Admin", wardScoped: true },
-  { value: "FIELD_AGENT", label: "Field Agent", wardScoped: true },
 ];
 
 export default function NewUserPage() {

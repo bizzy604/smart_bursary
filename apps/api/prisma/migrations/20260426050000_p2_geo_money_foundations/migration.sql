@@ -6,7 +6,6 @@
 -- 1. Extend existing enums
 -- ────────────────────────────────────────────────────────────────────────────
 ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'VILLAGE_ADMIN';
-ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'FIELD_AGENT';
 
 ALTER TYPE "ApplicationStatus" ADD VALUE IF NOT EXISTS 'WARD_DISTRIBUTION_PENDING';
 ALTER TYPE "ApplicationStatus" ADD VALUE IF NOT EXISTS 'VILLAGE_ALLOCATION_PENDING';

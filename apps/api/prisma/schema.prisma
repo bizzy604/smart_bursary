@@ -18,7 +18,6 @@ enum UserRole {
   COUNTY_ADMIN
   PLATFORM_OPERATOR
   VILLAGE_ADMIN
-  FIELD_AGENT
 }
 
 enum ProgramStatus {

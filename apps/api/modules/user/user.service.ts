@@ -22,7 +22,6 @@ import type { UpdateUserDto } from './dto/update-user.dto';
 const WARD_SCOPED_ROLES: ReadonlySet<UserRole> = new Set([
 	UserRole.WARD_ADMIN,
 	UserRole.VILLAGE_ADMIN,
-	UserRole.FIELD_AGENT,
 ]);
 
 const STAFF_ROLES: ReadonlySet<UserRole> = new Set([
@@ -30,7 +29,6 @@ const STAFF_ROLES: ReadonlySet<UserRole> = new Set([
 	UserRole.WARD_ADMIN,
 	UserRole.VILLAGE_ADMIN,
 	UserRole.FINANCE_OFFICER,
-	UserRole.FIELD_AGENT,
 ]);
 
 type UserRowSelect = Prisma.UserGetPayload<{

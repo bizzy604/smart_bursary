@@ -9,7 +9,6 @@ export type AdminUserRole =
   | "WARD_ADMIN"
   | "VILLAGE_ADMIN"
   | "FINANCE_OFFICER"
-  | "FIELD_AGENT"
   | "PLATFORM_OPERATOR"
   | "STUDENT";
 

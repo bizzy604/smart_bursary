@@ -13,7 +13,6 @@ const INVITABLE_ROLES = [
 	UserRole.WARD_ADMIN,
 	UserRole.VILLAGE_ADMIN,
 	UserRole.FINANCE_OFFICER,
-	UserRole.FIELD_AGENT,
 ] as const;
 
 export class InviteUserDto {

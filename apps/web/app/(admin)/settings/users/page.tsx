@@ -48,7 +48,6 @@ const ROLE_LABELS: Record<AdminUserRole, string> = {
   STUDENT: "Student",
   WARD_ADMIN: "Ward Admin",
   VILLAGE_ADMIN: "Village Admin",
-  FIELD_AGENT: "Field Agent",
   FINANCE_OFFICER: "Finance Officer",
   COUNTY_ADMIN: "County Admin",
   PLATFORM_OPERATOR: "Platform Operator",
@@ -59,7 +58,6 @@ const ROLE_FILTERS: AdminUserRole[] = [
   "WARD_ADMIN",
   "VILLAGE_ADMIN",
   "FINANCE_OFFICER",
-  "FIELD_AGENT",
 ];
 
 type ConfirmAction = "deactivate" | "reactivate" | "delete";
