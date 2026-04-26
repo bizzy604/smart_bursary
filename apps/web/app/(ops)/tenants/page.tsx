@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
+import { toast } from "sonner";
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
 import {
   compactChartLabel,
@@ -16,14 +17,31 @@ import { Building2, PauseCircle, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
 import { type SpreadsheetColumn } from "@/lib/csv-export";
-import { fetchOpsTenants, type OpsTenantSummary } from "@/lib/ops-api";
-import { opsTenantColumns } from "./columns";
+import {
+  deactivateOpsTenant,
+  deleteOpsTenant,
+  fetchOpsTenants,
+  reactivateOpsTenant,
+  type OpsTenantSummary,
+} from "@/lib/ops-api";
+import { createOpsTenantColumns, type OpsTenantAction } from "./columns";
 
 const OPS_TENANT_CSV_COLUMNS: SpreadsheetColumn<OpsTenantSummary>[] = [
   { header: "County", value: (row) => row.countyName, width: 24 },
@@ -143,6 +161,73 @@ export default function OpsTenantsPage() {
   );
   const topTenant = tenantFootprintData[0] ?? null;
   const showPlanPieChart = shouldUsePieChart(planDistributionData.length);
+
+  const [confirm, setConfirm] = useState<
+    | {
+        action: OpsTenantAction;
+        tenant: OpsTenantSummary;
+      }
+    | null
+  >(null);
+  const [busyTenantId, setBusyTenantId] = useState<string | null>(null);
+
+  const handleAction = useCallback(
+    (action: OpsTenantAction, tenant: OpsTenantSummary) => {
+      setConfirm({ action, tenant });
+    },
+    [],
+  );
+
+  const columns = useMemo(
+    () =>
+      createOpsTenantColumns({
+        onAction: handleAction,
+        pendingTenantId: busyTenantId,
+      }),
+    [handleAction, busyTenantId],
+  );
+
+  const handleConfirm = useCallback(async () => {
+    if (!confirm) return;
+    const { action, tenant } = confirm;
+    setBusyTenantId(tenant.id);
+    try {
+      if (action === "deactivate") {
+        const result = await deactivateOpsTenant(tenant.id);
+        setTenants((prev) =>
+          prev.map((row) =>
+            row.id === tenant.id ? { ...row, isActive: result.isActive } : row,
+          ),
+        );
+        toast.success("Tenant deactivated", {
+          description: `${tenant.countyName} is suspended and county admins cannot sign in.`,
+        });
+      } else if (action === "reactivate") {
+        const result = await reactivateOpsTenant(tenant.id);
+        setTenants((prev) =>
+          prev.map((row) =>
+            row.id === tenant.id ? { ...row, isActive: result.isActive } : row,
+          ),
+        );
+        toast.success("Tenant reactivated", {
+          description: `${tenant.countyName} can sign in again.`,
+        });
+      } else {
+        await deleteOpsTenant(tenant.id);
+        setTenants((prev) => prev.filter((row) => row.id !== tenant.id));
+        toast.success("Tenant deleted", {
+          description: `${tenant.countyName} has been removed from the registry.`,
+        });
+      }
+      setConfirm(null);
+    } catch (reason: unknown) {
+      const message =
+        reason instanceof Error ? reason.message : "Unable to complete action.";
+      toast.error("Action failed", { description: message });
+    } finally {
+      setBusyTenantId(null);
+    }
+  }, [confirm]);
 
   return (
     <main className="space-y-5">
@@ -332,7 +417,7 @@ export default function OpsTenantsPage() {
       ) : (
         <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
           <DataTable
-            columns={opsTenantColumns}
+            columns={columns}
             data={tenants}
             isLoading={isLoading}
             error={error}
@@ -353,6 +438,59 @@ export default function OpsTenantsPage() {
           />
         </section>
       )}
+
+      <AlertDialog
+        open={confirm !== null}
+        onOpenChange={(open) => {
+          if (!open && busyTenantId === null) {
+            setConfirm(null);
+          }
+        }}
+      >
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirm?.action === "delete"
+                ? "Delete tenant?"
+                : confirm?.action === "deactivate"
+                  ? "Deactivate tenant?"
+                  : "Reactivate tenant?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirm?.action === "delete"
+                ? `${confirm.tenant.countyName} will be soft-deleted and removed from the registry. This cannot be undone from the UI.`
+                : confirm?.action === "deactivate"
+                  ? `${confirm?.tenant.countyName} will be suspended and county admins will lose access immediately.`
+                  : `${confirm?.tenant.countyName} will regain platform access for its county admins.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busyTenantId !== null}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                variant={
+                  confirm?.action === "delete" ? "destructive" : "default"
+                }
+                disabled={busyTenantId !== null}
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleConfirm();
+                }}
+              >
+                {busyTenantId
+                  ? "Working…"
+                  : confirm?.action === "delete"
+                    ? "Delete tenant"
+                    : confirm?.action === "deactivate"
+                      ? "Deactivate"
+                      : "Reactivate"}
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }
