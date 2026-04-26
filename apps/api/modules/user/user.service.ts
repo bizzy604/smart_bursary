@@ -142,11 +142,16 @@ export class UserService {
 		this.assertWardScopeMatchesRole(dto.role, dto.wardId);
 
 		const existing = await this.prisma.user.findFirst({
-			where: { email: dto.email, countyId, deletedAt: null },
-			select: { id: true },
+			where: { email: dto.email, countyId },
+			select: { id: true, deletedAt: true },
 		});
 
 		if (existing) {
+			if (existing.deletedAt) {
+				throw new ConflictException(
+					'A user with that email was previously deleted in this tenant. Contact a platform operator to permanently remove or restore the record before re-inviting.',
+				);
+			}
 			throw new ConflictException('A user with that email already exists in this tenant.');
 		}
 

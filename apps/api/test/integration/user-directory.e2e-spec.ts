@@ -203,6 +203,19 @@ describe('User directory (e2e)', () => {
 		const ids = list.body.data.map((row: { id: string }) => row.id);
 		expect(ids).not.toContain(createdUserId);
 	});
+
+	it('returns an actionable 409 when re-inviting a soft-deleted email', async () => {
+		const deleted = await prisma.user.findUnique({ where: { id: createdUserId } });
+		expect(deleted?.deletedAt).not.toBeNull();
+
+		const response = await request(app.getHttpServer())
+			.post('/api/v1/users/invite')
+			.set('Authorization', `Bearer ${adminToken}`)
+			.send({ email: deleted!.email, role: UserRole.WARD_ADMIN, wardId })
+			.expect(409);
+
+		expect(response.body.error?.message ?? response.body.message).toMatch(/previously deleted/i);
+	});
 });
 
 function signToken(
