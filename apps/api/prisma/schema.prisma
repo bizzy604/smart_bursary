@@ -26,6 +26,7 @@ enum ProgramStatus {
   ACTIVE
   CLOSED
   SUSPENDED
+  ARCHIVED
 }
 
 enum ApplicationStatus {
@@ -315,6 +316,7 @@ model BursaryProgram {
   createdBy      String        @map("created_by") @db.Uuid
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz(6)
 
   county                   County                    @relation(fields: [countyId], references: [id])
   ward                     Ward?                     @relation(fields: [wardId], references: [id])

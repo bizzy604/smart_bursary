@@ -29,16 +29,58 @@ import {
 } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
 import {
+  archiveAdminProgram,
   closeAdminProgram,
+  deleteAdminProgram,
   fetchAdminPrograms,
   type ProgramListItem,
   ProgramStatus,
   publishAdminProgram,
+  unarchiveAdminProgram,
 } from "@/lib/admin-programs";
 import { formatCurrencyKes } from "@/lib/format";
-import { buildProgramListColumns } from "./columns";
+import { buildProgramListColumns, type ProgramRowAction } from "./columns";
 
-type ProgramActionType = "publish" | "close";
+type ProgramActionType = ProgramRowAction;
+
+const PRESENT_TENSE: Record<ProgramActionType, string> = {
+  publish: "Publishing",
+  close: "Closing",
+  archive: "Archiving",
+  unarchive: "Restoring",
+  delete: "Deleting",
+};
+
+const PAST_TENSE_SINGLE_TITLE: Record<ProgramActionType, string> = {
+  publish: "Program published",
+  close: "Program closed",
+  archive: "Program archived",
+  unarchive: "Program restored",
+  delete: "Program deleted",
+};
+
+const PAST_TENSE_MULTI_TITLE: Record<ProgramActionType, string> = {
+  publish: "Programs published",
+  close: "Programs closed",
+  archive: "Programs archived",
+  unarchive: "Programs restored",
+  delete: "Programs deleted",
+};
+
+function formatActionVerb(type: ProgramActionType): string {
+  switch (type) {
+    case "publish":
+      return "published";
+    case "close":
+      return "closed";
+    case "archive":
+      return "archived";
+    case "unarchive":
+      return "restored";
+    case "delete":
+      return "deleted";
+  }
+}
 
 function pluralize(count: number, singular: string, plural = `${singular}s`) {
   return count === 1 ? singular : plural;
@@ -144,13 +186,24 @@ export default function ProgramSettingsListPage() {
       setMutatingProgramIds(programIds);
       setFeedback(null);
 
+      const runOne = (programId: string) => {
+        switch (type) {
+          case "publish":
+            return publishAdminProgram(programId);
+          case "close":
+            return closeAdminProgram(programId);
+          case "archive":
+            return archiveAdminProgram(programId);
+          case "unarchive":
+            return unarchiveAdminProgram(programId);
+          case "delete":
+            return deleteAdminProgram(programId);
+        }
+      };
+
       try {
         const results = await Promise.allSettled(
-          selectedPrograms.map((program) =>
-            type === "publish"
-              ? publishAdminProgram(program.id)
-              : closeAdminProgram(program.id),
-          ),
+          selectedPrograms.map((program) => runOne(program.id)),
         );
 
         await refreshPrograms();
@@ -160,64 +213,62 @@ export default function ProgramSettingsListPage() {
           (result) => result.status === "fulfilled",
         ).length;
         const failed = results.length - succeeded;
+        const verb = formatActionVerb(type);
+        const firstName = selectedPrograms[0]?.name ?? "the program";
+
+        const successDescription =
+          succeeded === 1
+            ? type === "publish"
+              ? "The bursary program is now available to students."
+              : type === "close"
+                ? "New submissions are now blocked for this program."
+                : type === "archive"
+                  ? `${firstName} has been archived and is no longer listed for students.`
+                  : type === "unarchive"
+                    ? `${firstName} has been restored to draft.`
+                    : `${firstName} has been removed from the registry.`
+            : type === "publish"
+              ? `${succeeded} bursary programs are now available to students.`
+              : type === "close"
+                ? `New submissions are now blocked for ${succeeded} programs.`
+                : type === "archive"
+                  ? `${succeeded} programs have been archived.`
+                  : type === "unarchive"
+                    ? `${succeeded} programs have been restored.`
+                    : `${succeeded} programs have been removed from the registry.`;
 
         if (failed === 0) {
           const successMessage =
             succeeded === 1
-              ? type === "publish"
-                ? "Program published successfully."
-                : "Program closed successfully."
-              : `${succeeded} programs ${type === "publish" ? "published" : "closed"} successfully.`;
+              ? `Program ${verb} successfully.`
+              : `${succeeded} programs ${verb} successfully.`;
 
           setFeedback({ type: "success", message: successMessage });
           toast.success(
             succeeded === 1
-              ? type === "publish"
-                ? "Program published"
-                : "Program closed"
-              : type === "publish"
-                ? "Programs published"
-                : "Programs closed",
-            {
-              description:
-                succeeded === 1
-                  ? type === "publish"
-                    ? "The bursary program is now available to students."
-                    : "New submissions are now blocked for this program."
-                  : type === "publish"
-                    ? `${succeeded} bursary programs are now available to students.`
-                    : `New submissions are now blocked for ${succeeded} programs.`,
-            },
+              ? PAST_TENSE_SINGLE_TITLE[type]
+              : PAST_TENSE_MULTI_TITLE[type],
+            { description: successDescription },
           );
         } else {
           const failureMessage =
             succeeded === 0
-              ? type === "publish"
-                ? `Failed to publish ${selectedPrograms.length === 1 ? "program" : `${selectedPrograms.length} selected programs`}.`
-                : `Failed to close ${selectedPrograms.length === 1 ? "program" : `${selectedPrograms.length} selected programs`}.`
-              : `${succeeded} ${pluralize(succeeded, "program")} ${type === "publish" ? "published" : "closed"}; ${failed} ${pluralize(failed, "request", "requests")} failed.`;
+              ? `Failed to ${type} ${selectedPrograms.length === 1 ? "program" : `${selectedPrograms.length} selected programs`}.`
+              : `${succeeded} ${pluralize(succeeded, "program")} ${verb}; ${failed} ${pluralize(failed, "request", "requests")} failed.`;
 
           setFeedback({ type: "error", message: failureMessage });
-          toast.error(
-            type === "publish"
-              ? "Publish completed with errors"
-              : "Close completed with errors",
-            { description: failureMessage },
-          );
+          toast.error(`${PRESENT_TENSE[type]} completed with errors`, {
+            description: failureMessage,
+          });
         }
       } catch (error: unknown) {
         const message =
           error instanceof Error
             ? error.message
-            : type === "publish"
-              ? "Failed to publish program."
-              : "Failed to close program.";
+            : `Failed to ${type} program.`;
 
         setFeedback({ type: "error", message });
-        toast.error(
-          type === "publish" ? "Publish failed" : "Close failed",
-          { description: message },
-        );
+        toast.error(`${PRESENT_TENSE[type]} failed`, { description: message });
       } finally {
         setPendingAction(null);
         setMutatingProgramIds([]);
@@ -229,11 +280,8 @@ export default function ProgramSettingsListPage() {
   const columns = useMemo(() => {
     return buildProgramListColumns({
       mutatingProgramIds: mutatingProgramIdSet,
-      onRequestPublish: (program) => {
-        openProgramAction("publish", [program]);
-      },
-      onRequestClose: (program) => {
-        openProgramAction("close", [program]);
+      onRequestAction: (action, program) => {
+        openProgramAction(action, [program]);
       },
     });
   }, [mutatingProgramIdSet, openProgramAction]);
@@ -246,6 +294,9 @@ export default function ProgramSettingsListPage() {
       );
       const activePrograms = selectedPrograms.filter(
         (program) => program.status === "ACTIVE",
+      );
+      const archivablePrograms = selectedPrograms.filter(
+        (program) => program.status !== "ARCHIVED",
       );
 
       return (
@@ -270,6 +321,26 @@ export default function ProgramSettingsListPage() {
               Close selected ({activePrograms.length})
             </Button>
           ) : null}
+          {archivablePrograms.length > 0 ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isMutating}
+              onClick={() =>
+                openProgramAction("archive", archivablePrograms)
+              }
+            >
+              Archive selected ({archivablePrograms.length})
+            </Button>
+          ) : null}
+          <Button
+            variant="destructive"
+            size="sm"
+            disabled={isMutating}
+            onClick={() => openProgramAction("delete", selectedPrograms)}
+          >
+            Delete selected ({selectedPrograms.length})
+          </Button>
         </>
       );
     },
@@ -278,25 +349,79 @@ export default function ProgramSettingsListPage() {
 
   const pendingPrograms = pendingAction?.programs ?? [];
   const pendingProgramCount = pendingPrograms.length;
-  const pendingProgramName = pendingPrograms[0]?.name;
-  const dialogTitle = pendingAction
-    ? pendingAction.type === "publish"
-      ? pendingProgramCount === 1
-        ? "Publish program?"
-        : `Publish ${pendingProgramCount} programs?`
-      : pendingProgramCount === 1
-        ? "Close program?"
-        : `Close ${pendingProgramCount} programs?`
-    : "";
-  const dialogDescription = pendingAction
-    ? pendingAction.type === "publish"
-      ? pendingProgramCount === 1
-        ? `This will make ${pendingProgramName} visible to students for applications.`
-        : `This will make ${pendingProgramCount} selected draft programs visible to students for applications.`
-      : pendingProgramCount === 1
-        ? `This will stop new submissions for ${pendingProgramName}. Existing records will remain accessible.`
-        : `This will stop new submissions for ${pendingProgramCount} selected active programs. Existing records will remain accessible.`
-    : "";
+  const pendingProgramName = pendingPrograms[0]?.name ?? "this program";
+  const dialogTitle = (() => {
+    if (!pendingAction) return "";
+    const isMulti = pendingProgramCount > 1;
+    switch (pendingAction.type) {
+      case "publish":
+        return isMulti
+          ? `Publish ${pendingProgramCount} programs?`
+          : "Publish program?";
+      case "close":
+        return isMulti
+          ? `Close ${pendingProgramCount} programs?`
+          : "Close program?";
+      case "archive":
+        return isMulti
+          ? `Archive ${pendingProgramCount} programs?`
+          : "Archive program?";
+      case "unarchive":
+        return isMulti
+          ? `Restore ${pendingProgramCount} programs from archive?`
+          : "Restore program from archive?";
+      case "delete":
+        return isMulti
+          ? `Delete ${pendingProgramCount} programs?`
+          : "Delete program?";
+    }
+  })();
+  const dialogDescription = (() => {
+    if (!pendingAction) return "";
+    const isMulti = pendingProgramCount > 1;
+    switch (pendingAction.type) {
+      case "publish":
+        return isMulti
+          ? `This will make ${pendingProgramCount} selected draft programs visible to students for applications.`
+          : `This will make ${pendingProgramName} visible to students for applications.`;
+      case "close":
+        return isMulti
+          ? `This will stop new submissions for ${pendingProgramCount} selected active programs. Existing records will remain accessible.`
+          : `This will stop new submissions for ${pendingProgramName}. Existing records will remain accessible.`;
+      case "archive":
+        return isMulti
+          ? `${pendingProgramCount} selected programs will be archived and hidden from default listings. You can restore them later from the Archived filter.`
+          : `${pendingProgramName} will be archived and hidden from default listings. You can restore it later from the Archived filter.`;
+      case "unarchive":
+        return isMulti
+          ? `${pendingProgramCount} archived programs will be restored to DRAFT. You can re-publish them after review.`
+          : `${pendingProgramName} will be restored to DRAFT. You can re-publish it after review.`;
+      case "delete":
+        return isMulti
+          ? `${pendingProgramCount} selected programs will be removed from the registry. This cannot be undone from the UI.`
+          : `${pendingProgramName} will be removed from the registry. This cannot be undone from the UI.`;
+    }
+  })();
+  const confirmButtonLabel = (() => {
+    if (!pendingAction) return "Confirm";
+    if (isMutating) return `${PRESENT_TENSE[pendingAction.type]}...`;
+    switch (pendingAction.type) {
+      case "publish":
+        return "Confirm Publish";
+      case "close":
+        return "Confirm Close";
+      case "archive":
+        return "Archive program";
+      case "unarchive":
+        return "Restore program";
+      case "delete":
+        return "Delete program";
+    }
+  })();
+  const isDestructive =
+    pendingAction?.type === "close" ||
+    pendingAction?.type === "archive" ||
+    pendingAction?.type === "delete";
 
   return (
     <main className="space-y-5">
@@ -377,6 +502,7 @@ export default function ProgramSettingsListPage() {
                 <option value="ACTIVE">Active</option>
                 <option value="CLOSED">Closed</option>
                 <option value="SUSPENDED">Suspended</option>
+                <option value="ARCHIVED">Archived</option>
               </select>
             </label>
 
@@ -433,7 +559,7 @@ export default function ProgramSettingsListPage() {
             <AlertDialogAction
               disabled={isMutating}
               className={
-                pendingAction?.type === "close"
+                isDestructive
                   ? "bg-danger-500 hover:bg-danger-700"
                   : undefined
               }
@@ -448,13 +574,7 @@ export default function ProgramSettingsListPage() {
                 );
               }}
             >
-              {pendingAction?.type === "publish"
-                ? isMutating
-                  ? "Publishing..."
-                  : "Confirm Publish"
-                : isMutating
-                  ? "Closing..."
-                  : "Confirm Close"}
+              {confirmButtonLabel}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

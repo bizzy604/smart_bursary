@@ -1,6 +1,11 @@
 import { apiRequestJson } from "@/lib/api-client";
 
-export type ProgramStatus = "DRAFT" | "ACTIVE" | "CLOSED" | "SUSPENDED";
+export type ProgramStatus =
+  | "DRAFT"
+  | "ACTIVE"
+  | "CLOSED"
+  | "SUSPENDED"
+  | "ARCHIVED";
 
 type ProgramApiShape = {
   id: string;
@@ -190,4 +195,28 @@ export async function closeAdminProgram(programId: string): Promise<{ id: string
   });
 
   return unwrapData<{ id: string; status: ProgramStatus; closesAt: string }>(payload);
+}
+
+export async function archiveAdminProgram(programId: string): Promise<{ id: string; status: ProgramStatus }> {
+  const payload = await requestJson<unknown>(`/programs/${programId}/archive`, {
+    method: "POST",
+  });
+
+  return unwrapData<{ id: string; status: ProgramStatus }>(payload);
+}
+
+export async function unarchiveAdminProgram(programId: string): Promise<{ id: string; status: ProgramStatus }> {
+  const payload = await requestJson<unknown>(`/programs/${programId}/unarchive`, {
+    method: "POST",
+  });
+
+  return unwrapData<{ id: string; status: ProgramStatus }>(payload);
+}
+
+export async function deleteAdminProgram(programId: string): Promise<{ id: string; deleted: boolean }> {
+  const payload = await requestJson<unknown>(`/programs/${programId}`, {
+    method: "DELETE",
+  });
+
+  return unwrapData<{ id: string; deleted: boolean }>(payload);
 }

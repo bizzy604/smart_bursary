@@ -145,6 +145,43 @@ export class ProgramLifecycleService {
 		});
 	}
 
+	async archiveProgram(countyId: string, programId: string) {
+		const existing = await this.requireProgram(countyId, programId);
+		if (existing.status === ProgramStatus.ARCHIVED) {
+			return { id: existing.id, status: existing.status };
+		}
+
+		return this.prisma.bursaryProgram.update({
+			where: { id: programId },
+			data: { status: ProgramStatus.ARCHIVED },
+			select: { id: true, status: true },
+		});
+	}
+
+	async unarchiveProgram(countyId: string, programId: string) {
+		const existing = await this.requireProgram(countyId, programId);
+		if (existing.status !== ProgramStatus.ARCHIVED) {
+			throw new BadRequestException('Only ARCHIVED programs can be unarchived.');
+		}
+
+		return this.prisma.bursaryProgram.update({
+			where: { id: programId },
+			data: { status: ProgramStatus.DRAFT },
+			select: { id: true, status: true },
+		});
+	}
+
+	async deleteProgram(countyId: string, programId: string) {
+		const existing = await this.requireProgram(countyId, programId);
+
+		await this.prisma.bursaryProgram.update({
+			where: { id: existing.id },
+			data: { deletedAt: new Date(), status: ProgramStatus.ARCHIVED },
+		});
+
+		return { id: existing.id, deleted: true };
+	}
+
 	private parseDateOrThrow(value: string, field: string): Date {
 		const date = new Date(value);
 		if (Number.isNaN(date.getTime())) {
@@ -171,7 +208,7 @@ export class ProgramLifecycleService {
 
 	private async requireProgram(countyId: string, programId: string) {
 		const program = await this.prisma.bursaryProgram.findFirst({
-			where: { id: programId, countyId },
+			where: { id: programId, countyId, deletedAt: null },
 			select: { id: true, status: true, opensAt: true, closesAt: true },
 		});
 		if (!program) {
