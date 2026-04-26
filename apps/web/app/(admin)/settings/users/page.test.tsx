@@ -1,89 +1,73 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { fetchAdminSettingsMock, fetchWardSummaryReportMock } = vi.hoisted(() => ({
-  fetchAdminSettingsMock: vi.fn(),
-  fetchWardSummaryReportMock: vi.fn(),
+const { fetchAdminUsersMock } = vi.hoisted(() => ({
+  fetchAdminUsersMock: vi.fn(),
 }));
 
-vi.mock("@/lib/admin-settings", () => ({
-  fetchAdminSettings: fetchAdminSettingsMock,
+vi.mock("@/lib/admin-users", () => ({
+  fetchAdminUsers: fetchAdminUsersMock,
+  fetchTenantWards: vi.fn(),
+  deactivateAdminUser: vi.fn(),
+  reactivateAdminUser: vi.fn(),
+  deleteAdminUser: vi.fn(),
+  inviteAdminUser: vi.fn(),
 }));
 
-vi.mock("@/lib/reporting-api", () => ({
-  fetchWardSummaryReport: fetchWardSummaryReportMock,
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 import SettingsUsersPage from "@/app/(admin)/settings/users/page";
 
 describe("SettingsUsersPage", () => {
   beforeEach(() => {
-    fetchAdminSettingsMock.mockReset();
-    fetchWardSummaryReportMock.mockReset();
-
-    fetchAdminSettingsMock.mockResolvedValue({
-      countyId: "county-1",
-      branding: {
-        countyName: "Turkana County",
+    fetchAdminUsersMock.mockReset();
+    fetchAdminUsersMock.mockResolvedValue([
+      {
+        id: "user-1",
+        email: "ward.admin@turkana.go.ke",
+        phone: null,
+        role: "WARD_ADMIN",
+        isActive: true,
+        emailVerified: true,
+        phoneVerified: false,
+        wardId: "ward-1",
+        ward: { id: "ward-1", name: "Lodwar Ward", code: "LDW" },
+        lastLoginAt: "2026-04-20T10:00:00.000Z",
+        createdAt: "2026-04-01T10:00:00.000Z",
+        updatedAt: "2026-04-20T10:00:00.000Z",
       },
-    });
-
-    fetchWardSummaryReportMock.mockResolvedValue({
-      generatedAt: new Date().toISOString(),
-      rows: [
-        {
-          applicationId: "app-1",
-          reference: "TRK-001",
-          applicantName: "Aisha Lokiru",
-          wardName: "Kalokol",
-          programName: "2026 Fund",
-          academicYear: "2026",
-          educationLevel: "UNIVERSITY",
-          status: "WARD_REVIEW",
-          aiScore: 78.2,
-          wardRecommendationKes: 35000,
-          countyAllocationKes: 0,
-          reviewerName: "Elijah Lokwang",
-          reviewerStage: "WARD_REVIEW",
-          reviewedAt: "2026-04-18T09:00:00.000Z",
-        },
-        {
-          applicationId: "app-2",
-          reference: "TRK-002",
-          applicantName: "Musa Lomuria",
-          wardName: "Lokichar",
-          programName: "2026 Fund",
-          academicYear: "2026",
-          educationLevel: "COLLEGE",
-          status: "COUNTY_REVIEW",
-          aiScore: 82.5,
-          wardRecommendationKes: 42000,
-          countyAllocationKes: 42000,
-          reviewerName: "County Finance Officer",
-          reviewerStage: "COUNTY_REVIEW",
-          reviewedAt: "2026-04-18T10:15:00.000Z",
-        },
-      ],
-    });
+      {
+        id: "user-2",
+        email: "finance@turkana.go.ke",
+        phone: "+254712345678",
+        role: "FINANCE_OFFICER",
+        isActive: true,
+        emailVerified: true,
+        phoneVerified: false,
+        wardId: null,
+        ward: null,
+        lastLoginAt: null,
+        createdAt: "2026-04-02T10:00:00.000Z",
+        updatedAt: "2026-04-02T10:00:00.000Z",
+      },
+    ]);
   });
 
-  it("loads reviewer telemetry and filters by stage", async () => {
-    const user = userEvent.setup();
+  it("loads tenant users from the API and renders rows", async () => {
     render(<SettingsUsersPage />);
 
     await waitFor(() => {
-      expect(fetchAdminSettingsMock).toHaveBeenCalledTimes(1);
-      expect(fetchWardSummaryReportMock).toHaveBeenCalledTimes(1);
+      expect(fetchAdminUsersMock).toHaveBeenCalled();
     });
 
-    expect(await screen.findByText("Users and Review Workforce")).toBeInTheDocument();
-    expect(screen.getByText("Elijah Lokwang")).toBeInTheDocument();
-    expect(screen.getByText("County Finance Officer")).toBeInTheDocument();
-
-    await user.selectOptions(screen.getByLabelText("Filter reviewers by stage"), "COUNTY_REVIEW");
-
-    expect(screen.queryByText("Elijah Lokwang")).not.toBeInTheDocument();
-    expect(screen.getByText("County Finance Officer")).toBeInTheDocument();
+    expect(await screen.findByText("Tenant Users")).toBeInTheDocument();
+    expect(await screen.findByText("ward.admin@turkana.go.ke")).toBeInTheDocument();
+    expect(screen.getByText("finance@turkana.go.ke")).toBeInTheDocument();
+    expect(screen.getByText("Lodwar Ward")).toBeInTheDocument();
   });
 });
