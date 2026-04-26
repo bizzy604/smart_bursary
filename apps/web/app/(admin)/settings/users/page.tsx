@@ -82,9 +82,7 @@ export default function SettingsUsersPage() {
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      const list = await fetchAdminUsers({
-        isActive: statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
-      });
+      const list = await fetchAdminUsers();
       setUsers(list);
       setError(null);
     } catch (reason: unknown) {
@@ -96,19 +94,20 @@ export default function SettingsUsersPage() {
 
   useEffect(() => {
     void loadUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter]);
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
     return users.filter((user) => {
       if (roleFilter !== "ALL" && user.role !== roleFilter) return false;
+      if (statusFilter === "ACTIVE" && !user.isActive) return false;
+      if (statusFilter === "INACTIVE" && user.isActive) return false;
       if (term && !user.email.toLowerCase().includes(term) && !(user.phone ?? "").toLowerCase().includes(term)) {
         return false;
       }
       return true;
     });
-  }, [users, searchTerm, roleFilter]);
+  }, [users, searchTerm, roleFilter, statusFilter]);
 
   const handleConfirm = async () => {
     if (!confirm) return;

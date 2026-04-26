@@ -5,7 +5,7 @@
  */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength } from 'class-validator';
 import { UserRole } from '@prisma/client';
 
 const INVITABLE_ROLES = [
@@ -24,7 +24,7 @@ export class InviteUserDto {
 	email!: string;
 
 	@ApiProperty({ enum: INVITABLE_ROLES })
-	@IsEnum(UserRole)
+	@IsIn(INVITABLE_ROLES as readonly UserRole[])
 	role!: UserRole;
 
 	@ApiPropertyOptional({ description: 'Ward identifier (required for ward-scoped roles).' })
