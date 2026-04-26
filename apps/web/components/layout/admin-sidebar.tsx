@@ -23,19 +23,21 @@ import {
 } from "@/components/ui/sidebar";
 
 interface AdminSidebarProps {
-	role: Extract<AuthUser["role"], "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN">;
+	role: Extract<AuthUser["role"], "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN" | "VILLAGE_ADMIN">;
 }
 
 const PORTAL_LABEL_BY_ROLE: Record<AdminSidebarProps["role"], string> = {
 	WARD_ADMIN: "Ward Portal",
 	FINANCE_OFFICER: "Finance Portal",
 	COUNTY_ADMIN: "County Admin",
+	VILLAGE_ADMIN: "Village Portal",
 };
 
 const PORTAL_TAGLINE_BY_ROLE: Record<AdminSidebarProps["role"], string> = {
 	WARD_ADMIN: "Application reviews",
 	FINANCE_OFFICER: "Disbursements & finance",
 	COUNTY_ADMIN: "County operations",
+	VILLAGE_ADMIN: "Student allocations",
 };
 
 export function AdminSidebar({ role }: AdminSidebarProps) {

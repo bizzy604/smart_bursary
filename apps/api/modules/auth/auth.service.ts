@@ -188,6 +188,14 @@ export class AuthService {
 		return { ok: true };
 	}
 
+	async listActiveCounties(): Promise<{ id: string; slug: string; name: string }[]> {
+		return this.prisma.county.findMany({
+			where: { isActive: true },
+			select: { id: true, slug: true, name: true },
+			orderBy: { name: 'asc' },
+		});
+	}
+
 	async issueRefreshTokenForUser(user: {
 		id: string;
 		email: string;

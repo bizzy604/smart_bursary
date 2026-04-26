@@ -4,7 +4,8 @@
  * Used by: DocumentController and the virus-scan queue adapter.
  */
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import { PrismaService } from '../../database/prisma.service';
@@ -34,6 +35,18 @@ type StoredDocument = {
   scanStatus: 'PENDING' | 'CLEAN' | 'INFECTED' | 'FAILED';
   scanCompletedAt: Date | null;
   uploadedAt: Date;
+};
+
+type DocumentActor = {
+  userId: string;
+  role: UserRole;
+  wardId: string | null;
+};
+
+type ScopedApplication = {
+  id: string;
+  applicantId: string;
+  wardId: string;
 };
 
 @Injectable()
@@ -85,24 +98,32 @@ export class DocumentService {
     return this.mapDocument(document);
   }
 
-  async getDocument(countyId: string, userId: string, documentId: string) {
+  async getDocument(countyId: string, actor: DocumentActor, documentId: string) {
     const document = await this.prisma.document.findFirst({
-      where: {
-        id: documentId,
-        countyId,
-        application: { applicantId: userId },
-      },
+      where: { id: documentId, countyId },
+      include: { application: { select: { id: true, applicantId: true, wardId: true } } },
     });
 
-    if (!document) {
+    if (!document || !document.application) {
       throw new NotFoundException('Document not found');
     }
+
+    this.assertDocumentAccess(document.application as ScopedApplication, actor);
 
     return this.mapDocument(document);
   }
 
-  async listDocuments(countyId: string, userId: string, applicationId: string) {
-    await this.ensureApplicantApplication(countyId, userId, applicationId);
+  async listDocuments(countyId: string, actor: DocumentActor, applicationId: string) {
+    const application = await this.prisma.application.findFirst({
+      where: { id: applicationId, countyId },
+      select: { id: true, applicantId: true, wardId: true },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    this.assertDocumentAccess(application as ScopedApplication, actor);
 
     const documents = await this.prisma.document.findMany({
       where: { applicationId, countyId },
@@ -135,6 +156,28 @@ export class DocumentService {
       downloadUrl: signedDownload.url,
       downloadExpiresAt: signedDownload.expiresAt,
     };
+  }
+
+  private assertDocumentAccess(application: ScopedApplication, actor: DocumentActor) {
+    if (actor.role === UserRole.STUDENT) {
+      if (actor.userId !== application.applicantId) {
+        throw new ForbiddenException('Students can only access their own documents.');
+      }
+      return;
+    }
+
+    if (actor.role === UserRole.WARD_ADMIN || actor.role === UserRole.VILLAGE_ADMIN) {
+      if (!actor.wardId || actor.wardId !== application.wardId) {
+        throw new ForbiddenException('Ward admins can only access documents for applications in their ward.');
+      }
+      return;
+    }
+
+    if (actor.role === UserRole.FINANCE_OFFICER || actor.role === UserRole.COUNTY_ADMIN || actor.role === UserRole.PLATFORM_OPERATOR) {
+      return;
+    }
+
+    throw new ForbiddenException('Role is not allowed to access documents.');
   }
 
   private normalizeDocType(docType: string): string {

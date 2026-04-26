@@ -5,6 +5,7 @@ import {
 	ClipboardList,
 	FileSearch,
 	LayoutDashboard,
+	MapPin,
 	Settings,
 	Users,
 	Wallet,
@@ -19,7 +20,7 @@ export interface AdminNavigationItem {
 	icon: LucideIcon;
 }
 
-type AdminRole = Extract<AuthUser["role"], "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN">;
+type AdminRole = Extract<AuthUser["role"], "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN" | "VILLAGE_ADMIN">;
 
 const wardNavigationItems: AdminNavigationItem[] = [
 	{ href: "/ward/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -42,13 +43,25 @@ const countyAdminNavigationItems: AdminNavigationItem[] = [
 	{ href: "/county/review", label: "Review Queue", icon: FileSearch },
 	{ href: "/county/disbursements", label: "Disbursements", icon: Wallet },
 	{ href: "/county/reports", label: "Reports", icon: BarChart3 },
+	{ href: "/county/locations" as Route, label: "Locations", icon: MapPin },
 	{ href: "/settings/users" as Route, label: "Team", icon: Users },
 	{ href: "/settings", label: "Settings", icon: Settings },
+];
+
+const villageAdminNavigationItems: AdminNavigationItem[] = [
+	{ href: "/village/dashboard", label: "Dashboard", icon: LayoutDashboard },
+	{ href: "/village/applications", label: "Applications", icon: ClipboardList },
+	{ href: "/village/review", label: "Review Queue", icon: FileSearch },
+	{ href: "/village/allocations", label: "Allocations", icon: Wallet },
 ];
 
 export function getAdminNavigationItems(role: AdminRole): AdminNavigationItem[] {
 	if (role === "WARD_ADMIN") {
 		return wardNavigationItems;
+	}
+
+	if (role === "VILLAGE_ADMIN") {
+		return villageAdminNavigationItems;
 	}
 
 	if (role === "COUNTY_ADMIN") {

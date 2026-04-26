@@ -14,12 +14,51 @@ export type SeedContext = {
     turkanaCentral: string;
     turkanaNorth: string;
     turkanaWest: string;
+    loima: string;
+    turkanaSouth: string;
+    turkanaEast: string;
     nakuruTownEast: string;
   };
   wards: {
     lodwar: string;
     kanamkemer: string;
     kakuma: string;
+    // Turkana North
+    kaeris: string;
+    lakeZone: string;
+    lapur: string;
+    kaalengKaikor: string;
+    kibish: string;
+    nakalale: string;
+    // Turkana West
+    lopur: string;
+    letea: string;
+    songot: string;
+    kalobeyei: string;
+    lokichoggio: string;
+    nanaam: string;
+    // Turkana Central
+    kerioDelta: string;
+    kangatotha: string;
+    kalokol: string;
+    // Loima
+    kotarukLobei: string;
+    turkwel: string;
+    loima: string;
+    lokiriamaLorengippi: string;
+    // Turkana South
+    kaputir: string;
+    katilu: string;
+    lobokat: string;
+    kalapata: string;
+    lokichar: string;
+    // Turkana East
+    kapedoNapeitom: string;
+    katilia: string;
+    lokoriKochodin: string;
+    // Nakuru
+    biashara: string;
+    kivumbini: string;
   };
   villageUnits: {
     lodwarTown: string;

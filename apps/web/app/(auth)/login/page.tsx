@@ -8,10 +8,20 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { useCounties } from "@/hooks/use-counties";
 
 function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const { counties, isLoading: countiesLoading } = useCounties();
+	const [countySlug, setCountySlug] = useState<string>("turkana");
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(() => {
 		const reason = searchParams?.get("reason");
@@ -30,10 +40,10 @@ function LoginForm() {
 		const formData = new FormData(event.currentTarget);
 		const email = String(formData.get("email") ?? "").trim();
 		const password = String(formData.get("password") ?? "");
-		const countySlug = String(formData.get("county_slug") ?? "").trim().toLowerCase();
+		const selectedCounty = countySlug.trim().toLowerCase();
 
-		if (!email || !password || !countySlug) {
-			setErrorMessage("Enter your email, password, and county slug to continue.");
+		if (!email || !password || !selectedCounty) {
+			setErrorMessage("Enter your email, password, and county to continue.");
 			return;
 		}
 
@@ -44,12 +54,12 @@ function LoginForm() {
 			const result = await signIn("credentials", {
 				email,
 				password,
-				countySlug,
+				countySlug: selectedCounty,
 				redirect: false,
 			});
 
 			if (!result || result.error) {
-				setErrorMessage("Invalid credentials. Check your email, password, and county slug.");
+				setErrorMessage("Invalid credentials. Check your email, password, and county.");
 				return;
 			}
 
@@ -98,12 +108,29 @@ function LoginForm() {
 
 			<div className="space-y-2">
 				<label htmlFor="county" className="text-sm font-medium text-foreground/90">
-					County slug
+					County
 				</label>
-				<Input id="county" name="county_slug" placeholder="turkana" required />
-			</div>
+				<input type="hidden" name="county_slug" value={countySlug} />
+				<Select
+					value={countySlug}
+					onValueChange={setCountySlug}
+					disabled={countiesLoading}
+				>
+					<SelectTrigger id="county">
+						<SelectValue placeholder="Select county" />
+					</SelectTrigger>
+					<SelectContent>
+						{counties.map((county) => (
+							<SelectItem key={county.slug} value={county.slug}>
+								{county.name}
+							</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+					{countiesLoading ? <p className="text-xs text-muted-foreground">Loading counties…</p> : null}
+				</div>
 
-			<Button type="submit" fullWidth disabled={isSubmitting}>
+			<Button type="submit" fullWidth disabled={isSubmitting || countiesLoading}>
 				{isSubmitting ? "Signing in..." : "Sign in"}
 			</Button>
 

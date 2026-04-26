@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 /**
  * Village-admin per-student allocation queue (Commit 5c of the data-integrity rollout).
@@ -31,7 +31,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/toast";
+import { toast } from "sonner";
 import { ApiClientError } from "@/lib/api-client";
 import {
 	AllocateToStudentInput,
@@ -246,7 +246,16 @@ export default function VillageAllocationsPage() {
 	}
 
 	return (
-		<section className="space-y-6">
+		<main className="space-y-5">
+			<section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+				<div>
+					<h1 className="font-serif text-2xl font-bold text-primary">Village Allocation Queue</h1>
+					<p className="mt-2 text-sm text-muted-foreground">
+						Set per-student amounts for applicants in your assigned village(s).
+					</p>
+				</div>
+			</section>
+
 			{assignments.length > 1 ? (
 				<Card>
 					<CardHeader>
@@ -298,7 +307,7 @@ export default function VillageAllocationsPage() {
 					) : null}
 				</>
 			)}
-		</section>
+		</main>
 	);
 }
 
@@ -545,14 +554,14 @@ function ApplicationsQueue(props: {
 										</td>
 									</tr>
 								);
-							})}
-						</tbody>
-					</table>
-				</div>
-			</CardContent>
-		</Card>
-	);
-}
+								})}
+							</tbody>
+						</table>
+					</div>
+				</CardContent>
+			</Card>
+		);
+	}
 
 // Suppress unused-import warning if AllocationOverrideReasonCode is never
 // referenced (the override panel is wired up for the privileged-actor variant

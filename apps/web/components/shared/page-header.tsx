@@ -26,7 +26,7 @@ export function PageHeader({
 		return (
 			<section
 				className={cn(
-					"relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary via-secondary to-secondary p-6 text-white shadow-sm",
+					"relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f1d32] via-[#1e3a5f] to-[#254a7c] p-6 text-white shadow-sm",
 					className,
 				)}
 			>
@@ -46,7 +46,7 @@ export function PageHeader({
 				<div className="relative flex flex-wrap items-start justify-between gap-4">
 					<div className="min-w-0 max-w-2xl space-y-2">
 						{eyebrow ? (
-							<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent/40">
+							<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/80">
 								{eyebrow}
 							</p>
 						) : null}
@@ -54,7 +54,7 @@ export function PageHeader({
 							{title}
 						</h1>
 						{description ? (
-							<p className="max-w-xl text-sm leading-relaxed text-secondary/10">
+							<p className="max-w-xl text-sm leading-relaxed text-white/90">
 								{description}
 							</p>
 						) : null}

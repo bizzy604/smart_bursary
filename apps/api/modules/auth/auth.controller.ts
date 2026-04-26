@@ -139,9 +139,16 @@ export class AuthController {
 		return this.passwordResetService.resetPassword(dto);
 	}
 
+	@Get('counties')
+	@ApiOperation({ summary: 'List active counties for registration / login picker' })
+	@ApiOkResponse({ description: 'Active county slugs and names.' })
+	listCounties() {
+		return this.authService.listActiveCounties();
+	}
+
+	@Get('me')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
-	@Get('me')
 	me(@CurrentUser() user: Record<string, unknown>): Record<string, unknown> {
 		return user;
 	}

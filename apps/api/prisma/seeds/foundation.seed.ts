@@ -27,18 +27,54 @@ const TURKANA_SUB_COUNTIES: ReadonlyArray<{ key: SubCountyKey; code: string; nam
   { key: 'turkanaCentral', code: 'TRK-SC-CEN', name: 'Turkana Central', county: 'turkana' },
   { key: 'turkanaNorth',   code: 'TRK-SC-NTH', name: 'Turkana North',   county: 'turkana' },
   { key: 'turkanaWest',    code: 'TRK-SC-WST', name: 'Turkana West',    county: 'turkana' },
+  { key: 'loima',          code: 'TRK-SC-LOI', name: 'Loima',           county: 'turkana' },
+  { key: 'turkanaSouth',   code: 'TRK-SC-STH', name: 'Turkana South',   county: 'turkana' },
+  { key: 'turkanaEast',    code: 'TRK-SC-EST', name: 'Turkana East',    county: 'turkana' },
   { key: 'nakuruTownEast', code: 'NKR-SC-NTE', name: 'Nakuru Town East', county: 'nakuru' },
 ] as const;
 
-const TURKANA_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey }> = [
-  { code: 'TRK-001', name: 'Lodwar Township', subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral' },
-  { code: 'TRK-002', name: 'Kanamkemer',      subCounty: 'Turkana North',   subCountyKey: 'turkanaNorth' },
-  { code: 'TRK-003', name: 'Kakuma',          subCounty: 'Turkana West',    subCountyKey: 'turkanaWest' },
+const TURKANA_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey; key: WardKey }> = [
+  // Turkana North (6 wards)
+  { code: 'TRK-N-001', name: 'Kaeris',            subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'kaeris' },
+  { code: 'TRK-N-002', name: 'Lake Zone',        subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'lakeZone' },
+  { code: 'TRK-N-003', name: 'Lapur',             subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'lapur' },
+  { code: 'TRK-N-004', name: 'Kaaleng / Kaikor',  subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'kaalengKaikor' },
+  { code: 'TRK-N-005', name: 'Kibish',            subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'kibish' },
+  { code: 'TRK-N-006', name: 'Nakalale',          subCounty: 'Turkana North', subCountyKey: 'turkanaNorth', key: 'nakalale' },
+  // Turkana West (7 wards)
+  { code: 'TRK-W-001', name: 'Kakuma',            subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'kakuma' },
+  { code: 'TRK-W-002', name: 'Lopur',             subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'lopur' },
+  { code: 'TRK-W-003', name: 'Letea',             subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'letea' },
+  { code: 'TRK-W-004', name: 'Songot',            subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'songot' },
+  { code: 'TRK-W-005', name: 'Kalobeyei',         subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'kalobeyei' },
+  { code: 'TRK-W-006', name: 'Lokichoggio',       subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'lokichoggio' },
+  { code: 'TRK-W-007', name: 'Nanaam',            subCounty: 'Turkana West',  subCountyKey: 'turkanaWest',  key: 'nanaam' },
+  // Turkana Central (5 wards)
+  { code: 'TRK-C-001', name: 'Kerio Delta',       subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral', key: 'kerioDelta' },
+  { code: 'TRK-C-002', name: "Kang'atotha",       subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral', key: 'kangatotha' },
+  { code: 'TRK-C-003', name: 'Kalokol',           subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral', key: 'kalokol' },
+  { code: 'TRK-C-004', name: 'Lodwar Township',   subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral', key: 'lodwar' },
+  { code: 'TRK-C-005', name: 'Kanamkemer',        subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral', key: 'kanamkemer' },
+  // Loima (4 wards)
+  { code: 'TRK-L-001', name: "Kotaruk / Lobei",    subCounty: 'Loima',            subCountyKey: 'loima',          key: 'kotarukLobei' },
+  { code: 'TRK-L-002', name: 'Turkwel',           subCounty: 'Loima',            subCountyKey: 'loima',          key: 'turkwel' },
+  { code: 'TRK-L-003', name: 'Loima',             subCounty: 'Loima',            subCountyKey: 'loima',          key: 'loima' },
+  { code: 'TRK-L-004', name: 'Lokiriama / Lorengippi', subCounty: 'Loima', subCountyKey: 'loima', key: 'lokiriamaLorengippi' },
+  // Turkana South (5 wards)
+  { code: 'TRK-S-001', name: 'Kaputir',           subCounty: 'Turkana South',   subCountyKey: 'turkanaSouth',   key: 'kaputir' },
+  { code: 'TRK-S-002', name: 'Katilu',            subCounty: 'Turkana South',   subCountyKey: 'turkanaSouth',   key: 'katilu' },
+  { code: 'TRK-S-003', name: 'Lobokat',           subCounty: 'Turkana South',   subCountyKey: 'turkanaSouth',   key: 'lobokat' },
+  { code: 'TRK-S-004', name: 'Kalapata',          subCounty: 'Turkana South',   subCountyKey: 'turkanaSouth',   key: 'kalapata' },
+  { code: 'TRK-S-005', name: 'Lokichar',          subCounty: 'Turkana South',   subCountyKey: 'turkanaSouth',   key: 'lokichar' },
+  // Turkana East (3 wards)
+  { code: 'TRK-E-001', name: 'Kapedo / Napeitom', subCounty: 'Turkana East',    subCountyKey: 'turkanaEast',    key: 'kapedoNapeitom' },
+  { code: 'TRK-E-002', name: 'Katilia',           subCounty: 'Turkana East',    subCountyKey: 'turkanaEast',    key: 'katilia' },
+  { code: 'TRK-E-003', name: 'Lokori / Kochodin', subCounty: 'Turkana East',    subCountyKey: 'turkanaEast',    key: 'lokoriKochodin' },
 ];
 
-const NAKURU_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey }> = [
-  { code: 'NKR-001', name: 'Biashara',  subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast' },
-  { code: 'NKR-002', name: 'Kivumbini', subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast' },
+const NAKURU_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey; key: WardKey }> = [
+  { code: 'NKR-001', name: 'Biashara',  subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast', key: 'biashara' },
+  { code: 'NKR-002', name: 'Kivumbini', subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast', key: 'kivumbini' },
 ];
 
 type VillageUnitKey = keyof SeedContext['villageUnits'];
@@ -205,7 +241,7 @@ export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext>
 
   return {
     county: countyIds,
-    wards: { lodwar: wards.lodwar, kanamkemer: wards.kanamkemer, kakuma: wards.kakuma },
+    wards,
     users: userIds,
     subCounties,
     villageUnits,
@@ -233,7 +269,7 @@ async function seedSubCounties(
 async function seedWards(
   prisma: PrismaClient,
   countyId: string,
-  rows: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: keyof SeedContext['subCounties'] }>,
+  rows: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: keyof SeedContext['subCounties']; key: WardKey }>,
   subCounties: SeedContext['subCounties'],
 ): Promise<Record<string, string>> {
   const wardIds: Record<string, string> = {};
@@ -245,9 +281,7 @@ async function seedWards(
       create: { countyId, code: ward.code, name: ward.name, subCounty: ward.subCounty, subCountyId, isActive: true },
       select: { id: true },
     });
-    if (ward.code === 'TRK-001') wardIds.lodwar = saved.id;
-    if (ward.code === 'TRK-002') wardIds.kanamkemer = saved.id;
-    if (ward.code === 'TRK-003') wardIds.kakuma = saved.id;
+    wardIds[ward.key] = saved.id;
   }
   return wardIds;
 }

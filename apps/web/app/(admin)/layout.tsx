@@ -12,14 +12,15 @@ const ROLE_LABELS = {
 	WARD_ADMIN: "Ward Administrator",
 	FINANCE_OFFICER: "Finance Officer",
 	COUNTY_ADMIN: "County Administrator",
+	VILLAGE_ADMIN: "Village Administrator",
 	PLATFORM_OPERATOR: "Platform Operator",
 	STUDENT: "Student",
 } as const;
 
-type AdminRole = "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN";
+type AdminRole = "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN" | "VILLAGE_ADMIN";
 
 function isAdminRole(role: AppRole): role is AdminRole {
-	return role === "WARD_ADMIN" || role === "FINANCE_OFFICER" || role === "COUNTY_ADMIN";
+	return role === "WARD_ADMIN" || role === "FINANCE_OFFICER" || role === "COUNTY_ADMIN" || role === "VILLAGE_ADMIN";
 }
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -33,15 +34,23 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 	}
 
 	const adminRole = session.user.role;
-	const inCountySpace = adminRole !== "WARD_ADMIN";
-	const userName = session.user.fullName?.trim() || (inCountySpace ? "County Officer" : "Ward Officer");
+	const inCountySpace = adminRole !== "WARD_ADMIN" && adminRole !== "VILLAGE_ADMIN";
+	const fallbackName =
+		adminRole === "VILLAGE_ADMIN"
+			? "Village Officer"
+			: inCountySpace
+				? "County Officer"
+				: "Ward Officer";
+	const userName = session.user.fullName?.trim() || fallbackName;
 	const roleLabel = ROLE_LABELS[adminRole];
 	const portalLabel =
 		adminRole === "WARD_ADMIN"
 			? "Ward Review Portal"
-			: adminRole === "COUNTY_ADMIN"
-				? "County Administration Portal"
-				: "County Finance Portal";
+			: adminRole === "VILLAGE_ADMIN"
+				? "Village Allocation Portal"
+				: adminRole === "COUNTY_ADMIN"
+					? "County Administration Portal"
+					: "County Finance Portal";
 
 	return (
 		<CountyBrandingProvider>

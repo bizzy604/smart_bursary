@@ -6,8 +6,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { FieldGroup } from "@/components/forms/field-group";
 import { FormSection } from "@/components/forms/form-section";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAutoSave } from "@/hooks/use-auto-save";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
+import { useSubCounties, useWards, useVillageUnits } from "@/hooks/use-locations";
 
 interface SectionAForm {
   fullName: string;
@@ -18,6 +26,9 @@ interface SectionAForm {
   admissionNumber: string;
   course: string;
   yearOfStudy: string;
+  subCountyId: string;
+  wardId: string;
+  villageUnitId: string;
 }
 
 const defaultForm: SectionAForm = {
@@ -29,6 +40,9 @@ const defaultForm: SectionAForm = {
   admissionNumber: "",
   course: "",
   yearOfStudy: "",
+  subCountyId: "",
+  wardId: "",
+  villageUnitId: "",
 };
 
 export default function ApplySectionAPage() {
@@ -61,7 +75,10 @@ export default function ApplySectionAPage() {
     form.email.includes("@") &&
     form.institution.trim().length > 2 &&
     form.admissionNumber.trim().length > 1 &&
-    form.course.trim().length > 1;
+    form.course.trim().length > 1 &&
+    form.subCountyId.trim().length > 0 &&
+    form.wardId.trim().length > 0 &&
+    form.villageUnitId.trim().length > 0;
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-a", isValid);
@@ -128,6 +145,8 @@ export default function ApplySectionAPage() {
         </div>
       </FieldGroup>
 
+      <LocationFields form={form} setForm={setForm} />
+
       <FieldGroup title="Academic Profile">
         <div className="grid gap-3 md:grid-cols-2">
           <label className="space-y-1 text-sm text-foreground/90 md:col-span-2">
@@ -156,5 +175,81 @@ export default function ApplySectionAPage() {
         </div>
       </FieldGroup>
     </FormSection>
+  );
+}
+
+function LocationFields({
+  form,
+  setForm,
+}: {
+  form: SectionAForm;
+  setForm: React.Dispatch<React.SetStateAction<SectionAForm>>;
+}) {
+  const { subCounties, isLoading: scLoading } = useSubCounties();
+  const { wards, isLoading: wLoading } = useWards(undefined, form.subCountyId || null);
+  const { villages, isLoading: vLoading } = useVillageUnits(form.wardId || null);
+
+  return (
+    <FieldGroup title="Residence">
+      <div className="grid gap-3 md:grid-cols-3">
+        <label className="space-y-1 text-sm text-foreground/90">
+          <span className="font-medium">Sub-County</span>
+          <Select
+            value={form.subCountyId}
+            onValueChange={(value) => setForm((prev) => ({ ...prev, subCountyId: value, wardId: "", villageUnitId: "" }))}
+            disabled={scLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select sub-county" />
+            </SelectTrigger>
+            <SelectContent>
+              {subCounties.map((sc) => (
+                <SelectItem key={sc.id} value={sc.id}>
+                  {sc.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+        <label className="space-y-1 text-sm text-foreground/90">
+          <span className="font-medium">Ward</span>
+          <Select
+            value={form.wardId}
+            onValueChange={(value) => setForm((prev) => ({ ...prev, wardId: value, villageUnitId: "" }))}
+            disabled={wLoading || !form.subCountyId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select ward" />
+            </SelectTrigger>
+            <SelectContent>
+              {wards.map((w) => (
+                <SelectItem key={w.id} value={w.id}>
+                  {w.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+        <label className="space-y-1 text-sm text-foreground/90">
+          <span className="font-medium">Village Unit</span>
+          <Select
+            value={form.villageUnitId}
+            onValueChange={(value) => setForm((prev) => ({ ...prev, villageUnitId: value }))}
+            disabled={vLoading || !form.wardId}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select village unit" />
+            </SelectTrigger>
+            <SelectContent>
+              {villages.map((v) => (
+                <SelectItem key={v.id} value={v.id}>
+                  {v.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </label>
+      </div>
+    </FieldGroup>
   );
 }

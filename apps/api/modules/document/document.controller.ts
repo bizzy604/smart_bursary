@@ -36,10 +36,10 @@ import { UploadDocumentDto } from './dto/upload-document.dto';
 @ApiBearerAuth()
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
-@Roles(UserRole.STUDENT)
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
+  @Roles(UserRole.STUDENT)
   @Post('upload')
   @ApiOperation({ summary: 'Upload a document for an application' })
   @ApiConsumes('multipart/form-data')
@@ -75,6 +75,7 @@ export class DocumentController {
   }
 
   @Get(':documentId')
+  @Roles(UserRole.STUDENT, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN, UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
   @ApiOperation({ summary: 'Get a document by id' })
   @ApiParam({ name: 'documentId', description: 'Document identifier' })
   async getDocument(
@@ -82,10 +83,11 @@ export class DocumentController {
     @County() countyId: string,
     @CurrentUser() user: any,
   ) {
-    return this.documentService.getDocument(countyId, user['userId'], documentId);
+    return this.documentService.getDocument(countyId, user, documentId);
   }
 
   @Get('application/:applicationId')
+  @Roles(UserRole.STUDENT, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN, UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
   @ApiOperation({ summary: 'List all documents for an application' })
   @ApiParam({ name: 'applicationId', description: 'Application identifier' })
   async listDocuments(
@@ -93,6 +95,6 @@ export class DocumentController {
     @County() countyId: string,
     @CurrentUser() user: any,
   ) {
-    return this.documentService.listDocuments(countyId, user['userId'], applicationId);
+    return this.documentService.listDocuments(countyId, user, applicationId);
   }
 }

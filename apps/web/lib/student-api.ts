@@ -440,6 +440,9 @@ function normalizeSectionA(data: Record<string, unknown>): Record<string, unknow
     admissionNumber: toText(data.admissionNumber),
     course: toText(data.course),
     yearOfStudy: toText(data.yearOfStudy),
+    subCountyId: toText(data.subCountyId),
+    wardId: toText(data.wardId),
+    villageUnitId: toText(data.villageUnitId),
   };
 }
 

@@ -35,14 +35,12 @@ const ROLE_ACCESS_POLICY: Record<AppRole, RoleAccessPolicy> = {
 			"/county/review",
 			"/county/disbursements",
 			"/county/reports",
+			"/county/locations",
 			"/settings",
 		],
 	},
 	VILLAGE_ADMIN: {
-		// Cast: Next typedRoutes regenerates the Route union only on `next build`.
-		// The page file at app/(village-admin)/village/allocations/page.tsx is the
-		// source of truth — once a build runs, the cast becomes a no-op.
-		home: "/village/allocations" as Route,
+		home: "/village/dashboard" as Route,
 		allowedPrefixes: ["/village"],
 	},
 	PLATFORM_OPERATOR: {
