@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -161,7 +161,7 @@ const aiScore: ColumnDef<ReviewQueueItem> = {
 		/>
 	),
 	cell: ({ row }) => (
-		<div className="text-right font-display text-sm font-semibold tabular-nums text-brand-900">
+		<div className="text-right font-serif text-sm font-semibold tabular-nums text-primary">
 			{row.original.aiScore.toFixed(1)}
 		</div>
 	),

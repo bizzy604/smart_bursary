@@ -1,4 +1,4 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -10,15 +10,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-b from-brand-700 to-brand-900 text-white shadow-sm ring-1 ring-inset ring-brand-900/20 hover:from-brand-600 hover:to-brand-800",
+          "bg-gradient-to-b from-secondary to-primary text-white shadow-sm ring-1 ring-inset ring-primary/20 hover:from-secondary hover:to-secondary",
         destructive:
-          "bg-danger-500 text-white shadow-sm ring-1 ring-inset ring-danger-700/30 hover:bg-danger-700",
+          "bg-red-500 text-white shadow-sm ring-1 ring-inset ring-red-700/30 hover:bg-red-700",
         outline:
-          "border border-gray-200 bg-white text-gray-700 shadow-xs hover:border-brand-200 hover:bg-brand-50/60 hover:text-brand-900",
+          "border border-border bg-background text-foreground/90 shadow-xs hover:border-secondary/40 hover:bg-secondary/10 hover:text-primary",
         secondary:
-          "bg-gray-100 text-gray-900 shadow-xs hover:bg-gray-200/80",
-        ghost: "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
-        link: "text-brand-700 underline-offset-4 hover:underline",
+          "bg-muted text-foreground shadow-xs hover:bg-muted/80",
+        ghost: "text-foreground/90 hover:bg-muted hover:text-foreground",
+        link: "text-secondary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",

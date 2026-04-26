@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -115,7 +115,7 @@ export default function SettingsWardsPage() {
       </Card>
 
       {error ? (
-        <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-4">
@@ -159,14 +159,14 @@ export default function SettingsWardsPage() {
           />
 
           {isLoading ? (
-            <p className="text-sm text-gray-600">Loading ward analytics...</p>
+            <p className="text-sm text-muted-foreground">Loading ward analytics...</p>
           ) : filteredRows.length === 0 ? (
-            <p className="text-sm text-gray-600">No wards matched your search.</p>
+            <p className="text-sm text-muted-foreground">No wards matched your search.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-2 py-2">Ward</th>
                     <th className="px-2 py-2">Applications</th>
                     <th className="px-2 py-2">Approved</th>
@@ -178,14 +178,14 @@ export default function SettingsWardsPage() {
                 </thead>
                 <tbody>
                   {filteredRows.map((row) => (
-                    <tr key={row.ward_id} className="border-b border-gray-100">
-                      <td className="px-2 py-2 font-medium text-brand-900">{row.ward_name}</td>
-                      <td className="px-2 py-2 text-gray-700">{row.applications}</td>
-                      <td className="px-2 py-2 text-gray-700">{row.approved}</td>
-                      <td className="px-2 py-2 text-gray-700">{row.pendingCountyReview}</td>
-                      <td className="px-2 py-2 text-gray-700">{row.disbursedCount}</td>
-                      <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.allocated_kes)}</td>
-                      <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(row.averageAllocationKes)}</td>
+                    <tr key={row.ward_id} className="border-b border-border">
+                      <td className="px-2 py-2 font-medium text-primary">{row.ward_name}</td>
+                      <td className="px-2 py-2 text-foreground/90">{row.applications}</td>
+                      <td className="px-2 py-2 text-foreground/90">{row.approved}</td>
+                      <td className="px-2 py-2 text-foreground/90">{row.pendingCountyReview}</td>
+                      <td className="px-2 py-2 text-foreground/90">{row.disbursedCount}</td>
+                      <td className="px-2 py-2 text-foreground/90">{formatCurrencyKes(row.allocated_kes)}</td>
+                      <td className="px-2 py-2 text-foreground/90">{formatCurrencyKes(row.averageAllocationKes)}</td>
                     </tr>
                   ))}
                 </tbody>

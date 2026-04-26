@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -85,7 +85,7 @@ export default function CountyReviewDetailPage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-xs">
+      <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground shadow-xs">
         Loading county review details...
       </section>
     );
@@ -93,7 +93,7 @@ export default function CountyReviewDetailPage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
         {error}
       </section>
     );
@@ -123,12 +123,12 @@ export default function CountyReviewDetailPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">Final Allocation Review</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold text-brand-900">{application.reference}</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className="mt-1 font-serif text-2xl font-semibold text-primary">{application.reference}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               {application.applicantName} • {application.wardName} Ward •
               {application.reviewedAt ? ` Reviewed ${formatShortDate(application.reviewedAt)}` : " Pending"}
             </p>
@@ -143,24 +143,24 @@ export default function CountyReviewDetailPage() {
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-          <h2 className="font-display text-lg font-semibold text-brand-900">Recommendation Summary</h2>
+        <article className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+          <h2 className="font-serif text-lg font-semibold text-primary">Recommendation Summary</h2>
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-gray-500">Ward Recommendation</dt>
-              <dd className="font-medium text-gray-900">{formatCurrencyKes(application.wardRecommendationKes)}</dd>
+              <dt className="text-muted-foreground">Ward Recommendation</dt>
+              <dd className="font-medium text-foreground">{formatCurrencyKes(application.wardRecommendationKes)}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Current Allocation</dt>
-              <dd className="font-medium text-gray-900">{formatCurrencyKes(application.countyAllocationKes)}</dd>
+              <dt className="text-muted-foreground">Current Allocation</dt>
+              <dd className="font-medium text-foreground">{formatCurrencyKes(application.countyAllocationKes)}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Program</dt>
-              <dd className="font-medium text-gray-900">{application.programName}</dd>
+              <dt className="text-muted-foreground">Program</dt>
+              <dd className="font-medium text-foreground">{application.programName}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Education Level</dt>
-              <dd className="font-medium text-gray-900">{application.educationLevel}</dd>
+              <dt className="text-muted-foreground">Education Level</dt>
+              <dd className="font-medium text-foreground">{application.educationLevel}</dd>
             </div>
           </dl>
           <p className="mt-4 rounded-lg border border-info-100 bg-info-50 p-3 text-sm text-info-700">
@@ -177,7 +177,7 @@ export default function CountyReviewDetailPage() {
       </section>
 
       {documentsError ? (
-        <section className="rounded-xl border border-warning-200 bg-warning-50 p-4 text-sm text-warning-700">
+        <section className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
           {documentsError}
         </section>
       ) : null}

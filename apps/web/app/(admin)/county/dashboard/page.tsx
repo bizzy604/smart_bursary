@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -232,7 +232,7 @@ export default function CountyDashboardPage() {
       />
 
       {dashboardError ? (
-        <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {dashboardError}
         </p>
       ) : null}
@@ -281,7 +281,7 @@ export default function CountyDashboardPage() {
           title="Program utilization across county funds"
           description="Spot which bursary windows are closest to budget pressure before the next approval run."
           aside={
-            <div className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+            <div className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-primary">
               {programUtilizationData.length} tracked
             </div>
           }
@@ -344,20 +344,20 @@ export default function CountyDashboardPage() {
                   </BarChart>
                 )}
               </ChartContainer>
-              <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 text-sm text-gray-700">
+              <div className="rounded-xl border border-border bg-muted/80 p-3 text-sm text-foreground/90">
                 Budget approvals currently total{" "}
-                <span className="font-semibold text-brand-900">
+                <span className="font-semibold text-primary">
                   {formatCurrencyKes(stats.allocatedKes)}
                 </span>
                 , leaving{" "}
-                <span className="font-semibold text-brand-900">
+                <span className="font-semibold text-primary">
                   {formatCurrencyKes(stats.remainingKes)}
                 </span>{" "}
                 still available for the remaining cycle.
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Program utilization will appear here once county program analytics
               are available.
             </p>
@@ -369,7 +369,7 @@ export default function CountyDashboardPage() {
           title="Where the county review load is coming from"
           description="Compare ward application volume with approvals to see where committee throughput is strongest."
           aside={
-            <div className="rounded-full border border-success-100 bg-success-50 px-3 py-1 text-xs font-semibold text-success-700">
+            <div className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
               {dashboardData?.ward_breakdown.length ?? 0} wards
             </div>
           }
@@ -416,8 +416,8 @@ export default function CountyDashboardPage() {
                 </BarChart>
               </ChartContainer>
               {busiestWard ? (
-                <div className="rounded-xl border border-success-100 bg-success-50/70 p-3 text-sm text-gray-700">
-                  <span className="font-semibold text-brand-900">
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-sm text-foreground/90">
+                  <span className="font-semibold text-primary">
                     {busiestWard.wardName}
                   </span>{" "}
                   is currently leading county activity with{" "}
@@ -433,7 +433,7 @@ export default function CountyDashboardPage() {
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Ward-level volume trends will appear here once the county report
               includes ward activity.
             </p>
@@ -442,17 +442,17 @@ export default function CountyDashboardPage() {
       </section>
 
       {dashboardData?.ward_breakdown?.length ? (
-        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-          <h2 className="font-display text-xl font-semibold text-brand-900">
+        <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+          <h2 className="font-serif text-xl font-semibold text-primary">
             Ward Breakdown
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Auto-refreshes every 30 seconds.
           </p>
           <div className="mt-3 overflow-x-auto">
             <table className="min-w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                   <th className="px-2 py-2">Ward</th>
                   <th className="px-2 py-2">Applications</th>
                   <th className="px-2 py-2">Approved</th>
@@ -461,15 +461,15 @@ export default function CountyDashboardPage() {
               </thead>
               <tbody>
                 {dashboardData.ward_breakdown.map((row) => (
-                  <tr key={row.ward_id} className="border-b border-gray-100">
-                    <td className="px-2 py-2 font-medium text-brand-900">
+                  <tr key={row.ward_id} className="border-b border-border">
+                    <td className="px-2 py-2 font-medium text-primary">
                       {row.ward_name}
                     </td>
-                    <td className="px-2 py-2 text-gray-700">
+                    <td className="px-2 py-2 text-foreground/90">
                       {row.applications}
                     </td>
-                    <td className="px-2 py-2 text-gray-700">{row.approved}</td>
-                    <td className="px-2 py-2 text-gray-700">
+                    <td className="px-2 py-2 text-foreground/90">{row.approved}</td>
+                    <td className="px-2 py-2 text-foreground/90">
                       {formatCurrencyKes(row.allocated_kes)}
                     </td>
                   </tr>
@@ -480,13 +480,13 @@ export default function CountyDashboardPage() {
         </section>
       ) : null}
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-semibold text-brand-900">
+            <h2 className="font-serif text-xl font-semibold text-primary">
               County Review Queue
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Applications recommended by ward committees and awaiting final
               decision.
             </p>

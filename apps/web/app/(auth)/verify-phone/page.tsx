@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ export default function VerifyPhonePage() {
 			<CardContent>
 				<form className="space-y-4">
 					<div className="space-y-2">
-						<label htmlFor="otp" className="text-sm font-medium text-gray-700">
+						<label htmlFor="otp" className="text-sm font-medium text-foreground/90">
 							One-time password
 						</label>
 						<Input id="otp" name="otp" inputMode="numeric" pattern="[0-9]{6}" placeholder="847291" required />
@@ -28,11 +28,11 @@ export default function VerifyPhonePage() {
 				</form>
 			</CardContent>
 
-			<CardFooter className="space-y-2 text-center text-sm text-gray-600">
-				<button type="button" className="font-semibold text-brand-700 hover:underline">
+			<CardFooter className="space-y-2 text-center text-sm text-muted-foreground">
+				<button type="button" className="font-semibold text-secondary hover:underline">
 					Send new OTP
 				</button>
-				<Link href="/login" className="text-brand-700 hover:underline">
+				<Link href="/login" className="text-secondary hover:underline">
 					Back to sign in
 				</Link>
 			</CardFooter>

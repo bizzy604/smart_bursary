@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -37,7 +37,7 @@ export default function ApplyEntryPage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm">
+      <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground shadow-sm">
         Loading application...
       </section>
     );
@@ -45,16 +45,16 @@ export default function ApplyEntryPage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700 shadow-sm">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700 shadow-sm">
         {error}
       </section>
     );
   }
 
   return (
-    <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="font-display text-2xl font-semibold text-brand-900">{program?.name ?? "Application Wizard"}</h2>
-      <p className="mt-2 text-sm text-gray-600">
+    <section className="rounded-2xl border border-border bg-background p-6 shadow-sm">
+      <h2 className="font-serif text-2xl font-semibold text-primary">{program?.name ?? "Application Wizard"}</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
         Sections A-F are now active. Continue from your latest incomplete section or restart a fresh draft.
       </p>
 

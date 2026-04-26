@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -96,14 +96,14 @@ export default function ApplySectionDPage() {
   });
 
   if (!programState) {
-    return <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">Loading section...</section>;
+    return <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Loading section...</section>;
   }
 
   if (!isUnlocked) {
     return (
-      <section className="rounded-2xl border border-warning-100 bg-warning-50 p-6">
-        <h2 className="font-display text-xl font-semibold text-warning-700">Complete Section C First</h2>
-        <p className="mt-2 text-sm text-warning-700">Section D unlocks after family details are captured.</p>
+      <section className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
+        <h2 className="font-serif text-xl font-semibold text-amber-700">Complete Section C First</h2>
+        <p className="mt-2 text-sm text-amber-700">Section D unlocks after family details are captured.</p>
         <div className="mt-4">
           <Link href={`/apply/${params.programId}/section-c`}>
             <Button>Go to Section C</Button>
@@ -136,7 +136,7 @@ export default function ApplySectionDPage() {
 
       <FieldGroup title="Cost Pressures">
         <div className="grid gap-3 md:grid-cols-3">
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Rent / Boarding (KES)</span>
             <Input
               type="number"
@@ -144,7 +144,7 @@ export default function ApplySectionDPage() {
               onChange={(event) => setForm({ ...form, rentOrBoardingKes: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Medical Support (KES)</span>
             <Input
               type="number"
@@ -152,7 +152,7 @@ export default function ApplySectionDPage() {
               onChange={(event) => setForm({ ...form, medicalSupportKes: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Well-Wisher Support (KES)</span>
             <Input
               type="number"
@@ -167,7 +167,7 @@ export default function ApplySectionDPage() {
         <textarea
           value={form.hardshipNarrative}
           onChange={(event) => setForm({ ...form, hardshipNarrative: event.target.value })}
-          className="min-h-[150px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+          className="min-h-[150px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
           placeholder="Describe your current hardship and why bursary support is critical this term."
         />
       </FieldGroup>

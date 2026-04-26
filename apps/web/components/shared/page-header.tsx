@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ export function PageHeader({
 		return (
 			<section
 				className={cn(
-					"relative overflow-hidden rounded-2xl border border-brand-900/20 bg-gradient-to-br from-brand-900 via-brand-800 to-brand-700 p-6 text-white shadow-sm",
+					"relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary via-secondary to-secondary p-6 text-white shadow-sm",
 					className,
 				)}
 			>
@@ -41,20 +41,20 @@ export function PageHeader({
 				/>
 				<div
 					aria-hidden
-					className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent-400/25 blur-3xl"
+					className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-accent/80 blur-3xl"
 				/>
 				<div className="relative flex flex-wrap items-start justify-between gap-4">
 					<div className="min-w-0 max-w-2xl space-y-2">
 						{eyebrow ? (
-							<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-200">
+							<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent/40">
 								{eyebrow}
 							</p>
 						) : null}
-						<h1 className="font-display text-[28px] font-semibold leading-tight tracking-tight">
+						<h1 className="font-serif text-[28px] font-semibold leading-tight tracking-tight">
 							{title}
 						</h1>
 						{description ? (
-							<p className="max-w-xl text-sm leading-relaxed text-brand-50/90">
+							<p className="max-w-xl text-sm leading-relaxed text-secondary/10">
 								{description}
 							</p>
 						) : null}
@@ -68,7 +68,7 @@ export function PageHeader({
 	return (
 		<section
 			className={cn(
-				"flex flex-wrap items-start justify-between gap-4 border-b border-gray-200/70 pb-5",
+				"flex flex-wrap items-start justify-between gap-4 border-b border-border/70 pb-5",
 				className,
 			)}
 		>
@@ -76,7 +76,7 @@ export function PageHeader({
 				{Icon ? (
 					<span
 						aria-hidden
-						className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 ring-1 ring-brand-100"
+						className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary/10 text-secondary ring-1 ring-secondary/30"
 					>
 						<Icon className="h-4 w-4" />
 					</span>
@@ -87,11 +87,11 @@ export function PageHeader({
 							{eyebrow}
 						</p>
 					) : null}
-					<h1 className="font-display text-[24px] font-semibold leading-tight tracking-tight text-brand-900">
+					<h1 className="font-serif text-[24px] font-semibold leading-tight tracking-tight text-primary">
 						{title}
 					</h1>
 					{description ? (
-						<p className="max-w-2xl text-sm leading-relaxed text-gray-500">{description}</p>
+						<p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p>
 					) : null}
 				</div>
 			</div>

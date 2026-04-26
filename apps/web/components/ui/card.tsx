@@ -1,11 +1,11 @@
-import type { HTMLAttributes } from "react";
+﻿import type { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
 			className={cn(
-				"rounded-2xl border border-gray-200/80 bg-white shadow-sm transition-shadow",
+				"rounded-2xl border border-border/80 bg-background shadow-sm transition-shadow",
 				className,
 			)}
 			{...props}
@@ -21,7 +21,7 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
 	return (
 		<h2
 			className={cn(
-				"font-display text-[22px] font-semibold tracking-tight text-brand-900",
+				"font-serif text-[22px] font-semibold tracking-tight text-primary",
 				className,
 			)}
 			{...props}
@@ -30,7 +30,7 @@ export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingEle
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-	return <p className={cn("text-sm leading-relaxed text-gray-500", className)} {...props} />;
+	return <p className={cn("text-sm leading-relaxed text-muted-foreground", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {

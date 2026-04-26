@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
@@ -10,18 +10,18 @@ interface ApplicationCardProps {
 
 export function ApplicationCard({ application }: ApplicationCardProps) {
 	return (
-		<article className="rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
+		<article className="rounded-xl border border-border bg-background p-5 shadow-xs">
 			<div className="flex flex-wrap items-start justify-between gap-3">
 				<div className="space-y-1">
-					<p className="font-mono text-xs uppercase tracking-wide text-gray-500">{application.reference}</p>
-					<h3 className="font-display text-lg font-semibold text-brand-900">{application.programName}</h3>
-					<p className="text-sm text-gray-600">Requested: {formatCurrencyKes(application.requestedKes)}</p>
+					<p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{application.reference}</p>
+					<h3 className="font-serif text-lg font-semibold text-primary">{application.programName}</h3>
+					<p className="text-sm text-muted-foreground">Requested: {formatCurrencyKes(application.requestedKes)}</p>
 				</div>
 				<StatusBadge status={application.status} />
 			</div>
 
-			<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
-				<p className="text-xs text-gray-500">Updated {formatShortDate(application.updatedAt)}</p>
+			<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+				<p className="text-xs text-muted-foreground">Updated {formatShortDate(application.updatedAt)}</p>
 				<div className="flex gap-2">
 					{application.status === "DRAFT" ? (
 						<Link href={`/apply/${application.programId}`}>

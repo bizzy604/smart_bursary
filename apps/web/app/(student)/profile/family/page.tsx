@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ export default function FamilyProfilePage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-xs">
+      <section className="rounded-xl border border-border bg-background p-6 text-sm text-muted-foreground shadow-xs">
         Loading profile...
       </section>
     );
@@ -19,7 +19,7 @@ export default function FamilyProfilePage() {
 
   if (error || !profile) {
     return (
-      <section className="rounded-xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+      <section className="rounded-xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
         {error ?? "Failed to load profile."}
       </section>
     );
@@ -27,23 +27,23 @@ export default function FamilyProfilePage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-xs">
-        <h1 className="font-display text-2xl font-bold text-brand-900">Family and Financial Details</h1>
-        <p className="mt-2 text-sm text-gray-600">
+      <section className="rounded-xl border border-border bg-background p-6 shadow-xs">
+        <h1 className="font-serif text-2xl font-bold text-primary">Family and Financial Details</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           This information supports fair scoring and committee review decisions.
         </p>
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Family Status</label>
+            <label className="text-sm font-medium text-foreground/90">Family Status</label>
             <Input value={profile.familyStatus} readOnly />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Siblings in School</label>
+            <label className="text-sm font-medium text-foreground/90">Siblings in School</label>
             <Input value={String(profile.siblingsInSchool)} readOnly />
           </div>
           <div className="space-y-2 sm:col-span-2">
-            <label className="text-sm font-medium text-gray-700">Guardian Annual Income</label>
+            <label className="text-sm font-medium text-foreground/90">Guardian Annual Income</label>
             <Input value={formatCurrencyKes(profile.guardianIncomeKes)} readOnly />
           </div>
         </div>

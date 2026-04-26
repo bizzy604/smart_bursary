@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -85,7 +85,7 @@ export default function CountyApplicationDetailPage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-xs">
+      <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground shadow-xs">
         Loading county application details...
       </section>
     );
@@ -93,7 +93,7 @@ export default function CountyApplicationDetailPage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
         {error}
       </section>
     );
@@ -115,16 +115,16 @@ export default function CountyApplicationDetailPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-county-primary">
               County Application Detail
             </p>
-            <h1 className="mt-1 font-display text-2xl font-semibold text-brand-900">
+            <h1 className="mt-1 font-serif text-2xl font-semibold text-primary">
               {application.reference}
             </h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-muted-foreground">
               {application.applicantName} | {application.wardName} Ward | {application.programName}
             </p>
           </div>
@@ -144,62 +144,62 @@ export default function CountyApplicationDetailPage() {
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-          <h2 className="font-display text-lg font-semibold text-brand-900">Applicant Snapshot</h2>
+        <article className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+          <h2 className="font-serif text-lg font-semibold text-primary">Applicant Snapshot</h2>
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-gray-500">Applicant</dt>
-              <dd className="font-medium text-gray-900">{application.applicantName}</dd>
+              <dt className="text-muted-foreground">Applicant</dt>
+              <dd className="font-medium text-foreground">{application.applicantName}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Ward</dt>
-              <dd className="font-medium text-gray-900">{application.wardName}</dd>
+              <dt className="text-muted-foreground">Ward</dt>
+              <dd className="font-medium text-foreground">{application.wardName}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Program</dt>
-              <dd className="font-medium text-gray-900">{application.programName}</dd>
+              <dt className="text-muted-foreground">Program</dt>
+              <dd className="font-medium text-foreground">{application.programName}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Academic Year</dt>
-              <dd className="font-medium text-gray-900">{application.academicYear}</dd>
+              <dt className="text-muted-foreground">Academic Year</dt>
+              <dd className="font-medium text-foreground">{application.academicYear}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Education Level</dt>
-              <dd className="font-medium text-gray-900">{application.educationLevel}</dd>
+              <dt className="text-muted-foreground">Education Level</dt>
+              <dd className="font-medium text-foreground">{application.educationLevel}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Reviewer Stage</dt>
-              <dd className="font-medium text-gray-900">{application.reviewerStage}</dd>
+              <dt className="text-muted-foreground">Reviewer Stage</dt>
+              <dd className="font-medium text-foreground">{application.reviewerStage}</dd>
             </div>
           </dl>
         </article>
 
-        <article className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-          <h2 className="font-display text-lg font-semibold text-brand-900">Recommendation Context</h2>
+        <article className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+          <h2 className="font-serif text-lg font-semibold text-primary">Recommendation Context</h2>
           <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-gray-500">AI Score</dt>
-              <dd className="font-medium text-gray-900">{application.aiScore.toFixed(1)} / 100</dd>
+              <dt className="text-muted-foreground">AI Score</dt>
+              <dd className="font-medium text-foreground">{application.aiScore.toFixed(1)} / 100</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Status</dt>
-              <dd className="font-medium text-gray-900">{application.status}</dd>
+              <dt className="text-muted-foreground">Status</dt>
+              <dd className="font-medium text-foreground">{application.status}</dd>
             </div>
             <div>
-              <dt className="text-gray-500">Ward Recommendation</dt>
-              <dd className="font-medium text-gray-900">
+              <dt className="text-muted-foreground">Ward Recommendation</dt>
+              <dd className="font-medium text-foreground">
                 {formatCurrencyKes(application.wardRecommendationKes)}
               </dd>
             </div>
             <div>
-              <dt className="text-gray-500">County Allocation</dt>
-              <dd className="font-medium text-gray-900">
+              <dt className="text-muted-foreground">County Allocation</dt>
+              <dd className="font-medium text-foreground">
                 {formatCurrencyKes(application.countyAllocationKes)}
               </dd>
             </div>
             <div>
-              <dt className="text-gray-500">Last Reviewed</dt>
-              <dd className="font-medium text-gray-900">
+              <dt className="text-muted-foreground">Last Reviewed</dt>
+              <dd className="font-medium text-foreground">
                 {application.reviewedAt ? formatShortDate(application.reviewedAt) : "Pending"}
               </dd>
             </div>
@@ -217,18 +217,18 @@ export default function CountyApplicationDetailPage() {
         anomalyFlags={scoreCard.anomalyFlags}
       />
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">Timeline</h2>
+      <section className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">Timeline</h2>
         {timeline.length === 0 ? (
-          <p className="mt-3 text-sm text-gray-600">No timeline events are available for this application yet.</p>
+          <p className="mt-3 text-sm text-muted-foreground">No timeline events are available for this application yet.</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {timeline.map((event) => (
-              <li key={event.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
-                <p className="text-sm font-semibold text-brand-900">
+              <li key={event.id} className="rounded-lg border border-border bg-muted p-3">
+                <p className="text-sm font-semibold text-primary">
                   {event.label} | {formatShortDate(event.date)}
                 </p>
-                <p className="mt-1 text-sm text-gray-600">{event.note}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{event.note}</p>
               </li>
             ))}
           </ul>

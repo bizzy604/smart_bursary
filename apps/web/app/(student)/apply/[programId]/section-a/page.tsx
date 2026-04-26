@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Route } from "next";
 import { useParams, useRouter } from "next/navigation";
@@ -81,7 +81,7 @@ export default function ApplySectionAPage() {
   });
 
   if (!programState) {
-    return <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">Loading section...</section>;
+    return <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Loading section...</section>;
   }
 
   return (
@@ -102,22 +102,22 @@ export default function ApplySectionAPage() {
     >
       <FieldGroup title="Applicant Identity">
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Full Name</span>
             <Input value={form.fullName} onChange={(event) => setForm({ ...form, fullName: event.target.value })} />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">National ID / Birth Cert No.</span>
             <Input
               value={form.nationalIdOrBirthCert}
               onChange={(event) => setForm({ ...form, nationalIdOrBirthCert: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Phone Number</span>
             <Input value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Email Address</span>
             <Input
               type="email"
@@ -130,22 +130,22 @@ export default function ApplySectionAPage() {
 
       <FieldGroup title="Academic Profile">
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="space-y-1 text-sm text-gray-700 md:col-span-2">
+          <label className="space-y-1 text-sm text-foreground/90 md:col-span-2">
             <span className="font-medium">Institution</span>
             <Input value={form.institution} onChange={(event) => setForm({ ...form, institution: event.target.value })} />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Admission Number</span>
             <Input
               value={form.admissionNumber}
               onChange={(event) => setForm({ ...form, admissionNumber: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Course / Class</span>
             <Input value={form.course} onChange={(event) => setForm({ ...form, course: event.target.value })} />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Year of Study</span>
             <Input
               value={form.yearOfStudy}

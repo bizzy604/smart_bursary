@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -85,14 +85,14 @@ export default function ApplySectionEPage() {
   });
 
   if (!programState) {
-    return <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">Loading section...</section>;
+    return <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Loading section...</section>;
   }
 
   if (!isUnlocked) {
     return (
-      <section className="rounded-2xl border border-warning-100 bg-warning-50 p-6">
-        <h2 className="font-display text-xl font-semibold text-warning-700">Complete Section D First</h2>
-        <p className="mt-2 text-sm text-warning-700">Declarations unlock after financial details are captured.</p>
+      <section className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
+        <h2 className="font-serif text-xl font-semibold text-amber-700">Complete Section D First</h2>
+        <p className="mt-2 text-sm text-amber-700">Declarations unlock after financial details are captured.</p>
         <div className="mt-4">
           <Link href={`/apply/${params.programId}/section-d`}>
             <Button>Go to Section D</Button>
@@ -121,12 +121,12 @@ export default function ApplySectionEPage() {
     >
       <FieldGroup title="Additional Disclosures">
         <div className="space-y-4">
-          <label className="flex items-start gap-2 text-sm text-gray-700">
+          <label className="flex items-start gap-2 text-sm text-foreground/90">
             <input
               type="checkbox"
               checked={form.hasOtherBursary}
               onChange={(event) => setForm({ ...form, hasOtherBursary: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I am receiving support from another bursary or scholarship source.</span>
           </label>
@@ -134,17 +134,17 @@ export default function ApplySectionEPage() {
             <textarea
               value={form.otherBursaryDetails}
               onChange={(event) => setForm({ ...form, otherBursaryDetails: event.target.value })}
-              className="min-h-[110px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+              className="min-h-[110px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
               placeholder="Provide bursary source and annual amount."
             />
           ) : null}
 
-          <label className="flex items-start gap-2 text-sm text-gray-700">
+          <label className="flex items-start gap-2 text-sm text-foreground/90">
             <input
               type="checkbox"
               checked={form.hasDisabilityNeeds}
               onChange={(event) => setForm({ ...form, hasDisabilityNeeds: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I have disability-related or special support needs relevant to this application.</span>
           </label>
@@ -152,7 +152,7 @@ export default function ApplySectionEPage() {
             <textarea
               value={form.disabilityDetails}
               onChange={(event) => setForm({ ...form, disabilityDetails: event.target.value })}
-              className="min-h-[110px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+              className="min-h-[110px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
               placeholder="Describe accommodation or support requirements."
             />
           ) : null}
@@ -160,7 +160,7 @@ export default function ApplySectionEPage() {
       </FieldGroup>
 
       <FieldGroup title="Applicant Declaration">
-        <label className="space-y-1 text-sm text-gray-700">
+        <label className="space-y-1 text-sm text-foreground/90">
           <span className="font-medium">Declaration Full Name</span>
           <Input
             value={form.declarationName}
@@ -168,13 +168,13 @@ export default function ApplySectionEPage() {
           />
         </label>
 
-        <div className="space-y-2 text-sm text-gray-700">
+        <div className="space-y-2 text-sm text-foreground/90">
           <label className="flex items-start gap-2">
             <input
               type="checkbox"
               checked={form.confirmTruth}
               onChange={(event) => setForm({ ...form, confirmTruth: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I confirm that all information provided is true and complete.</span>
           </label>
@@ -183,7 +183,7 @@ export default function ApplySectionEPage() {
               type="checkbox"
               checked={form.authorizeVerification}
               onChange={(event) => setForm({ ...form, authorizeVerification: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I authorize verification with my school and local administration offices.</span>
           </label>
@@ -192,7 +192,7 @@ export default function ApplySectionEPage() {
               type="checkbox"
               checked={form.acceptPrivacyPolicy}
               onChange={(event) => setForm({ ...form, acceptPrivacyPolicy: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I accept county privacy and data processing terms for this bursary program.</span>
           </label>

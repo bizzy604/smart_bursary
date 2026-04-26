@@ -13,124 +13,101 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
-  			brand: {
-  				'50': '#EFF6FC',
-  				'100': '#D6E8F5',
-  				'300': '#6B9EC4',
-  				'500': '#2E5F8F',
-  				'700': '#1E3A5F',
-  				'900': '#0D2B4E'
-  			},
-  			accent: {
-  				'50': '#FEFAF0',
-  				'100': '#FDF0D5',
-  				'400': '#D4900D',
-  				'500': '#C47D00',
-  				'700': '#8A5700',
-  				'900': '#5A3600',
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			success: {
-  				'50': '#EDFBF4',
-  				'100': '#D1F5E3',
-  				'500': '#1E8A57',
-  				'700': '#145C3A'
-  			},
-  			warning: {
-  				'50': '#FFF8ED',
-  				'100': '#FDECC8',
-  				'500': '#B86500',
-  				'700': '#7A4500'
-  			},
-  			danger: {
-  				'50': '#FFF4F4',
-  				'100': '#FDDEDE',
-  				'500': '#C0392B',
-  				'700': '#8B1A1A'
-  			},
+  			// Tenant branding (consumed via CSS variable). Status colours (success / warning /
+  			// danger / error) and neutrals (gray) intentionally use Tailwind's default palettes.
   			county: {
   				primary: 'var(--county-primary)',
   				'primary-text': 'var(--county-primary-text)'
   			},
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
+  			// shadcn/ui semantic tokens — backed by oklch CSS variables.
+  			// `<alpha-value>` keeps Tailwind's `bg-primary/50` modifier syntax working.
+  			background: 'oklch(var(--background) / <alpha-value>)',
+  			foreground: 'oklch(var(--foreground) / <alpha-value>)',
   			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
+  				DEFAULT: 'oklch(var(--card) / <alpha-value>)',
+  				foreground: 'oklch(var(--card-foreground) / <alpha-value>)'
   			},
   			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
+  				DEFAULT: 'oklch(var(--popover) / <alpha-value>)',
+  				foreground: 'oklch(var(--popover-foreground) / <alpha-value>)'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
+  				foreground: 'oklch(var(--primary-foreground) / <alpha-value>)'
   			},
   			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
+  				DEFAULT: 'oklch(var(--secondary) / <alpha-value>)',
+  				foreground: 'oklch(var(--secondary-foreground) / <alpha-value>)'
   			},
   			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
+  				DEFAULT: 'oklch(var(--muted) / <alpha-value>)',
+  				foreground: 'oklch(var(--muted-foreground) / <alpha-value>)'
+  			},
+  			accent: {
+  				DEFAULT: 'oklch(var(--accent) / <alpha-value>)',
+  				foreground: 'oklch(var(--accent-foreground) / <alpha-value>)'
   			},
   			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
+  				DEFAULT: 'oklch(var(--destructive) / <alpha-value>)',
+  				foreground: 'oklch(var(--destructive-foreground) / <alpha-value>)'
   			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
+  			border: 'oklch(var(--border) / <alpha-value>)',
+  			input: 'oklch(var(--input) / <alpha-value>)',
+  			ring: 'oklch(var(--ring) / <alpha-value>)',
   			chart: {
-  				'1': 'var(--chart-1)',
-  				'2': 'var(--chart-2)',
-  				'3': 'var(--chart-3)',
-  				'4': 'var(--chart-4)',
-  				'5': 'var(--chart-5)'
+  				'1': 'oklch(var(--chart-1) / <alpha-value>)',
+  				'2': 'oklch(var(--chart-2) / <alpha-value>)',
+  				'3': 'oklch(var(--chart-3) / <alpha-value>)',
+  				'4': 'oklch(var(--chart-4) / <alpha-value>)',
+  				'5': 'oklch(var(--chart-5) / <alpha-value>)'
   			},
   			sidebar: {
-  				DEFAULT: 'hsl(var(--sidebar-background))',
-  				foreground: 'hsl(var(--sidebar-foreground))',
-  				primary: 'hsl(var(--sidebar-primary))',
-  				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-  				accent: 'hsl(var(--sidebar-accent))',
-  				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-  				border: 'hsl(var(--sidebar-border))',
-  				ring: 'hsl(var(--sidebar-ring))'
+  				DEFAULT: 'oklch(var(--sidebar) / <alpha-value>)',
+  				foreground: 'oklch(var(--sidebar-foreground) / <alpha-value>)',
+  				primary: 'oklch(var(--sidebar-primary) / <alpha-value>)',
+  				'primary-foreground': 'oklch(var(--sidebar-primary-foreground) / <alpha-value>)',
+  				accent: 'oklch(var(--sidebar-accent) / <alpha-value>)',
+  				'accent-foreground': 'oklch(var(--sidebar-accent-foreground) / <alpha-value>)',
+  				border: 'oklch(var(--sidebar-border) / <alpha-value>)',
+  				ring: 'oklch(var(--sidebar-ring) / <alpha-value>)'
   			}
   		},
   		fontFamily: {
-  			display: [
-  				'var(--font-display)',
-  				'Plus Jakarta Sans',
-  				'DM Sans',
+  			// Theme spec keys
+  			sans: [
+  				'var(--font-sans)',
+  				'Oxanium',
   				'sans-serif'
   			],
-  			body: [
-  				'var(--font-body)',
-  				'Noto Sans',
-  				'sans-serif'
+  			serif: [
+  				'var(--font-serif)',
+  				'Playfair Display',
+  				'ui-serif',
+  				'serif'
   			],
   			mono: [
   				'var(--font-mono)',
   				'JetBrains Mono',
+  				'ui-monospace',
   				'monospace'
   			]
   		},
   		borderRadius: {
-  			sm: 'calc(var(--radius) - 6px)',
-  			md: 'calc(var(--radius) - 4px)',
+  			sm: 'calc(var(--radius) - 4px)',
+  			md: 'calc(var(--radius) - 2px)',
   			lg: 'var(--radius)',
   			xl: 'calc(var(--radius) + 4px)',
-  			'2xl': 'calc(var(--radius) + 12px)'
+  			'2xl': 'calc(var(--radius) + 8px)'
   		},
   		boxShadow: {
-  			xs: '0 1px 2px rgba(0,0,0,0.05)',
-  			sm: '0 1px 3px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.06)',
-  			md: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05)',
-  			lg: '0 10px 15px rgba(0,0,0,0.10), 0 4px 6px rgba(0,0,0,0.05)',
-  			xl: '0 20px 25px rgba(0,0,0,0.10), 0 10px 10px rgba(0,0,0,0.04)'
+  			'2xs': 'var(--shadow-2xs)',
+  			xs: 'var(--shadow-xs)',
+  			sm: 'var(--shadow-sm)',
+  			DEFAULT: 'var(--shadow)',
+  			md: 'var(--shadow-md)',
+  			lg: 'var(--shadow-lg)',
+  			xl: 'var(--shadow-xl)',
+  			'2xl': 'var(--shadow-2xl)'
   		},
   		animation: {
   			'pulse-ring': 'pulse-ring 2s ease-in-out infinite',
@@ -142,10 +119,10 @@ const config: Config = {
   		keyframes: {
   			'pulse-ring': {
   				'0%, 100%': {
-  					boxShadow: '0 0 0 0 rgba(196, 125, 0, 0.4)'
+  					boxShadow: '0 0 0 0 oklch(var(--accent) / 0.4)'
   				},
   				'70%': {
-  					boxShadow: '0 0 0 8px rgba(196, 125, 0, 0)'
+  					boxShadow: '0 0 0 8px oklch(var(--accent) / 0)'
   				}
   			},
   			'fade-in-up': {

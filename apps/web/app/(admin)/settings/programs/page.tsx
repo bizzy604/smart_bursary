@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -315,27 +315,27 @@ export default function ProgramSettingsListPage() {
           </div>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-            <p className="text-xs uppercase tracking-[0.12em] text-brand-700">
+          <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+            <p className="text-xs uppercase tracking-[0.12em] text-secondary">
               Budget Ceiling
             </p>
-            <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+            <p className="mt-1 font-serif text-xl font-semibold text-primary">
               {formatCurrencyKes(summary.ceiling)}
             </p>
           </article>
-          <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-            <p className="text-xs uppercase tracking-[0.12em] text-brand-700">
+          <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+            <p className="text-xs uppercase tracking-[0.12em] text-secondary">
               Allocated
             </p>
-            <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+            <p className="mt-1 font-serif text-xl font-semibold text-primary">
               {formatCurrencyKes(summary.allocated)}
             </p>
           </article>
-          <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-            <p className="text-xs uppercase tracking-[0.12em] text-brand-700">
+          <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+            <p className="text-xs uppercase tracking-[0.12em] text-secondary">
               Disbursed
             </p>
-            <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+            <p className="mt-1 font-serif text-xl font-semibold text-primary">
               {formatCurrencyKes(summary.disbursed)}
             </p>
           </article>
@@ -354,8 +354,8 @@ export default function ProgramSettingsListPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -364,13 +364,13 @@ export default function ProgramSettingsListPage() {
 
           <div className="grid gap-3 md:grid-cols-[180px_180px_auto]">
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Status</span>
+              <span className="font-medium text-foreground/90">Status</span>
               <select
                 value={status}
                 onChange={(event) =>
                   setStatus(event.target.value as "ALL" | ProgramStatus)
                 }
-                className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm"
+                className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="DRAFT">Draft</option>
@@ -381,12 +381,12 @@ export default function ProgramSettingsListPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Academic Year</span>
+              <span className="font-medium text-foreground/90">Academic Year</span>
               <input
                 value={academicYear}
                 onChange={(event) => setAcademicYear(event.target.value)}
                 placeholder="2026"
-                className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm"
+                className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
               />
             </label>
           </div>
@@ -434,7 +434,7 @@ export default function ProgramSettingsListPage() {
               disabled={isMutating}
               className={
                 pendingAction?.type === "close"
-                  ? "bg-danger-500 hover:bg-danger-700"
+                  ? "bg-red-500 hover:bg-red-700"
                   : undefined
               }
               onClick={() => {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FileText } from "lucide-react";
@@ -47,7 +47,7 @@ export default function ApplicationsPage() {
           }
         />
       ) : (
-        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
           <DataTable
             columns={studentApplicationColumns}
             data={applications}

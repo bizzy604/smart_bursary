@@ -1,4 +1,4 @@
-import type { LucideIcon } from "lucide-react";
+﻿import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Inbox } from "lucide-react";
 
@@ -26,8 +26,8 @@ export function EmptyState({
 			className={cn(
 				"flex flex-col items-center rounded-2xl border border-dashed p-10 text-center",
 				tone === "brand"
-					? "border-brand-200 bg-gradient-to-b from-brand-50/80 to-white"
-					: "border-gray-200 bg-white/60",
+					? "border-secondary/40 bg-gradient-to-b from-secondary/10 to-white"
+					: "border-border bg-background/60",
 				className,
 			)}
 		>
@@ -36,16 +36,16 @@ export function EmptyState({
 				className={cn(
 					"flex h-12 w-12 items-center justify-center rounded-2xl",
 					tone === "brand"
-						? "bg-brand-100/70 text-brand-700 ring-1 ring-brand-200"
-						: "bg-gray-100 text-gray-500 ring-1 ring-gray-200",
+						? "bg-secondary/30 text-secondary ring-1 ring-secondary/40"
+						: "bg-muted text-muted-foreground ring-1 ring-border",
 				)}
 			>
 				<Icon className="h-5 w-5" />
 			</span>
-			<h2 className="mt-4 font-display text-lg font-semibold tracking-tight text-brand-900">
+			<h2 className="mt-4 font-serif text-lg font-semibold tracking-tight text-primary">
 				{title}
 			</h2>
-			<p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-gray-500">
+			<p className="mx-auto mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">
 				{description}
 			</p>
 			{action ? <div className="mt-5">{action}</div> : null}

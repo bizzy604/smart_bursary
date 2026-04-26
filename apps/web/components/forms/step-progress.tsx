@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import type { Route } from "next";
 
 export interface StepItem {
@@ -21,15 +21,15 @@ export function StepProgress({ steps, currentKey, completedKeys }: StepProgressP
 	const progress = ((currentIndex + 1) / steps.length) * 100;
 
 	return (
-		<section className="space-y-3 rounded-2xl border border-county-primary/20 bg-white p-4 shadow-sm">
+		<section className="space-y-3 rounded-2xl border border-county-primary/20 bg-background p-4 shadow-sm">
 			<div className="space-y-1">
 				<p className="text-xs font-medium uppercase tracking-[0.14em] text-county-primary">Application Steps</p>
-				<h2 className="font-display text-base font-semibold text-brand-900">
+				<h2 className="font-serif text-base font-semibold text-primary">
 					Step {currentIndex + 1} of {steps.length}: {steps[currentIndex]?.label}
 				</h2>
 			</div>
 
-			<div className="h-2 overflow-hidden rounded-full bg-gray-100">
+			<div className="h-2 overflow-hidden rounded-full bg-muted">
 				<div className="h-full rounded-full bg-county-primary transition-all duration-300" style={{ width: `${progress}%` }} />
 			</div>
 
@@ -53,7 +53,7 @@ export function StepProgress({ steps, currentKey, completedKeys }: StepProgressP
 										"rounded-lg border px-2 py-2 text-center text-xs font-medium",
 										isCurrent
 											? "border-county-primary bg-county-primary/10 text-county-primary"
-											: "border-gray-200 bg-gray-50 text-gray-500",
+											: "border-border bg-muted text-muted-foreground",
 									].join(" ")}
 								>
 									{index + 1}. {step.label}

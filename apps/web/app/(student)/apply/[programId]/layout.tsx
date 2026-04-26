@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -27,7 +27,7 @@ export default function ApplyWizardLayout({ children }: { children: ReactNode })
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">
         Loading application wizard...
       </section>
     );
@@ -35,7 +35,7 @@ export default function ApplyWizardLayout({ children }: { children: ReactNode })
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
         {error}
       </section>
     );
@@ -61,10 +61,10 @@ export default function ApplyWizardLayout({ children }: { children: ReactNode })
 
   return (
     <main className="space-y-4">
-      <section className="rounded-2xl border border-county-primary/20 bg-white p-4 shadow-xs sm:p-5">
+      <section className="rounded-2xl border border-county-primary/20 bg-background p-4 shadow-xs sm:p-5">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-county-primary">Application Wizard</p>
-        <h1 className="mt-1 font-display text-2xl font-semibold text-brand-900">{program.name}</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="mt-1 font-serif text-2xl font-semibold text-primary">{program.name}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Complete all sections before preview and submission. Your draft is auto-saved as you edit.
         </p>
       </section>

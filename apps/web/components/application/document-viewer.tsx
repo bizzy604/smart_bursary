@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
 import { downloadTextFile, openPreviewHtml } from "@/lib/client-download";
@@ -10,9 +10,9 @@ interface DocumentViewerProps {
 }
 
 const statusStyles: Record<SupportingDocument["status"], string> = {
-	VERIFIED: "border-success-100 bg-success-50 text-success-700",
-	PENDING_SCAN: "border-warning-100 bg-warning-50 text-warning-700",
-	MISSING: "border-danger-100 bg-danger-50 text-danger-700",
+	VERIFIED: "border-emerald-100 bg-emerald-50 text-emerald-700",
+	PENDING_SCAN: "border-amber-100 bg-amber-50 text-amber-700",
+	MISSING: "border-red-100 bg-red-50 text-red-700",
 };
 
 const statusLabel: Record<SupportingDocument["status"], string> = {
@@ -60,19 +60,19 @@ export function DocumentViewer({ documents }: DocumentViewerProps) {
 	}
 
 	return (
-		<section className="rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
-			<h3 className="font-display text-lg font-semibold text-brand-900">Supporting Documents</h3>
+		<section className="rounded-2xl border border-secondary/30 bg-background p-5 shadow-xs">
+			<h3 className="font-serif text-lg font-semibold text-primary">Supporting Documents</h3>
 			{documents.length === 0 ? (
-				<p className="mt-3 text-sm text-gray-600">No supporting documents are available for this application yet.</p>
+				<p className="mt-3 text-sm text-muted-foreground">No supporting documents are available for this application yet.</p>
 			) : null}
 			<div className="mt-4 space-y-3">
 				{documents.map((document) => {
 					const isBlocked = document.status === "MISSING";
 
 					return (
-						<article key={document.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+						<article key={document.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted p-3">
 							<div>
-								<p className="text-sm font-semibold text-gray-800">{document.label}</p>
+								<p className="text-sm font-semibold text-foreground">{document.label}</p>
 								<span className={cn("mt-1 inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold", statusStyles[document.status])}>
 									{statusLabel[document.status]}
 								</span>

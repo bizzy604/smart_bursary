@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import { GraduationCap } from "lucide-react";
@@ -51,7 +51,7 @@ export default function ProgramsPage() {
         icon={GraduationCap}
       />
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <DataTable
           columns={columns}
           data={programs}

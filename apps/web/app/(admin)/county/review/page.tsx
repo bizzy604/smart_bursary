@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Route } from "next";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -199,14 +199,14 @@ export default function CountyReviewQueuePage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">County Review Queue</h1>
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h1 className="font-serif text-2xl font-semibold text-primary">County Review Queue</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Final approval stage for ward-recommended applications before disbursement.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <DataTable
           columns={countyReviewColumns}
           data={queue}

@@ -2,209 +2,154 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * tweakcn theme adapted for Tailwind v3.
+ *
+ * The pasted theme stored colors as `oklch(L C H)` strings. We strip the wrapper
+ * here and re-add it inside `tailwind.config.ts` (`oklch(var(--token) / <alpha-value>)`)
+ * so Tailwind's alpha-modifier syntax (e.g. `bg-primary/50`) keeps working in v3.
+ */
+
 :root {
-  --color-brand-900: #0d2b4e;
-  --color-brand-700: #1e3a5f;
-  --color-brand-500: #2e5f8f;
-  --color-brand-300: #6b9ec4;
-  --color-brand-100: #d6e8f5;
-  --color-brand-50: #eff6fc;
+  --background: 1 0 0;
+  --foreground: 0.2393 0 0;
+  --card: 1 0 0;
+  --card-foreground: 0.2533 0.0474 223.4741;
+  --popover: 1 0 0;
+  --popover-foreground: 0.2393 0 0;
+  --primary: 0 0 0;
+  --primary-foreground: 1 0 0;
+  --secondary: 0.3244 0.1403 264.3635;
+  --secondary-foreground: 1 0 0;
+  --muted: 0.7826 0 0;
+  --muted-foreground: 0.4091 0 0;
+  --accent: 0.4521 0.1854 260.0985;
+  --accent-foreground: 1 0 0;
+  --destructive: 0.9257 0.1867 102.4953;
+  --destructive-foreground: 0 0 0;
+  --border: 0.3687 0.0967 246.9105;
+  --input: 0.4599 0.0787 184.1466;
+  --ring: 0.6696 0.1619 53.7409;
 
-  --color-accent-900: #5a3600;
-  --color-accent-700: #8a5700;
-  --color-accent-500: #c47d00;
-  --color-accent-400: #d4900d;
-  --color-accent-100: #fdf0d5;
-  --color-accent-50: #fefaf0;
+  --chart-1: 0.6696 0.1619 53.7409;
+  --chart-2: 0.5386 0.1305 140.4299;
+  --chart-3: 0.5444 0.1532 276.5974;
+  --chart-4: 0.9257 0.1867 102.4953;
+  --chart-5: 0.6749 0.0483 90.4302;
 
-  --color-success-700: #145c3a;
-  --color-success-500: #1e8a57;
-  --color-success-100: #d1f5e3;
-  --color-success-50: #edfbf4;
+  --sidebar: 1 0 0;
+  --sidebar-foreground: 0.2393 0 0;
+  --sidebar-primary: 0.6696 0.1619 53.7409;
+  --sidebar-primary-foreground: 1 0 0;
+  --sidebar-accent: 0.5444 0.1532 276.5974;
+  --sidebar-accent-foreground: 1 0 0;
+  --sidebar-border: 0.7324 0.1048 61.6735;
+  --sidebar-ring: 0.6696 0.1619 53.7409;
 
-  --color-warning-700: #7a4500;
-  --color-warning-500: #b86500;
-  --color-warning-100: #fdecc8;
-  --color-warning-50: #fff8ed;
+  --radius: 0px;
 
-  --color-danger-700: #8b1a1a;
-  --color-danger-500: #c0392b;
-  --color-danger-100: #fddede;
-  --color-danger-50: #fff4f4;
+  --shadow-2xs: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.20);
+  --shadow-xs: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.20);
+  --shadow-sm: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.40), 0px 1px 2px -1px hsl(0 0% 10.1961% / 0.40);
+  --shadow: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.40), 0px 1px 2px -1px hsl(0 0% 10.1961% / 0.40);
+  --shadow-md: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.40), 0px 2px 4px -1px hsl(0 0% 10.1961% / 0.40);
+  --shadow-lg: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.40), 0px 4px 6px -1px hsl(0 0% 10.1961% / 0.40);
+  --shadow-xl: 0px 2px 4px 0px hsl(0 0% 10.1961% / 0.40), 0px 8px 10px -1px hsl(0 0% 10.1961% / 0.40);
+  --shadow-2xl: 0px 2px 4px 0px hsl(0 0% 10.1961% / 1.00);
 
-  --color-info-700: #0c4b8a;
-  --color-info-500: #1565c0;
-  --color-info-100: #dbeafe;
-  --color-info-50: #eff6ff;
-
-  --color-gray-950: #0d0d0d;
-  --color-gray-900: #1a1a1a;
-  --color-gray-800: #2c2c2c;
-  --color-gray-700: #404040;
-  --color-gray-600: #595959;
-  --color-gray-500: #737373;
-  --color-gray-400: #9ca3af;
-  --color-gray-300: #d1d5db;
-  --color-gray-200: #e5e7eb;
-  --color-gray-100: #f3f4f6;
-  --color-gray-50: #f9fafb;
-  --color-white: #ffffff;
-
-  --color-surface-primary: var(--color-white);
-  --color-surface-secondary: var(--color-gray-50);
-  --color-surface-tertiary: var(--color-gray-100);
-  --color-surface-overlay: rgba(0, 0, 0, 0.5);
-
-  --color-border-default: var(--color-gray-200);
-  --color-border-strong: var(--color-gray-300);
-  --color-border-focus: var(--color-brand-500);
-
-  --color-text-primary: var(--color-gray-900);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-tertiary: var(--color-gray-400);
-  --color-text-inverse: var(--color-white);
-  --color-text-brand: var(--color-brand-700);
-  --color-text-accent: var(--color-accent-700);
-
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
-
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-  --radius-full: 9999px;
-
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
-
-  --transition-fast: 100ms ease;
-  --transition-normal: 200ms ease;
-  --transition-slow: 350ms ease;
-
+  /* Tenant branding (consumed by county-branding-provider; not part of the test theme). */
   --county-primary: #1e3a5f;
   --county-primary-text: #ffffff;
-
-  /*
-	 * Canonical shadcn/ui HSL token layer.
-	 * Values are space-separated HSL channels (no hsl() wrapper) so shadcn components
-	 * can compose them with alpha via `hsl(var(--primary) / 0.5)` etc.
-	 * These aliases read from the same design decisions above; tenant branding still
-	 * flows through --county-primary (hex) while shadcn components consume --primary (HSL).
-	 * The county-branding-provider sets both vars in lockstep.
-	 */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
-  --primary: 210 52% 25%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 50% 92%;
-  --secondary-foreground: 210 60% 18%;
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 35%;
-  --accent: 36 100% 38%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 6 63% 46%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 210 52% 37%;
-  --radius: 0.75rem;
-  --chart-1: hsl(210 52% 37%);
-  --chart-2: hsl(36 100% 38%);
-  --chart-3: hsl(154 64% 33%);
-  --chart-4: hsl(28 100% 36%);
-  --chart-5: hsl(212 75% 30%);
 }
 
 .dark {
-  --background: 220 18% 8%;
-  --foreground: 0 0% 98%;
-  --card: 220 18% 10%;
-  --card-foreground: 0 0% 98%;
-  --popover: 220 18% 10%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 210 60% 65%;
-  --primary-foreground: 220 30% 12%;
-  --secondary: 220 14% 16%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 220 14% 16%;
-  --muted-foreground: 220 9% 65%;
-  --accent: 36 90% 60%;
-  --accent-foreground: 220 30% 12%;
-  --destructive: 6 63% 56%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 220 14% 20%;
-  --input: 220 14% 20%;
-  --ring: 210 60% 65%;
-  --chart-1: hsl(210 60% 65%);
-  --chart-2: hsl(36 90% 60%);
-  --chart-3: hsl(154 55% 55%);
-  --chart-4: hsl(18 85% 65%);
-  --chart-5: hsl(198 75% 68%);
+  --background: 0.2178 0 0;
+  --foreground: 0.9067 0 0;
+  --card: 0.2850 0 0;
+  --card-foreground: 0.9067 0 0;
+  --popover: 0.2850 0 0;
+  --popover-foreground: 0.9067 0 0;
+  --primary: 0.7779 0.1335 62.1726;
+  --primary-foreground: 1 0 0;
+  --secondary: 0.7099 0.2075 142.9994;
+  --secondary-foreground: 0 0 0;
+  --muted: 0.2645 0 0;
+  --muted-foreground: 0.7058 0 0;
+  --accent: 0.7272 0.1432 278.2595;
+  --accent-foreground: 0 0 0;
+  --destructive: 0.9532 0.2093 115.4959;
+  --destructive-foreground: 0 0 0;
+  --border: 0.4091 0 0;
+  --input: 0.4091 0 0;
+  --ring: 0.7779 0.1335 62.1726;
+
+  --chart-1: 0.7779 0.1335 62.1726;
+  --chart-2: 0.7099 0.2075 142.9994;
+  --chart-3: 0.7272 0.1432 278.2595;
+  --chart-4: 0.9532 0.2093 115.4959;
+  --chart-5: 0.7515 0.0319 90.3762;
+
+  --sidebar: 0.1913 0 0;
+  --sidebar-foreground: 0.9067 0 0;
+  --sidebar-primary: 0.7779 0.1335 62.1726;
+  --sidebar-primary-foreground: 1 0 0;
+  --sidebar-accent: 0.7272 0.1432 278.2595;
+  --sidebar-accent-foreground: 0 0 0;
+  --sidebar-border: 0.4091 0 0;
+  --sidebar-ring: 0.7779 0.1335 62.1726;
+
+  --shadow-2xs: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.30);
+  --shadow-xs: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.30);
+  --shadow-sm: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.60), 0px 1px 2px -1px hsl(0 0% 10.1961% / 0.60);
+  --shadow: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.60), 0px 1px 2px -1px hsl(0 0% 10.1961% / 0.60);
+  --shadow-md: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.60), 0px 2px 4px -1px hsl(0 0% 10.1961% / 0.60);
+  --shadow-lg: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.60), 0px 4px 6px -1px hsl(0 0% 10.1961% / 0.60);
+  --shadow-xl: 0px 2px 5px 0px hsl(0 0% 10.1961% / 0.60), 0px 8px 10px -1px hsl(0 0% 10.1961% / 0.60);
+  --shadow-2xl: 0px 2px 5px 0px hsl(0 0% 10.1961% / 1.50);
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html,
-body {
-  margin: 0;
-  min-height: 100%;
-  padding: 0;
-}
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    padding: 0;
+  }
 
-body {
-  color: var(--color-text-primary);
-  font-family: var(--font-body), "Inter", "Noto Sans", system-ui, sans-serif;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03";
-  background:
-    radial-gradient(circle at 0% 0%, rgba(214, 232, 245, 0.55) 0, rgba(214, 232, 245, 0) 30%),
-    radial-gradient(circle at 100% 0%, rgba(253, 240, 213, 0.45) 0, rgba(253, 240, 213, 0) 28%),
-    linear-gradient(180deg, #f8fafc 0%, #f5f7fa 100%);
-}
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), "Oxanium", system-ui, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  letter-spacing: -0.011em;
-}
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif), "Playfair Display", ui-serif, serif;
+    letter-spacing: -0.011em;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--color-border-focus);
-  outline-offset: 2px;
+  :focus-visible {
+    outline: 2px solid oklch(var(--ring));
+    outline-offset: 2px;
+  }
 }
 
 .page-shell {
@@ -213,47 +158,6 @@ textarea {
 
 .county-pattern {
   background-image:
-    radial-gradient(circle at 1px 1px, rgba(13, 43, 78, 0.045) 1px, transparent 0);
+    radial-gradient(circle at 1px 1px, oklch(var(--foreground) / 0.045) 1px, transparent 0);
   background-size: 18px 18px;
-}
-
-.surface-card {
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xs);
-}
-
-.surface-elevated {
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-}
-
-/*
-	 ---break---
-	 */
-
-@layer base {
-  :root {
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-  .dark {
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
 }

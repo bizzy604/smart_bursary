@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -27,18 +27,18 @@ export default async function VillageAdminLayout({ children }: { children: React
 
 	return (
 		<CountyBrandingProvider>
-			<div className="min-h-screen bg-gray-50">
-				<header className="border-b border-gray-200 bg-white">
+			<div className="min-h-screen bg-muted">
+				<header className="border-b border-border bg-background">
 					<div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
 						<div>
-							<p className="text-xs uppercase tracking-[0.12em] text-gray-500">Village Portal</p>
-							<h1 className="font-display text-lg font-semibold text-brand-900">
+							<p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Village Portal</p>
+							<h1 className="font-serif text-lg font-semibold text-primary">
 								Village Allocation Queue
 							</h1>
 						</div>
 						<div className="text-right text-sm">
-							<p className="font-medium text-gray-900">{fullName}</p>
-							<p className="text-xs text-gray-500">Village Administrator</p>
+							<p className="font-medium text-foreground">{fullName}</p>
+							<p className="text-xs text-muted-foreground">Village Administrator</p>
 						</div>
 					</div>
 				</header>

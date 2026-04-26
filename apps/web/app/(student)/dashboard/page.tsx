@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo } from "react";
 import Link from "next/link";
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           title="Your application journey at a glance"
           description="See how your drafts, submissions, and review outcomes are distributed right now."
           aside={
-            <div className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+            <div className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-primary">
               {applications.length} tracked
             </div>
           }
@@ -223,21 +223,21 @@ export default function DashboardPage() {
                 )}
               </ChartContainer>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-brand-100 bg-brand-50/70 p-3">
+                <div className="rounded-xl border border-secondary/30 bg-secondary/10 p-3">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-county-primary">
                     Momentum
                   </p>
-                  <p className="mt-2 text-sm text-gray-700">
+                  <p className="mt-2 text-sm text-foreground/90">
                     {submittedApplications > 0
                       ? `${submittedApplications} application${submittedApplications === 1 ? "" : "s"} already moved beyond draft.`
                       : "Your next milestone is to submit your first application."}
                   </p>
                 </div>
-                <div className="rounded-xl border border-accent-100 bg-accent-50/80 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent-700">
+                <div className="rounded-xl border border-accent/20 bg-accent/10 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
                     Current Focus
                   </p>
-                  <p className="mt-2 text-sm text-gray-700">
+                  <p className="mt-2 text-sm text-foreground/90">
                     {inReview > 0
                       ? `${inReview} case${inReview === 1 ? "" : "s"} is actively being reviewed by ward or county teams.`
                       : "No active reviews yet. Submitted applications will appear here once committees start processing them."}
@@ -246,7 +246,7 @@ export default function DashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               No application activity yet. Once you start a draft or submit a
               request, this chart will show your progress mix.
             </p>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
           title="Open programs by funding utilization"
           description="Quickly spot which active funds are filling up fastest before you apply."
           aside={
-            <div className="rounded-full border border-accent-100 bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
+            <div className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
               {activePrograms} live funds
             </div>
           }
@@ -302,12 +302,12 @@ export default function DashboardPage() {
                 </BarChart>
               </ChartContainer>
               {leadProgram ? (
-                <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 text-sm text-gray-700">
-                  <span className="font-semibold text-brand-900">
+                <div className="rounded-xl border border-border bg-muted/80 p-3 text-sm text-foreground/90">
+                  <span className="font-semibold text-primary">
                     {leadProgram.fullName}
                   </span>{" "}
                   is currently the busiest open fund at{" "}
-                  <span className="font-semibold text-accent-700">
+                  <span className="font-semibold text-accent">
                     {formatPercent(leadProgram.utilization)}
                   </span>{" "}
                   utilization, with{" "}
@@ -323,7 +323,7 @@ export default function DashboardPage() {
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               No open programs are available yet. Funding utilization will
               appear here once county intakes are published.
             </p>
@@ -332,14 +332,14 @@ export default function DashboardPage() {
       </section>
 
       {error ? (
-        <section className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">
+        <section className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </section>
       ) : null}
 
-      <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
+      <section className="space-y-4 rounded-xl border border-border bg-background p-5 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-display text-xl font-semibold text-brand-900">
+          <h2 className="font-serif text-xl font-semibold text-primary">
             Open Programs
           </h2>
           <Link href="/programs">
@@ -350,7 +350,7 @@ export default function DashboardPage() {
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-gray-600">Loading programs...</p>
+          <p className="text-sm text-muted-foreground">Loading programs...</p>
         ) : (
           programs.map((program) => {
             const utilization =
@@ -359,14 +359,14 @@ export default function DashboardPage() {
             return (
               <article
                 key={program.id}
-                className="rounded-xl border border-gray-200 p-4"
+                className="rounded-xl border border-border p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="font-semibold text-brand-900">
+                    <h3 className="font-semibold text-primary">
                       {program.name}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       {program.ward} • Closes{" "}
                       {formatShortDate(program.closesAt)}
                     </p>
@@ -377,15 +377,15 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="mt-4 space-y-2">
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{formatPercent(utilization)} allocated</span>
                     <span>
                       {formatCurrencyKes(program.budgetCeilingKes)} budget
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-gray-100">
+                  <div className="h-2 rounded-full bg-muted">
                     <div
-                      className="h-2 rounded-full bg-accent-500"
+                      className="h-2 rounded-full bg-accent"
                       style={{ width: `${Math.min(100, utilization)}%` }}
                     />
                   </div>
@@ -396,13 +396,13 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <section className="space-y-4 rounded-xl border border-gray-200 bg-white p-5 shadow-xs">
+      <section className="space-y-4 rounded-xl border border-border bg-background p-5 shadow-xs">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-semibold text-brand-900">
+            <h2 className="font-serif text-xl font-semibold text-primary">
               My Applications
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Track status, download documents, and continue drafts.
             </p>
           </div>

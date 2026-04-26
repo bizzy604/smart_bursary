@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -243,8 +243,8 @@ export default function ProgramSettingsDetailPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -252,27 +252,27 @@ export default function ProgramSettingsDetailPage() {
           ) : null}
 
           {isLoading || !program ? (
-            <p className="text-sm text-gray-600">Loading program details...</p>
+            <p className="text-sm text-muted-foreground">Loading program details...</p>
           ) : (
             <>
               <div className="grid gap-4 md:grid-cols-3">
-                <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-                  <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Status</p>
-                  <p className="mt-1 font-display text-xl font-semibold text-brand-900">{program.status}</p>
+                <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+                  <p className="text-xs uppercase tracking-[0.12em] text-secondary">Status</p>
+                  <p className="mt-1 font-serif text-xl font-semibold text-primary">{program.status}</p>
                 </article>
-                <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-                  <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Allocated</p>
-                  <p className="mt-1 font-display text-xl font-semibold text-brand-900">{formatCurrencyKes(program.allocatedTotal)}</p>
+                <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+                  <p className="text-xs uppercase tracking-[0.12em] text-secondary">Allocated</p>
+                  <p className="mt-1 font-serif text-xl font-semibold text-primary">{formatCurrencyKes(program.allocatedTotal)}</p>
                 </article>
-                <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-                  <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Disbursed</p>
-                  <p className="mt-1 font-display text-xl font-semibold text-brand-900">{formatCurrencyKes(program.disbursedTotal)}</p>
+                <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+                  <p className="text-xs uppercase tracking-[0.12em] text-secondary">Disbursed</p>
+                  <p className="mt-1 font-serif text-xl font-semibold text-primary">{formatCurrencyKes(program.disbursedTotal)}</p>
                 </article>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2 text-sm md:col-span-2">
-                  <span className="font-medium text-gray-700">Program Name</span>
+                  <span className="font-medium text-foreground/90">Program Name</span>
                   <Input
                     value={form.name}
                     onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -281,18 +281,18 @@ export default function ProgramSettingsDetailPage() {
                 </label>
 
                 <label className="space-y-2 text-sm md:col-span-2">
-                  <span className="font-medium text-gray-700">Description</span>
+                  <span className="font-medium text-foreground/90">Description</span>
                   <textarea
                     value={form.description}
                     onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                     rows={3}
                     disabled={!isEditable}
-                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm disabled:bg-gray-50"
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:bg-muted"
                   />
                 </label>
 
                 <label className="space-y-2 text-sm">
-                  <span className="font-medium text-gray-700">Academic Year</span>
+                  <span className="font-medium text-foreground/90">Academic Year</span>
                   <Input
                     value={form.academicYear}
                     onChange={(event) => setForm((current) => ({ ...current, academicYear: event.target.value }))}
@@ -301,7 +301,7 @@ export default function ProgramSettingsDetailPage() {
                 </label>
 
                 <label className="space-y-2 text-sm">
-                  <span className="font-medium text-gray-700">Ward ID (Optional)</span>
+                  <span className="font-medium text-foreground/90">Ward ID (Optional)</span>
                   <Input
                     value={form.wardId}
                     onChange={(event) => setForm((current) => ({ ...current, wardId: event.target.value }))}
@@ -310,7 +310,7 @@ export default function ProgramSettingsDetailPage() {
                 </label>
 
                 <label className="space-y-2 text-sm">
-                  <span className="font-medium text-gray-700">Budget Ceiling (KES)</span>
+                  <span className="font-medium text-foreground/90">Budget Ceiling (KES)</span>
                   <Input
                     type="number"
                     min={1}
@@ -322,7 +322,7 @@ export default function ProgramSettingsDetailPage() {
                 </label>
 
                 <label className="space-y-2 text-sm">
-                  <span className="font-medium text-gray-700">Opens At</span>
+                  <span className="font-medium text-foreground/90">Opens At</span>
                   <Input
                     type="datetime-local"
                     value={form.opensAt}
@@ -332,7 +332,7 @@ export default function ProgramSettingsDetailPage() {
                 </label>
 
                 <label className="space-y-2 text-sm">
-                  <span className="font-medium text-gray-700">Closes At</span>
+                  <span className="font-medium text-foreground/90">Closes At</span>
                   <Input
                     type="datetime-local"
                     value={form.closesAt}
@@ -392,7 +392,7 @@ export default function ProgramSettingsDetailPage() {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSaving || isMutating}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className={pendingAction === "close" ? "bg-danger-500 hover:bg-danger-700" : undefined}
+              className={pendingAction === "close" ? "bg-red-500 hover:bg-red-700" : undefined}
               onClick={() => {
                 if (pendingAction === "save") {
                   void saveDraftChanges();

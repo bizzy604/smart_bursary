@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * Village-admin per-student allocation queue (Commit 5c of the data-integrity rollout).
@@ -224,7 +224,7 @@ export default function VillageAllocationsPage() {
 
 	// ─── Render ────────────────────────────────────────────────────────
 	if (isLoadingAssignments) {
-		return <p className="text-sm text-gray-600">Loading village assignment…</p>;
+		return <p className="text-sm text-muted-foreground">Loading village assignment…</p>;
 	}
 
 	if (assignments.length === 0) {
@@ -238,7 +238,7 @@ export default function VillageAllocationsPage() {
 				</CardHeader>
 				{pageFeedback ? (
 					<CardContent>
-						<p className="text-sm text-error-700">{pageFeedback.message}</p>
+						<p className="text-sm text-red-700">{pageFeedback.message}</p>
 					</CardContent>
 				) : null}
 			</Card>
@@ -271,9 +271,9 @@ export default function VillageAllocationsPage() {
 			) : null}
 
 			{!selectedVillageId ? (
-				<p className="text-sm text-gray-600">Select a village to begin.</p>
+				<p className="text-sm text-muted-foreground">Select a village to begin.</p>
 			) : isLoadingQueue || !queue ? (
-				<p className="text-sm text-gray-600">Loading queue…</p>
+				<p className="text-sm text-muted-foreground">Loading queue…</p>
 			) : (
 				<>
 					<QueueHeader queue={queue} totals={totals} />
@@ -289,8 +289,8 @@ export default function VillageAllocationsPage() {
 							role="status"
 							className={`rounded-md border px-4 py-3 text-sm ${
 								pageFeedback.type === "success"
-									? "border-success-200 bg-success-50 text-success-800"
-									: "border-error-200 bg-error-50 text-error-800"
+									? "border-emerald-200 bg-emerald-50 text-emerald-800"
+									: "border-red-200 bg-red-50 text-red-800"
 							}`}
 						>
 							{pageFeedback.message}
@@ -316,10 +316,10 @@ function QueueHeader(props: {
 	return (
 		<header className="space-y-3">
 			<div>
-				<h2 className="font-display text-2xl font-semibold text-brand-900">
+				<h2 className="font-serif text-2xl font-semibold text-primary">
 					{queue.village.name}
 				</h2>
-				<p className="text-sm text-gray-600">
+				<p className="text-sm text-muted-foreground">
 					{queue.village.ward?.name ? `${queue.village.ward.name} ward · ` : ""}
 					{queue.applications.length} application{queue.applications.length === 1 ? "" : "s"} pending
 					allocation
@@ -359,16 +359,16 @@ function SummaryCard(props: {
 	const tone = props.tone ?? "neutral";
 	const toneClass =
 		tone === "success"
-			? "border-success-200 bg-success-50 text-success-900"
+			? "border-emerald-200 bg-emerald-50 text-emerald-900"
 			: tone === "warning"
-				? "border-warning-200 bg-warning-50 text-warning-900"
+				? "border-amber-200 bg-amber-50 text-amber-900"
 				: tone === "info"
-					? "border-brand-100 bg-brand-50 text-brand-900"
-					: "border-gray-200 bg-white text-gray-900";
+					? "border-secondary/30 bg-secondary/10 text-primary"
+					: "border-border bg-background text-foreground";
 	return (
 		<article className={`rounded-lg border p-3 ${toneClass}`}>
 			<p className="text-xs uppercase tracking-[0.12em] opacity-80">{props.label}</p>
-			<p className="mt-1 font-display text-xl font-semibold">{props.value}</p>
+			<p className="mt-1 font-serif text-xl font-semibold">{props.value}</p>
 			{props.hint ? <p className="mt-1 text-xs opacity-80">{props.hint}</p> : null}
 		</article>
 	);
@@ -399,9 +399,9 @@ function VillagePoolsTable(props: { pools: VillagePoolSnapshot[] }) {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<div className="overflow-hidden rounded-md border border-gray-200">
-					<table className="min-w-full divide-y divide-gray-200 text-sm">
-						<thead className="bg-gray-50 text-left text-xs uppercase tracking-[0.08em] text-gray-600">
+				<div className="overflow-hidden rounded-md border border-border">
+					<table className="min-w-full divide-y divide-border text-sm">
+						<thead className="bg-muted text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
 							<tr>
 								<th className="px-3 py-2">Program</th>
 								<th className="px-3 py-2">Pool</th>
@@ -411,12 +411,12 @@ function VillagePoolsTable(props: { pools: VillagePoolSnapshot[] }) {
 								<th className="px-3 py-2">Deadline</th>
 							</tr>
 						</thead>
-						<tbody className="divide-y divide-gray-200 bg-white">
+						<tbody className="divide-y divide-border bg-background">
 							{props.pools.map((pool) => (
 								<tr key={pool.id}>
-									<td className="px-3 py-2 font-medium text-gray-900">
+									<td className="px-3 py-2 font-medium text-foreground">
 										<div>{pool.program.name}</div>
-										<div className="text-xs text-gray-500">{pool.program.academicYear}</div>
+										<div className="text-xs text-muted-foreground">{pool.program.academicYear}</div>
 									</td>
 									<td className="px-3 py-2">{formatCurrencyKes(pool.allocatedKes)}</td>
 									<td className="px-3 py-2">{formatCurrencyKes(pool.allocatedTotalKes)}</td>
@@ -424,15 +424,15 @@ function VillagePoolsTable(props: { pools: VillagePoolSnapshot[] }) {
 										<span
 											className={
 												pool.remainingKes <= 0
-													? "text-success-700 font-medium"
-													: "text-brand-700"
+													? "text-emerald-700 font-medium"
+													: "text-secondary"
 											}
 										>
 											{formatCurrencyKes(pool.remainingKes)}
 										</span>
 									</td>
-									<td className="px-3 py-2 text-xs text-gray-600">{pool.distributionMethod}</td>
-									<td className="px-3 py-2 text-xs text-gray-600">
+									<td className="px-3 py-2 text-xs text-muted-foreground">{pool.distributionMethod}</td>
+									<td className="px-3 py-2 text-xs text-muted-foreground">
 										{pool.villageAllocationDueAt
 											? new Date(pool.villageAllocationDueAt).toLocaleString()
 											: "—"}
@@ -477,9 +477,9 @@ function ApplicationsQueue(props: {
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
-				<div className="overflow-hidden rounded-md border border-gray-200">
-					<table className="min-w-full divide-y divide-gray-200 text-sm">
-						<thead className="bg-gray-50 text-left text-xs uppercase tracking-[0.08em] text-gray-600">
+				<div className="overflow-hidden rounded-md border border-border">
+					<table className="min-w-full divide-y divide-border text-sm">
+						<thead className="bg-muted text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
 							<tr>
 								<th className="px-3 py-2">Applicant</th>
 								<th className="px-3 py-2">Program</th>
@@ -488,23 +488,23 @@ function ApplicationsQueue(props: {
 								<th className="px-3 py-2 text-right">Action</th>
 							</tr>
 						</thead>
-						<tbody className="divide-y divide-gray-200 bg-white">
+						<tbody className="divide-y divide-border bg-background">
 							{queue.applications.map((app) => {
 								const state = rowStates[app.id];
 								return (
 									<tr key={app.id} className="align-top">
 										<td className="px-3 py-2">
-											<div className="font-medium text-gray-900">
+											<div className="font-medium text-foreground">
 												{app.applicantName ?? "(no profile)"}
 											</div>
-											<div className="text-xs text-gray-500">{app.submissionReference ?? app.id.slice(0, 8)}</div>
+											<div className="text-xs text-muted-foreground">{app.submissionReference ?? app.id.slice(0, 8)}</div>
 											{app.applicantPhone ? (
-												<div className="text-xs text-gray-400">{app.applicantPhone}</div>
+												<div className="text-xs text-muted-foreground">{app.applicantPhone}</div>
 											) : null}
 										</td>
 										<td className="px-3 py-2">
 											<div>{app.program?.name ?? "Unknown"}</div>
-											<div className="text-xs text-gray-500">{app.program?.academicYear ?? ""}</div>
+											<div className="text-xs text-muted-foreground">{app.program?.academicYear ?? ""}</div>
 										</td>
 										<td className="px-3 py-2">
 											{app.amountRequested != null
@@ -526,8 +526,8 @@ function ApplicationsQueue(props: {
 												<p
 													className={`mt-2 text-xs ${
 														state.feedback.type === "success"
-															? "text-success-700"
-															: "text-error-700"
+															? "text-emerald-700"
+															: "text-red-700"
 													}`}
 												>
 													{state.feedback.message}

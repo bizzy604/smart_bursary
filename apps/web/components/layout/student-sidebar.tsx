@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,16 +30,16 @@ export function StudentSidebar() {
 		<Sidebar
 			collapsible="icon"
 			variant="inset"
-			className="border-r border-gray-200/80 bg-white text-gray-900"
+			className="border-r border-border/80 bg-background text-foreground"
 		>
-			<SidebarHeader className="border-b border-gray-200/70 pb-3">
+			<SidebarHeader className="border-b border-border/70 pb-3">
 				<div className="flex items-center gap-3 px-1.5 py-1.5">
 					<CountyLogo label={county.logoText} />
 					<div className="min-w-0 group-data-[collapsible=icon]:hidden">
 						<p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-county-primary">
 							{county.name}
 						</p>
-						<h2 className="truncate font-display text-[15px] font-semibold leading-tight text-brand-900">
+						<h2 className="truncate font-serif text-[15px] font-semibold leading-tight text-primary">
 							{county.fundName}
 						</h2>
 					</div>
@@ -48,7 +48,7 @@ export function StudentSidebar() {
 
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+					<SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
 						Workspace
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -64,7 +64,7 @@ export function StudentSidebar() {
 											asChild
 											isActive={isActive}
 											tooltip={item.label}
-											className="h-10 gap-3 rounded-lg text-[13px] font-medium text-gray-600 transition-colors hover:bg-brand-50/70 hover:text-brand-900 data-[active=true]:bg-brand-50 data-[active=true]:text-brand-900 data-[active=true]:shadow-[inset_2px_0_0_0] data-[active=true]:shadow-county-primary"
+											className="h-10 gap-3 rounded-lg text-[13px] font-medium text-muted-foreground transition-colors hover:bg-secondary/10 hover:text-primary data-[active=true]:bg-secondary/10 data-[active=true]:text-primary data-[active=true]:shadow-[inset_2px_0_0_0] data-[active=true]:shadow-county-primary"
 										>
 											<Link href={item.href}>
 												<Icon className="h-4 w-4 shrink-0 text-current opacity-80" />

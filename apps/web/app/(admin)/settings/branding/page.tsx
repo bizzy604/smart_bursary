@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -98,8 +98,8 @@ export default function BrandingSettingsPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -108,7 +108,7 @@ export default function BrandingSettingsPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">County Name</span>
+              <span className="font-medium text-foreground/90">County Name</span>
               <Input
                 value={branding.countyName}
                 onChange={(event) => setBranding((current) => ({ ...current, countyName: event.target.value }))}
@@ -117,7 +117,7 @@ export default function BrandingSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Fund Name</span>
+              <span className="font-medium text-foreground/90">Fund Name</span>
               <Input
                 value={branding.fundName}
                 onChange={(event) => setBranding((current) => ({ ...current, fundName: event.target.value }))}
@@ -126,7 +126,7 @@ export default function BrandingSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Legal Reference</span>
+              <span className="font-medium text-foreground/90">Legal Reference</span>
               <Input
                 value={branding.legalReference}
                 onChange={(event) =>
@@ -137,7 +137,7 @@ export default function BrandingSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Logo Text (Fallback)</span>
+              <span className="font-medium text-foreground/90">Logo Text (Fallback)</span>
               <Input
                 maxLength={8}
                 value={branding.logoText}
@@ -147,7 +147,7 @@ export default function BrandingSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm md:col-span-2">
-              <span className="font-medium text-gray-700">Logo Storage Key</span>
+              <span className="font-medium text-foreground/90">Logo Storage Key</span>
               <Input
                 placeholder="county-assets/turkana/logo.png"
                 value={branding.logoS3Key}
@@ -157,7 +157,7 @@ export default function BrandingSettingsPage() {
             </label>
 
             <div className="space-y-2 text-sm md:col-span-2">
-              <span className="font-medium text-gray-700">Primary Colour</span>
+              <span className="font-medium text-foreground/90">Primary Colour</span>
               <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)]">
                 <input
                   type="color"
@@ -166,7 +166,7 @@ export default function BrandingSettingsPage() {
                     setBranding((current) => ({ ...current, primaryColor: event.target.value.toUpperCase() }))
                   }
                   disabled={isLoading}
-                  className="h-11 w-full cursor-pointer rounded-md border border-gray-300 bg-white p-1"
+                  className="h-11 w-full cursor-pointer rounded-md border border-border bg-background p-1"
                 />
                 <Input
                   value={branding.primaryColor}
@@ -183,11 +183,11 @@ export default function BrandingSettingsPage() {
             className="rounded-xl border px-4 py-3"
             style={{ borderColor: branding.primaryColor, backgroundColor: `${branding.primaryColor}12` }}
           >
-            <p className="text-xs uppercase tracking-[0.12em] text-gray-600">Live Preview</p>
-            <p className="mt-2 font-display text-lg font-semibold" style={{ color: branding.primaryColor }}>
+            <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Live Preview</p>
+            <p className="mt-2 font-serif text-lg font-semibold" style={{ color: branding.primaryColor }}>
               {branding.countyName || "County Name"} - {branding.fundName || "Fund Name"}
             </p>
-            <p className="mt-1 text-sm text-gray-600">Legal Ref: {branding.legalReference || "-"}</p>
+            <p className="mt-1 text-sm text-muted-foreground">Legal Ref: {branding.legalReference || "-"}</p>
           </div>
 
           <div className="flex justify-end">

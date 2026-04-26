@@ -1,21 +1,21 @@
-import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Noto_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import type { Metadata } from "next";
+import { JetBrains_Mono, Oxanium, Playfair_Display } from "next/font/google";
 import { AppSessionProvider } from "@/components/providers/session-provider";
 import { PwaProvider } from "@/components/providers/pwa-provider";
 import { Toaster } from "@/components/ui/toast";
 import "../styles/globals.css";
 
-const display = Plus_Jakarta_Sans({
+const fontSans = Oxanium({
 	subsets: ["latin"],
-	variable: "--font-display",
+	variable: "--font-sans",
 });
 
-const body = Noto_Sans({
+const fontSerif = Playfair_Display({
 	subsets: ["latin"],
-	variable: "--font-body",
+	variable: "--font-serif",
 });
 
-const mono = JetBrains_Mono({
+const fontMono = JetBrains_Mono({
 	subsets: ["latin"],
 	variable: "--font-mono",
 });
@@ -31,8 +31,11 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-			<body className="font-body text-gray-900 antialiased">
+		<html
+			lang="en"
+			className={`${fontSans.variable} ${fontSerif.variable} ${fontMono.variable}`}
+		>
+			<body className="font-sans antialiased">
 				<AppSessionProvider>
 					<PwaProvider>
 						{children}

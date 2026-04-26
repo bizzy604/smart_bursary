@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -70,14 +70,14 @@ export default function ApplySectionFPage() {
   });
 
   if (!programState) {
-    return <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">Loading section...</section>;
+    return <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Loading section...</section>;
   }
 
   if (!isUnlocked) {
     return (
-      <section className="rounded-2xl border border-warning-100 bg-warning-50 p-6">
-        <h2 className="font-display text-xl font-semibold text-warning-700">Complete Section E First</h2>
-        <p className="mt-2 text-sm text-warning-700">Document upload unlocks after declarations are confirmed.</p>
+      <section className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
+        <h2 className="font-serif text-xl font-semibold text-amber-700">Complete Section E First</h2>
+        <p className="mt-2 text-sm text-amber-700">Document upload unlocks after declarations are confirmed.</p>
         <div className="mt-4">
           <Link href={`/apply/${params.programId}/section-e`}>
             <Button>Go to Section E</Button>
@@ -113,7 +113,7 @@ export default function ApplySectionFPage() {
         <textarea
           value={form.additionalNotes}
           onChange={(event) => setForm({ ...form, additionalNotes: event.target.value })}
-          className="min-h-[120px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+          className="min-h-[120px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
           placeholder="Any extra context for reviewers can be provided here."
         />
       </FieldGroup>

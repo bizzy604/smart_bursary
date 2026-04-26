@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 
@@ -112,20 +112,20 @@ export default function AiScoringSettingsPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
             </p>
           ) : null}
 
-          <div className="rounded-lg border border-brand-100 bg-brand-50 p-3 text-sm text-brand-900">
+          <div className="rounded-lg border border-secondary/30 bg-secondary/10 p-3 text-sm text-primary">
             <p>
               Total: <strong>{totalPercent}%</strong>
                {!canSave ? " (must be exactly 100%)" : ""}
             </p>
-            {lastUpdatedAt ? <p className="mt-1 text-brand-700">Last updated: {new Date(lastUpdatedAt).toLocaleString()}</p> : null}
+            {lastUpdatedAt ? <p className="mt-1 text-secondary">Last updated: {new Date(lastUpdatedAt).toLocaleString()}</p> : null}
           </div>
 
           <div className="space-y-4">
@@ -134,13 +134,13 @@ export default function AiScoringSettingsPage() {
               const percent = Math.round(value * 1000) / 10;
 
               return (
-                <div key={dimension.key} className="rounded-lg border border-gray-200 bg-white p-3">
+                <div key={dimension.key} className="rounded-lg border border-border bg-background p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-brand-900">{dimension.label}</p>
-                      <p className="mt-1 text-xs text-gray-600">{dimension.helper}</p>
+                      <p className="text-sm font-semibold text-primary">{dimension.label}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{dimension.helper}</p>
                     </div>
-                    <p className="text-sm font-semibold text-brand-900">{percent}%</p>
+                    <p className="text-sm font-semibold text-primary">{percent}%</p>
                   </div>
 
                   <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_100px] sm:items-center">

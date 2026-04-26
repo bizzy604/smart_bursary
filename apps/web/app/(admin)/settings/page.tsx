@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -107,17 +107,17 @@ export default function SettingsHomePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
-          <Link href={"/county/programs" as Route} className="rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
+          <Link href={"/county/programs" as Route} className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 text-sm text-primary">
             <p className="font-semibold">Program Management</p>
-            <p className="mt-1 text-brand-700">Create, edit, publish, and close bursary intake programs.</p>
+            <p className="mt-1 text-secondary">Create, edit, publish, and close bursary intake programs.</p>
           </Link>
-          <Link href="/settings/branding" className="rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
+          <Link href="/settings/branding" className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 text-sm text-primary">
             <p className="font-semibold">Branding & County Identity</p>
-            <p className="mt-1 text-brand-700">Update county name, fund title, legal reference, and visual tokens.</p>
+            <p className="mt-1 text-secondary">Update county name, fund title, legal reference, and visual tokens.</p>
           </Link>
-          <Link href="/settings/ai-scoring" className="rounded-lg border border-brand-100 bg-brand-50 p-4 text-sm text-brand-900">
+          <Link href="/settings/ai-scoring" className="rounded-lg border border-secondary/30 bg-secondary/10 p-4 text-sm text-primary">
             <p className="font-semibold">AI Scoring Weights</p>
-            <p className="mt-1 text-brand-700">Control score dimension priorities per county policy.</p>
+            <p className="mt-1 text-secondary">Control score dimension priorities per county policy.</p>
           </Link>
         </CardContent>
       </Card>
@@ -134,8 +134,8 @@ export default function SettingsHomePage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -144,7 +144,7 @@ export default function SettingsHomePage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Colour Scheme</span>
+              <span className="font-medium text-foreground/90">Colour Scheme</span>
               <select
                 value={formCustomization.colorScheme}
                 onChange={(event) =>
@@ -153,7 +153,7 @@ export default function SettingsHomePage() {
                     colorScheme: event.target.value as FormCustomizationSettings["colorScheme"],
                   }))
                 }
-                className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm"
+                className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
               >
                 <option value="COUNTY_PRIMARY">County Primary</option>
                 <option value="NEUTRAL">Neutral</option>
@@ -161,7 +161,7 @@ export default function SettingsHomePage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Logo Placement</span>
+              <span className="font-medium text-foreground/90">Logo Placement</span>
               <select
                 value={formCustomization.logoPlacement}
                 onChange={(event) =>
@@ -170,7 +170,7 @@ export default function SettingsHomePage() {
                     logoPlacement: event.target.value as FormCustomizationSettings["logoPlacement"],
                   }))
                 }
-                className="h-11 w-full rounded-md border border-gray-300 bg-white px-3 text-sm"
+                className="h-11 w-full rounded-md border border-border bg-background px-3 text-sm"
               >
                 <option value="HEADER_LEFT">Header Left</option>
                 <option value="HEADER_CENTER">Header Center</option>
@@ -180,11 +180,11 @@ export default function SettingsHomePage() {
           </div>
 
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-700">Section Order</p>
+            <p className="text-sm font-medium text-foreground/90">Section Order</p>
             <div className="space-y-2">
               {formCustomization.sectionOrder.map((section, index) => (
-                <div key={section} className="flex items-center justify-between rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
-                  <span className="text-sm text-gray-800">{SECTION_LABELS[section]}</span>
+                <div key={section} className="flex items-center justify-between rounded-md border border-border bg-muted px-3 py-2">
+                  <span className="text-sm text-foreground">{SECTION_LABELS[section]}</span>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"

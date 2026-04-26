@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -124,7 +124,7 @@ export default function SettingsUsersPage() {
       </Card>
 
       {error ? (
-        <p className="rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
+        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
       ) : null}
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -165,7 +165,7 @@ export default function SettingsUsersPage() {
               aria-label="Filter reviewers by stage"
               value={stageFilter}
               onChange={(event) => setStageFilter(event.target.value as "ALL" | ReviewerStage)}
-              className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700"
+              className="h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground/90"
             >
               <option value="ALL">All Stages</option>
               <option value="WARD_REVIEW">Ward Review</option>
@@ -174,14 +174,14 @@ export default function SettingsUsersPage() {
           </div>
 
           {isLoading ? (
-            <p className="text-sm text-gray-600">Loading reviewer directory...</p>
+            <p className="text-sm text-muted-foreground">Loading reviewer directory...</p>
           ) : filteredReviewers.length === 0 ? (
-            <p className="text-sm text-gray-600">No reviewers found for the selected filters.</p>
+            <p className="text-sm text-muted-foreground">No reviewers found for the selected filters.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+                  <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                     <th className="px-2 py-2">Name</th>
                     <th className="px-2 py-2">Stage</th>
                     <th className="px-2 py-2">Reviews</th>
@@ -190,13 +190,13 @@ export default function SettingsUsersPage() {
                 </thead>
                 <tbody>
                   {filteredReviewers.map((reviewer) => (
-                    <tr key={reviewer.key} className="border-b border-gray-100">
-                      <td className="px-2 py-2 font-medium text-brand-900">{reviewer.fullName}</td>
-                      <td className="px-2 py-2 text-gray-700">
+                    <tr key={reviewer.key} className="border-b border-border">
+                      <td className="px-2 py-2 font-medium text-primary">{reviewer.fullName}</td>
+                      <td className="px-2 py-2 text-foreground/90">
                         {reviewer.stage === "COUNTY_REVIEW" ? "County Review" : "Ward Review"}
                       </td>
-                      <td className="px-2 py-2 text-gray-700">{reviewer.reviewedCount}</td>
-                      <td className="px-2 py-2 text-gray-700">
+                      <td className="px-2 py-2 text-foreground/90">{reviewer.reviewedCount}</td>
+                      <td className="px-2 py-2 text-foreground/90">
                         {reviewer.lastActivity ? formatShortDate(reviewer.lastActivity) : "Not available"}
                       </td>
                     </tr>

@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,14 +16,14 @@ export default function RegisterPage() {
 			<CardContent>
 				<form className="space-y-4">
 					<div className="space-y-2">
-						<label htmlFor="fullName" className="text-sm font-medium text-gray-700">
+						<label htmlFor="fullName" className="text-sm font-medium text-foreground/90">
 							Full name
 						</label>
 						<Input id="fullName" name="full_name" autoComplete="name" placeholder="Aisha Lokiru" required />
 					</div>
 
 					<div className="space-y-2">
-						<label htmlFor="email" className="text-sm font-medium text-gray-700">
+						<label htmlFor="email" className="text-sm font-medium text-foreground/90">
 							Email address
 						</label>
 						<Input id="email" name="email" type="email" autoComplete="email" placeholder="aisha@example.com" required />
@@ -31,14 +31,14 @@ export default function RegisterPage() {
 
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="space-y-2">
-							<label htmlFor="phone" className="text-sm font-medium text-gray-700">
+							<label htmlFor="phone" className="text-sm font-medium text-foreground/90">
 								Phone number
 							</label>
 							<Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+254712345678" required />
 						</div>
 
 						<div className="space-y-2">
-							<label htmlFor="county" className="text-sm font-medium text-gray-700">
+							<label htmlFor="county" className="text-sm font-medium text-foreground/90">
 								County slug
 							</label>
 							<Input id="county" name="county_slug" placeholder="turkana" required />
@@ -47,14 +47,14 @@ export default function RegisterPage() {
 
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="space-y-2">
-							<label htmlFor="password" className="text-sm font-medium text-gray-700">
+							<label htmlFor="password" className="text-sm font-medium text-foreground/90">
 								Password
 							</label>
 							<Input id="password" name="password" type="password" autoComplete="new-password" required />
 						</div>
 
 						<div className="space-y-2">
-							<label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
+							<label htmlFor="confirmPassword" className="text-sm font-medium text-foreground/90">
 								Confirm password
 							</label>
 							<Input
@@ -73,10 +73,10 @@ export default function RegisterPage() {
 				</form>
 			</CardContent>
 
-			<CardFooter className="text-center text-sm text-gray-600">
+			<CardFooter className="text-center text-sm text-muted-foreground">
 				<p>
 					Already registered?{" "}
-					<Link href="/login" className="font-semibold text-brand-700 hover:underline">
+					<Link href="/login" className="font-semibold text-secondary hover:underline">
 						Sign in
 					</Link>
 				</p>

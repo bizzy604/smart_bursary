@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const Table = React.forwardRef<HTMLTableElement, React.HTMLAttributes<HTMLTableElement>>(
@@ -15,7 +15,7 @@ const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttribut
 		<thead
 			ref={ref}
 			className={cn(
-				"bg-gray-50/60 [&_tr]:border-b [&_tr]:border-gray-200/70",
+				"bg-muted/60 [&_tr]:border-b [&_tr]:border-border/70",
 				className,
 			)}
 			{...props}
@@ -47,7 +47,7 @@ const TableRow = React.forwardRef<HTMLTableRowElement, React.HTMLAttributes<HTML
 		<tr
 			ref={ref}
 			className={cn(
-				"border-b border-gray-200/70 transition-colors hover:bg-brand-50/40 data-[state=selected]:bg-brand-50",
+				"border-b border-border/70 transition-colors hover:bg-secondary/10 data-[state=selected]:bg-secondary/10",
 				className,
 			)}
 			{...props}
@@ -61,7 +61,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<
 		<th
 			ref={ref}
 			className={cn(
-				"h-11 px-4 text-left align-middle text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+				"h-11 px-4 text-left align-middle text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
 				className,
 			)}
 			{...props}
@@ -75,7 +75,7 @@ const TableCell = React.forwardRef<HTMLTableCellElement, React.TdHTMLAttributes<
 		<td
 			ref={ref}
 			className={cn(
-				"px-4 py-3 align-middle text-sm text-gray-700 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+				"px-4 py-3 align-middle text-sm text-foreground/90 [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
 				className,
 			)}
 			{...props}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Input } from "@/components/ui/input";
 
@@ -65,14 +65,14 @@ export function DocumentUpload({ value, onChange }: DocumentUploadProps) {
 			{requiredDocs.map((doc) => {
 				const selected = value.find((item) => item.type === doc.type);
 				return (
-					<article key={doc.type} className="rounded-xl border border-gray-200 bg-white p-3">
+					<article key={doc.type} className="rounded-xl border border-border bg-background p-3">
 						<div className="mb-3 space-y-1">
-							<h4 className="font-display text-sm font-semibold text-brand-900">{doc.label}</h4>
-							<p className="text-xs text-gray-600">{doc.hint}</p>
+							<h4 className="font-serif text-sm font-semibold text-primary">{doc.label}</h4>
+							<p className="text-xs text-muted-foreground">{doc.hint}</p>
 							{selected?.fileName ? <p className="text-xs text-green-700">Selected: {selected.fileName}</p> : null}
 						</div>
 
-						<label className="block text-sm text-gray-700">
+						<label className="block text-sm text-foreground/90">
 							<span className="sr-only">Upload file</span>
 							<Input
 								type="file"

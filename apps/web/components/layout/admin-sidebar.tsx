@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,13 +46,13 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
 		<Sidebar
 			collapsible="icon"
 			variant="inset"
-			className="border-r border-gray-200/80 bg-white text-gray-900"
+			className="border-r border-border/80 bg-background text-foreground"
 		>
-			<SidebarHeader className="border-b border-gray-200/70 pb-3">
+			<SidebarHeader className="border-b border-border/70 pb-3">
 				<div className="flex items-center gap-3 px-1.5 py-1.5">
 					<span
 						aria-hidden
-						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-brand-800 text-white shadow-sm ring-1 ring-brand-900/10"
+						className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary to-secondary text-white shadow-sm ring-1 ring-primary/10"
 					>
 						<Building2 className="h-4.5 w-4.5" />
 					</span>
@@ -60,7 +60,7 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
 						<p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-county-primary">
 							{PORTAL_LABEL_BY_ROLE[role]}
 						</p>
-						<h2 className="truncate font-display text-[15px] font-semibold leading-tight text-brand-900">
+						<h2 className="truncate font-serif text-[15px] font-semibold leading-tight text-primary">
 							{PORTAL_TAGLINE_BY_ROLE[role]}
 						</h2>
 					</div>
@@ -69,7 +69,7 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
 
 			<SidebarContent>
 				<SidebarGroup>
-					<SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-gray-400">
+					<SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
 						Navigation
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
@@ -85,7 +85,7 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
 											asChild
 											isActive={isActive}
 											tooltip={item.label}
-											className="h-10 gap-3 rounded-lg text-[13px] font-medium text-gray-600 transition-colors hover:bg-brand-50/70 hover:text-brand-900 data-[active=true]:bg-brand-50 data-[active=true]:text-brand-900 data-[active=true]:shadow-[inset_2px_0_0_0] data-[active=true]:shadow-county-primary"
+											className="h-10 gap-3 rounded-lg text-[13px] font-medium text-muted-foreground transition-colors hover:bg-secondary/10 hover:text-primary data-[active=true]:bg-secondary/10 data-[active=true]:text-primary data-[active=true]:shadow-[inset_2px_0_0_0] data-[active=true]:shadow-county-primary"
 										>
 											<Link href={item.href}>
 												<Icon className="h-4 w-4 shrink-0 text-current opacity-80" />

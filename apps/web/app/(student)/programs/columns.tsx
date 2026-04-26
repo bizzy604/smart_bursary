@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { type ColumnDef } from "@tanstack/react-table";
@@ -130,7 +130,7 @@ export function buildStudentProgramColumns(
         />
       ),
       cell: ({ getValue }) => (
-        <div className="text-right font-medium tabular-nums text-brand-900">
+        <div className="text-right font-medium tabular-nums text-primary">
           {formatPercent(Number(getValue<number>()))}
         </div>
       ),

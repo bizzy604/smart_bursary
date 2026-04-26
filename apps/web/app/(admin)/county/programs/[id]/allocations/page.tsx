@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * County admin Ward Allocation screen (Commit 5a of the data-integrity rollout).
@@ -148,8 +148,8 @@ export default function ProgramWardAllocationsPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -157,7 +157,7 @@ export default function ProgramWardAllocationsPage() {
           ) : null}
 
           {isLoading || !program || !allocationData ? (
-            <p className="text-sm text-gray-600">Loading program and ward allocations…</p>
+            <p className="text-sm text-muted-foreground">Loading program and ward allocations…</p>
           ) : (
             <>
               <ProgramHeaderTotals program={program} allocationData={allocationData} />
@@ -193,37 +193,37 @@ function ProgramHeaderTotals({
 }) {
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Program Ceiling</p>
-        <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+      <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-secondary">Program Ceiling</p>
+        <p className="mt-1 font-serif text-xl font-semibold text-primary">
           {formatCurrencyKes(allocationData.programBudgetCeiling)}
         </p>
-        <p className="mt-1 text-xs text-gray-600">{program.name}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{program.name}</p>
       </article>
-      <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Distributed to Wards</p>
-        <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+      <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-secondary">Distributed to Wards</p>
+        <p className="mt-1 font-serif text-xl font-semibold text-primary">
           {formatCurrencyKes(allocationData.totalAllocatedToWards)}
         </p>
-        <p className="mt-1 text-xs text-gray-600">{allocationData.allocations.length} ward(s)</p>
+        <p className="mt-1 text-xs text-muted-foreground">{allocationData.allocations.length} ward(s)</p>
       </article>
       <article
         className={`rounded-lg border p-3 ${
           allocationData.programRemainingCapacity <= 0
-            ? "border-warning-200 bg-warning-50"
-            : "border-success-200 bg-success-50"
+            ? "border-amber-200 bg-amber-50"
+            : "border-emerald-200 bg-emerald-50"
         }`}
       >
         <p
           className={`text-xs uppercase tracking-[0.12em] ${
-            allocationData.programRemainingCapacity <= 0 ? "text-warning-700" : "text-success-700"
+            allocationData.programRemainingCapacity <= 0 ? "text-amber-700" : "text-emerald-700"
           }`}
         >
           Remaining Capacity
         </p>
         <p
-          className={`mt-1 font-display text-xl font-semibold ${
-            allocationData.programRemainingCapacity <= 0 ? "text-warning-700" : "text-success-700"
+          className={`mt-1 font-serif text-xl font-semibold ${
+            allocationData.programRemainingCapacity <= 0 ? "text-amber-700" : "text-emerald-700"
           }`}
         >
           {formatCurrencyKes(allocationData.programRemainingCapacity)}
@@ -262,12 +262,12 @@ function NewAllocationForm({
     Number(allocatedKes) > remainingCapacity;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4 rounded-md border border-gray-200 bg-white p-4">
+    <form onSubmit={onSubmit} className="space-y-4 rounded-md border border-border bg-background p-4">
       <header>
-        <h3 className="font-display text-base font-semibold text-brand-900">
+        <h3 className="font-serif text-base font-semibold text-primary">
           Add ward allocation
         </h3>
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-muted-foreground">
           Submitting an allocation that already exists for this (program, ward) updates the existing
           row in place. Sum across wards is enforced ≤ program ceiling at write time.
         </p>
@@ -275,20 +275,20 @@ function NewAllocationForm({
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm">
-          <span className="font-medium text-gray-700">Ward ID (UUID)</span>
+          <span className="font-medium text-foreground/90">Ward ID (UUID)</span>
           <Input
             value={wardId}
             onChange={(event) => onWardIdChange(event.target.value)}
             placeholder="6f8c2d9c-1234-4abc-9def-0123456789ab"
             disabled={isSubmitting}
           />
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-muted-foreground">
             Paste the ward UUID from the wards directory. A picker will replace this in 5b.
           </span>
         </label>
 
         <label className="space-y-2 text-sm">
-          <span className="font-medium text-gray-700">Allocated amount (KES)</span>
+          <span className="font-medium text-foreground/90">Allocated amount (KES)</span>
           <Input
             type="number"
             min={1}
@@ -299,20 +299,20 @@ function NewAllocationForm({
             disabled={isSubmitting}
           />
           {wouldExceed ? (
-            <span className="text-xs text-danger-700">
+            <span className="text-xs text-red-700">
               Exceeds remaining program capacity ({formatCurrencyKes(remainingCapacity)}).
             </span>
           ) : null}
         </label>
 
         <label className="space-y-2 text-sm md:col-span-2">
-          <span className="font-medium text-gray-700">Note (optional)</span>
+          <span className="font-medium text-foreground/90">Note (optional)</span>
           <textarea
             value={note}
             onChange={(event) => onNoteChange(event.target.value)}
             rows={2}
             disabled={isSubmitting}
-            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm disabled:bg-gray-50"
+            className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm disabled:bg-muted"
             placeholder="Recorded in the immutable audit timeline."
           />
         </label>
@@ -336,7 +336,7 @@ function ExistingAllocations({
 }) {
   if (allocations.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-gray-300 bg-gray-50 p-4 text-sm text-gray-600">
+      <div className="rounded-md border border-dashed border-border bg-muted p-4 text-sm text-muted-foreground">
         No ward allocations yet. Add one above to start the §7 ward → village → student flow.
       </div>
     );
@@ -344,12 +344,12 @@ function ExistingAllocations({
 
   return (
     <section className="space-y-3">
-      <h3 className="font-display text-base font-semibold text-brand-900">
+      <h3 className="font-serif text-base font-semibold text-primary">
         Ward allocations ({allocations.length})
       </h3>
-      <div className="overflow-hidden rounded-md border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead className="bg-gray-50 text-left text-xs uppercase tracking-[0.08em] text-gray-600">
+      <div className="overflow-hidden rounded-md border border-border">
+        <table className="min-w-full divide-y divide-border text-sm">
+          <thead className="bg-muted text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
             <tr>
               <th className="px-3 py-2">Ward</th>
               <th className="px-3 py-2">Allocated</th>
@@ -359,24 +359,24 @@ function ExistingAllocations({
               <th className="px-3 py-2 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-border bg-background">
             {allocations.map((row) => {
               const remainingForVillages = row.allocatedKes - row.allocatedTotalKes;
               return (
                 <tr key={row.id}>
-                  <td className="px-3 py-2 font-medium text-gray-900">
+                  <td className="px-3 py-2 font-medium text-foreground">
                     <div>{row.wardName}</div>
                     {row.wardCode ? (
-                      <div className="text-xs text-gray-500">{row.wardCode}</div>
+                      <div className="text-xs text-muted-foreground">{row.wardCode}</div>
                     ) : null}
-                    <div className="font-mono text-[10px] text-gray-400">{row.wardId.slice(0, 8)}…</div>
+                    <div className="font-mono text-[10px] text-muted-foreground">{row.wardId.slice(0, 8)}…</div>
                   </td>
                   <td className="px-3 py-2">{formatCurrencyKes(row.allocatedKes)}</td>
                   <td className="px-3 py-2">
                     <div>{formatCurrencyKes(row.allocatedTotalKes)}</div>
                     <div
                       className={`text-xs ${
-                        remainingForVillages <= 0 ? "text-success-700" : "text-warning-700"
+                        remainingForVillages <= 0 ? "text-emerald-700" : "text-amber-700"
                       }`}
                     >
                       {remainingForVillages <= 0
@@ -385,13 +385,13 @@ function ExistingAllocations({
                     </div>
                   </td>
                   <td className="px-3 py-2">{formatCurrencyKes(row.disbursedTotalKes)}</td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
+                  <td className="px-3 py-2 text-xs text-muted-foreground">
                     {new Date(row.updatedAt).toLocaleString()}
                   </td>
                   <td className="px-3 py-2 text-right">
                     <Link
                       href={`/county/programs/${programId}/allocations/${row.id}` as Route}
-                      className="text-sm font-medium text-brand-700 hover:underline"
+                      className="text-sm font-medium text-secondary hover:underline"
                     >
                       Distribute →
                     </Link>
@@ -402,7 +402,7 @@ function ExistingAllocations({
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted-foreground">
         &quot;Distribute →&quot; opens the ward-committee village-split screen (§7 Stage 3).
       </p>
     </section>

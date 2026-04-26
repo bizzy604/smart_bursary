@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Input } from "@/components/ui/input";
 
@@ -25,7 +25,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 
 	return (
 		<div className="grid gap-3 md:grid-cols-2">
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Father Occupation</span>
 				<Input
 					placeholder="e.g. Farmer"
@@ -33,7 +33,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 					onChange={(event) => patch("fatherOccupation", event.target.value)}
 				/>
 			</label>
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Father Monthly Income (KES)</span>
 				<Input
 					type="number"
@@ -43,7 +43,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 				/>
 			</label>
 
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Mother Occupation</span>
 				<Input
 					placeholder="e.g. Trader"
@@ -51,7 +51,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 					onChange={(event) => patch("motherOccupation", event.target.value)}
 				/>
 			</label>
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Mother Monthly Income (KES)</span>
 				<Input
 					type="number"
@@ -61,7 +61,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 				/>
 			</label>
 
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Guardian Occupation</span>
 				<Input
 					placeholder="Leave blank if not applicable"
@@ -69,7 +69,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 					onChange={(event) => patch("guardianOccupation", event.target.value)}
 				/>
 			</label>
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Guardian Monthly Income (KES)</span>
 				<Input
 					type="number"
@@ -79,7 +79,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 				/>
 			</label>
 
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Other Income Source</span>
 				<Input
 					placeholder="e.g. Casual labor, remittance"
@@ -87,7 +87,7 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 					onChange={(event) => patch("additionalIncomeSource", event.target.value)}
 				/>
 			</label>
-			<label className="space-y-1 text-sm text-gray-700">
+			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Other Income (KES)</span>
 				<Input
 					type="number"

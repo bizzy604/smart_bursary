@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
@@ -124,7 +124,7 @@ export default function OpsHealthPage() {
           icon={Activity}
         />
         {snapshot ? (
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Last refresh {formatShortDate(snapshot.refreshedAt)} •{" "}
             {snapshot.totalTenants} tenants tracked
           </p>
@@ -160,7 +160,7 @@ export default function OpsHealthPage() {
         title="Live service latency snapshot"
         description="This compares monitored platform services by current response time, with color tied to health state."
         aside={
-          <div className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+          <div className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-primary">
             {snapshot?.overallStatus ?? "unknown"}
           </div>
         }
@@ -217,7 +217,7 @@ export default function OpsHealthPage() {
                 </BarChart>
               )}
             </ChartContainer>
-            <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 text-sm text-gray-700">
+            <div className="rounded-xl border border-border bg-muted/80 p-3 text-sm text-foreground/90">
               {stats.down > 0
                 ? `${stats.down} service requires immediate response. Use the incident feed below to identify the failing dependency.`
                 : stats.degraded > 0
@@ -226,15 +226,15 @@ export default function OpsHealthPage() {
             </div>
           </>
         ) : (
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-muted-foreground">
             Health telemetry will render here once the platform starts reporting
             service checks.
           </p>
         )}
       </DashboardChartCard>
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">
           Service Status
         </h2>
         <div className="mt-3">
@@ -262,26 +262,26 @@ export default function OpsHealthPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">
+      <section className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">
           Incident Feed
         </h2>
         {snapshot &&
         snapshot.services.some((service) => service.status !== "healthy") ? (
-          <ul className="mt-3 space-y-2 text-sm text-gray-700">
+          <ul className="mt-3 space-y-2 text-sm text-foreground/90">
             {snapshot.services
               .filter((service) => service.status !== "healthy")
               .map((service) => (
                 <li
                   key={service.name}
-                  className="rounded-lg border border-warning-100 bg-warning-50 p-3"
+                  className="rounded-lg border border-amber-100 bg-amber-50 p-3"
                 >
                   {service.name} is currently {service.status}. {service.note}
                 </li>
               ))}
           </ul>
         ) : (
-          <p className="mt-3 rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+          <p className="mt-3 rounded-lg border border-border bg-muted p-3 text-sm text-foreground/90">
             No active incidents. All monitored platform services are healthy.
           </p>
         )}

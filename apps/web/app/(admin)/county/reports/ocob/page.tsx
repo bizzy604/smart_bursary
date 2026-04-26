@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
@@ -131,18 +131,18 @@ export default function CountyOcobReportsPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">OCOB Report Generation</h1>
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h1 className="font-serif text-2xl font-semibold text-primary">OCOB Report Generation</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Generate county-level allocations, disbursements, and balances in an OCOB-compatible structure.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <div className="grid gap-3 md:grid-cols-4">
           <select
             aria-label="Select OCOB program"
-            className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700"
+            className="h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground/90"
             value={filters.programId}
             onChange={(event) => setFilters((current) => ({ ...current, programId: event.target.value }))}
           >
@@ -154,7 +154,7 @@ export default function CountyOcobReportsPage() {
 
           <select
             aria-label="Select OCOB academic year"
-            className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700"
+            className="h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground/90"
             value={filters.academicYear}
             onChange={(event) => setFilters((current) => ({ ...current, academicYear: event.target.value }))}
           >
@@ -166,7 +166,7 @@ export default function CountyOcobReportsPage() {
 
           <select
             aria-label="Select OCOB ward scope"
-            className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-700"
+            className="h-11 rounded-md border border-border bg-background px-3 text-sm text-foreground/90"
             value={filters.wardId}
             onChange={(event) => setFilters((current) => ({ ...current, wardId: event.target.value }))}
           >
@@ -176,18 +176,18 @@ export default function CountyOcobReportsPage() {
             ))}
           </select>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Button size="sm" onClick={() => void loadReport(filters)}>{isLoading ? "Loading..." : "Apply"}</Button>
             <span>Generated {formatShortDate(generatedAt ?? new Date().toISOString())}</span>
           </div>
         </div>
 
         {error ? (
-          <p className="mt-3 rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
+          <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         ) : null}
 
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-3 text-sm text-gray-700">
-          <span className="font-medium text-brand-900">{totals.applications} applications</span>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted px-3 py-3 text-sm text-foreground/90">
+          <span className="font-medium text-primary">{totals.applications} applications</span>
           <span>{totals.approved} approved</span>
           <span>Allocated {formatCurrencyKes(totals.allocatedKes)}</span>
           <span>Disbursed {formatCurrencyKes(totals.disbursedKes)}</span>

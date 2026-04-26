@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+﻿import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
@@ -7,18 +7,18 @@ const badgeVariants = cva(
 	{
 		variants: {
 			variant: {
-				neutral: "border-gray-200 bg-gray-50 text-gray-700",
+				neutral: "border-border bg-muted text-foreground/90",
 				info: "border-info-100 bg-info-50 text-info-700",
-				success: "border-success-100 bg-success-50 text-success-700",
-				warning: "border-warning-100 bg-warning-50 text-warning-700",
-				danger: "border-danger-100 bg-danger-50 text-danger-700",
+				success: "border-emerald-100 bg-emerald-50 text-emerald-700",
+				warning: "border-amber-100 bg-amber-50 text-amber-700",
+				danger: "border-red-100 bg-red-50 text-red-700",
 				default:
-					"border-transparent bg-brand-700 text-white shadow-xs hover:bg-brand-900",
+					"border-transparent bg-secondary text-white shadow-xs hover:bg-primary",
 				secondary:
-					"border-transparent bg-brand-50 text-brand-800 hover:bg-brand-100",
+					"border-transparent bg-secondary/10 text-secondary hover:bg-secondary/30",
 				destructive:
-					"border-transparent bg-danger-500 text-white shadow-xs hover:bg-danger-700",
-				outline: "border-gray-200 bg-transparent text-gray-700",
+					"border-transparent bg-red-500 text-white shadow-xs hover:bg-red-700",
+				outline: "border-border bg-transparent text-foreground/90",
 			},
 		},
 		defaultVariants: {

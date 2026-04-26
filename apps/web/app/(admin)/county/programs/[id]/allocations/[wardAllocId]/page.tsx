@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * Ward-committee Village-split screen (Commit 5b of the data-integrity rollout).
@@ -237,7 +237,7 @@ export default function WardVillageDistributionPage() {
   if (isLoading) {
     return (
       <main className="space-y-6 px-6 py-8">
-        <p className="text-sm text-gray-600">Loading ward distribution screen…</p>
+        <p className="text-sm text-muted-foreground">Loading ward distribution screen…</p>
       </main>
     );
   }
@@ -255,7 +255,7 @@ export default function WardVillageDistributionPage() {
           <CardContent>
             <Link
               href={`/county/programs/${programId}/allocations` as Route}
-              className="text-sm font-medium text-brand-700 hover:underline"
+              className="text-sm font-medium text-secondary hover:underline"
             >
               ← Back to ward allocations
             </Link>
@@ -270,14 +270,14 @@ export default function WardVillageDistributionPage() {
       <header className="space-y-2">
         <Link
           href={`/county/programs/${programId}/allocations` as Route}
-          className="text-xs font-medium text-brand-700 hover:underline"
+          className="text-xs font-medium text-secondary hover:underline"
         >
           ← Ward allocations for {program.name}
         </Link>
-        <h1 className="font-display text-2xl font-semibold text-brand-900">
+        <h1 className="font-serif text-2xl font-semibold text-primary">
           Distribute {wardAllocation.wardName} pool across villages
         </h1>
-        <p className="max-w-3xl text-sm text-gray-600">
+        <p className="max-w-3xl text-sm text-muted-foreground">
           The ward committee splits the {formatCurrencyKes(wardAllocation.allocatedKes)} pool across
           the villages below. The system has pre-filled a proportional split based on applicant
           count per village. Adjust as needed — the running total must equal the ward pool exactly
@@ -315,9 +315,9 @@ export default function WardVillageDistributionPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="overflow-hidden rounded-md border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead className="bg-gray-50 text-left text-xs uppercase tracking-[0.08em] text-gray-600">
+            <div className="overflow-hidden rounded-md border border-border">
+              <table className="min-w-full divide-y divide-border text-sm">
+                <thead className="bg-muted text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
                   <tr>
                     <th className="px-3 py-2">Village</th>
                     <th className="px-3 py-2">Applicants</th>
@@ -325,7 +325,7 @@ export default function WardVillageDistributionPage() {
                     <th className="px-3 py-2">% of ward pool</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-border bg-background">
                   {rows.map((row) => {
                     const draftNumeric = Number(row.draftKes);
                     const pct =
@@ -334,10 +334,10 @@ export default function WardVillageDistributionPage() {
                         : 0;
                     return (
                       <tr key={row.villageUnitId}>
-                        <td className="px-3 py-2 font-medium text-gray-900">
+                        <td className="px-3 py-2 font-medium text-foreground">
                           <div>{row.villageName}</div>
                           {row.villageCode ? (
-                            <div className="text-xs text-gray-500">{row.villageCode}</div>
+                            <div className="text-xs text-muted-foreground">{row.villageCode}</div>
                           ) : null}
                         </td>
                         <td className="px-3 py-2">{row.applicantCount}</td>
@@ -352,16 +352,16 @@ export default function WardVillageDistributionPage() {
                             className="w-44"
                           />
                         </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">{pct.toFixed(2)}%</td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{pct.toFixed(2)}%</td>
                       </tr>
                     );
                   })}
                 </tbody>
-                <tfoot className="bg-gray-50 text-xs uppercase tracking-[0.08em] text-gray-600">
+                <tfoot className="bg-muted text-xs uppercase tracking-[0.08em] text-muted-foreground">
                   <tr>
                     <td className="px-3 py-2 font-semibold">Total</td>
                     <td className="px-3 py-2">{suggestion.totalApplicants}</td>
-                    <td className="px-3 py-2 font-semibold text-gray-900">
+                    <td className="px-3 py-2 font-semibold text-foreground">
                       {formatCurrencyKes(sumDraft)}
                     </td>
                     <td className="px-3 py-2">
@@ -384,35 +384,35 @@ export default function WardVillageDistributionPage() {
           </CardHeader>
           <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <label className="space-y-1 text-sm">
-              <span className="font-medium text-gray-700">Distribution method</span>
+              <span className="font-medium text-foreground/90">Distribution method</span>
               <select
                 value={distributionMethod}
                 onChange={(event) => setDistributionMethod(event.target.value as DistributionMethod)}
-                className="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                className="block w-full rounded-md border border-border bg-background px-3 py-2 text-sm shadow-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
               >
                 <option value="PROPORTIONAL">Proportional (system suggestion)</option>
                 <option value="MANUAL_OVERRIDE">Manual override</option>
                 <option value="AI_WEIGHTED">AI-weighted</option>
               </select>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 Recorded with each village_budget_allocation row.
               </span>
             </label>
 
             <label className="space-y-1 text-sm">
-              <span className="font-medium text-gray-700">Village allocation deadline (optional)</span>
+              <span className="font-medium text-foreground/90">Village allocation deadline (optional)</span>
               <Input
                 type="datetime-local"
                 value={dueAt}
                 onChange={(event) => setDueAt(event.target.value)}
               />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 After this time, ward/county admins may override per §7.4 unavailability rules.
               </span>
             </label>
 
             <label className="space-y-1 text-sm md:col-span-2">
-              <span className="font-medium text-gray-700">Note (optional)</span>
+              <span className="font-medium text-foreground/90">Note (optional)</span>
               <Input
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
@@ -427,8 +427,8 @@ export default function WardVillageDistributionPage() {
             role="status"
             className={`rounded-md border px-4 py-3 text-sm ${
               feedback.type === "success"
-                ? "border-success-200 bg-success-50 text-success-800"
-                : "border-error-200 bg-error-50 text-error-800"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                : "border-red-200 bg-red-50 text-red-800"
             }`}
           >
             {feedback.message}
@@ -438,7 +438,7 @@ export default function WardVillageDistributionPage() {
         <div className="flex items-center justify-end gap-3">
           <Link
             href={`/county/programs/${programId}/allocations` as Route}
-            className="text-sm font-medium text-gray-600 hover:underline"
+            className="text-sm font-medium text-muted-foreground hover:underline"
           >
             Cancel
           </Link>
@@ -465,23 +465,23 @@ function ContextSummary(props: {
   const { program, wardAllocation, sumDraft, remaining, existing } = props;
   return (
     <section className="grid grid-cols-1 gap-3 md:grid-cols-4">
-      <article className="rounded-lg border border-gray-200 bg-white p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Program</p>
-        <p className="mt-1 font-display text-base font-semibold text-gray-900">{program.name}</p>
+      <article className="rounded-lg border border-border bg-background p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Program</p>
+        <p className="mt-1 font-serif text-base font-semibold text-foreground">{program.name}</p>
       </article>
-      <article className="rounded-lg border border-brand-100 bg-brand-50 p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-brand-700">Ward pool</p>
-        <p className="mt-1 font-display text-xl font-semibold text-brand-900">
+      <article className="rounded-lg border border-secondary/30 bg-secondary/10 p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-secondary">Ward pool</p>
+        <p className="mt-1 font-serif text-xl font-semibold text-primary">
           {formatCurrencyKes(wardAllocation.allocatedKes)}
         </p>
-        <p className="text-xs text-brand-700/80">{wardAllocation.wardName}</p>
+        <p className="text-xs text-secondary/80">{wardAllocation.wardName}</p>
       </article>
-      <article className="rounded-lg border border-gray-200 bg-white p-3">
-        <p className="text-xs uppercase tracking-[0.12em] text-gray-500">Draft total</p>
-        <p className="mt-1 font-display text-xl font-semibold text-gray-900">
+      <article className="rounded-lg border border-border bg-background p-3">
+        <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Draft total</p>
+        <p className="mt-1 font-serif text-xl font-semibold text-foreground">
           {formatCurrencyKes(sumDraft)}
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           {existing?.villages.length
             ? `Persisted: ${formatCurrencyKes(existing.totalDistributed)}`
             : "Not yet distributed"}
@@ -490,27 +490,27 @@ function ContextSummary(props: {
       <article
         className={`rounded-lg border p-3 ${
           Math.abs(remaining) < 0.01
-            ? "border-success-200 bg-success-50"
-            : "border-warning-200 bg-warning-50"
+            ? "border-emerald-200 bg-emerald-50"
+            : "border-amber-200 bg-amber-50"
         }`}
       >
         <p
           className={`text-xs uppercase tracking-[0.12em] ${
-            Math.abs(remaining) < 0.01 ? "text-success-700" : "text-warning-700"
+            Math.abs(remaining) < 0.01 ? "text-emerald-700" : "text-amber-700"
           }`}
         >
           Remaining to balance
         </p>
         <p
-          className={`mt-1 font-display text-xl font-semibold ${
-            Math.abs(remaining) < 0.01 ? "text-success-900" : "text-warning-900"
+          className={`mt-1 font-serif text-xl font-semibold ${
+            Math.abs(remaining) < 0.01 ? "text-emerald-900" : "text-amber-900"
           }`}
         >
           {formatCurrencyKes(remaining)}
         </p>
         <p
           className={`text-xs ${
-            Math.abs(remaining) < 0.01 ? "text-success-700" : "text-warning-700"
+            Math.abs(remaining) < 0.01 ? "text-emerald-700" : "text-amber-700"
           }`}
         >
           {Math.abs(remaining) < 0.01
@@ -527,13 +527,13 @@ function ContextSummary(props: {
 function BalanceBadge(props: { remaining: number; isBalanced: boolean }) {
   if (props.isBalanced) {
     return (
-      <p className="mt-3 text-sm font-medium text-success-700">
+      <p className="mt-3 text-sm font-medium text-emerald-700">
         ✓ Σ village allocations equals the ward pool. Ready to save.
       </p>
     );
   }
   return (
-    <p className="mt-3 text-sm font-medium text-warning-700">
+    <p className="mt-3 text-sm font-medium text-amber-700">
       Σ village allocations differs from the ward pool by{" "}
       <span className="font-semibold">{formatCurrencyKes(props.remaining)}</span>. Submit is
       disabled until the totals match (Invariant 2).
@@ -552,9 +552,9 @@ function ExistingDistributionTable(props: { existing: VillageAllocationListResul
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-hidden rounded-md border border-gray-200">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50 text-left text-xs uppercase tracking-[0.08em] text-gray-600">
+        <div className="overflow-hidden rounded-md border border-border">
+          <table className="min-w-full divide-y divide-border text-sm">
+            <thead className="bg-muted text-left text-xs uppercase tracking-[0.08em] text-muted-foreground">
               <tr>
                 <th className="px-3 py-2">Village</th>
                 <th className="px-3 py-2">Allocated</th>
@@ -564,15 +564,15 @@ function ExistingDistributionTable(props: { existing: VillageAllocationListResul
                 <th className="px-3 py-2">Deadline</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
+            <tbody className="divide-y divide-border bg-background">
               {existing.villages.map((row) => {
                 const remainingForStudents = row.allocatedKes - row.allocatedTotalKes;
                 return (
                   <tr key={row.id}>
-                    <td className="px-3 py-2 font-medium text-gray-900">
+                    <td className="px-3 py-2 font-medium text-foreground">
                       <div>{row.villageName}</div>
                       {row.villageCode ? (
-                        <div className="text-xs text-gray-500">{row.villageCode}</div>
+                        <div className="text-xs text-muted-foreground">{row.villageCode}</div>
                       ) : null}
                     </td>
                     <td className="px-3 py-2">{formatCurrencyKes(row.allocatedKes)}</td>
@@ -580,7 +580,7 @@ function ExistingDistributionTable(props: { existing: VillageAllocationListResul
                       <div>{formatCurrencyKes(row.allocatedTotalKes)}</div>
                       <div
                         className={`text-xs ${
-                          remainingForStudents <= 0 ? "text-success-700" : "text-warning-700"
+                          remainingForStudents <= 0 ? "text-emerald-700" : "text-amber-700"
                         }`}
                       >
                         {remainingForStudents <= 0
@@ -589,8 +589,8 @@ function ExistingDistributionTable(props: { existing: VillageAllocationListResul
                       </div>
                     </td>
                     <td className="px-3 py-2">{formatCurrencyKes(row.disbursedTotalKes)}</td>
-                    <td className="px-3 py-2 text-xs text-gray-600">{row.distributionMethod}</td>
-                    <td className="px-3 py-2 text-xs text-gray-600">
+                    <td className="px-3 py-2 text-xs text-muted-foreground">{row.distributionMethod}</td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
                       {row.villageAllocationDueAt
                         ? new Date(row.villageAllocationDueAt).toLocaleString()
                         : "—"}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -125,8 +125,8 @@ export default function NewProgramSettingsPage() {
             <p
               className={`rounded-md px-3 py-2 text-sm ${
                 feedback.type === "success"
-                  ? "border border-success-200 bg-success-50 text-success-700"
-                  : "border border-danger-200 bg-danger-50 text-danger-700"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-red-200 bg-red-50 text-red-700"
               }`}
             >
               {feedback.message}
@@ -135,7 +135,7 @@ export default function NewProgramSettingsPage() {
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="space-y-2 text-sm md:col-span-2">
-              <span className="font-medium text-gray-700">Program Name</span>
+              <span className="font-medium text-foreground/90">Program Name</span>
               <Input
                 value={form.name}
                 onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
@@ -144,18 +144,18 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm md:col-span-2">
-              <span className="font-medium text-gray-700">Description</span>
+              <span className="font-medium text-foreground/90">Description</span>
               <textarea
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 rows={3}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                 placeholder="Eligibility and policy notes for this intake"
               />
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Academic Year</span>
+              <span className="font-medium text-foreground/90">Academic Year</span>
               <Input
                 value={form.academicYear}
                 onChange={(event) => setForm((current) => ({ ...current, academicYear: event.target.value }))}
@@ -164,7 +164,7 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Ward ID (Optional)</span>
+              <span className="font-medium text-foreground/90">Ward ID (Optional)</span>
               <Input
                 value={form.wardId}
                 onChange={(event) => setForm((current) => ({ ...current, wardId: event.target.value }))}
@@ -173,7 +173,7 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Budget Ceiling (KES)</span>
+              <span className="font-medium text-foreground/90">Budget Ceiling (KES)</span>
               <Input
                 type="number"
                 min={1}
@@ -184,7 +184,7 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Opens At</span>
+              <span className="font-medium text-foreground/90">Opens At</span>
               <DatePicker
                 value={form.opensAt}
                 onChange={(date) => setForm((current) => ({ ...current, opensAt: date }))}
@@ -194,7 +194,7 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-gray-700">Closes At</span>
+              <span className="font-medium text-foreground/90">Closes At</span>
               <DatePicker
                 value={form.closesAt}
                 onChange={(date) => setForm((current) => ({ ...current, closesAt: date }))}

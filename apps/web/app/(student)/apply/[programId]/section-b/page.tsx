@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -89,14 +89,14 @@ export default function ApplySectionBPage() {
   });
 
   if (!programState) {
-    return <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">Loading section...</section>;
+    return <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">Loading section...</section>;
   }
 
   if (!isUnlocked) {
     return (
-      <section className="rounded-2xl border border-warning-100 bg-warning-50 p-6">
-        <h2 className="font-display text-xl font-semibold text-warning-700">Complete Section A First</h2>
-        <p className="mt-2 text-sm text-warning-700">You need to complete personal details before requesting support amounts.</p>
+      <section className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
+        <h2 className="font-serif text-xl font-semibold text-amber-700">Complete Section A First</h2>
+        <p className="mt-2 text-sm text-amber-700">You need to complete personal details before requesting support amounts.</p>
         <div className="mt-4">
           <Link href={`/apply/${params.programId}/section-a`}>
             <Button>Go to Section A</Button>
@@ -125,7 +125,7 @@ export default function ApplySectionBPage() {
     >
       <FieldGroup title="Fee Breakdown">
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Requested Amount (KES)</span>
             <Input
               type="number"
@@ -133,7 +133,7 @@ export default function ApplySectionBPage() {
               onChange={(event) => setForm({ ...form, requestedKes: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Current Fee Balance (KES)</span>
             <Input
               type="number"
@@ -141,7 +141,7 @@ export default function ApplySectionBPage() {
               onChange={(event) => setForm({ ...form, feeBalanceKes: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Total Annual Fee (KES)</span>
             <Input
               type="number"
@@ -149,7 +149,7 @@ export default function ApplySectionBPage() {
               onChange={(event) => setForm({ ...form, totalFeeKes: event.target.value })}
             />
           </label>
-          <label className="space-y-1 text-sm text-gray-700">
+          <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Support from Other Sponsors (KES)</span>
             <Input
               type="number"
@@ -164,25 +164,25 @@ export default function ApplySectionBPage() {
         <textarea
           value={form.reasonForSupport}
           onChange={(event) => setForm({ ...form, reasonForSupport: event.target.value })}
-          className="min-h-[140px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+          className="min-h-[140px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
           placeholder="Describe your current financial challenge and how this bursary will support your studies."
         />
       </FieldGroup>
 
       <FieldGroup title="Funding Disclosures">
         <div className="space-y-3">
-          <label className="flex items-start gap-2 text-sm text-gray-700">
+          <label className="flex items-start gap-2 text-sm text-foreground/90">
             <input
               type="checkbox"
               checked={form.helbApplied}
               onChange={(event) => setForm({ ...form, helbApplied: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I have applied for HELB support for this intake period.</span>
           </label>
 
           {form.helbApplied ? (
-            <label className="space-y-1 text-sm text-gray-700 md:max-w-sm">
+            <label className="space-y-1 text-sm text-foreground/90 md:max-w-sm">
               <span className="font-medium">HELB Amount (KES)</span>
               <Input
                 type="number"
@@ -192,19 +192,19 @@ export default function ApplySectionBPage() {
             </label>
           ) : null}
 
-          <label className="flex items-start gap-2 text-sm text-gray-700">
+          <label className="flex items-start gap-2 text-sm text-foreground/90">
             <input
               type="checkbox"
               checked={form.priorBursaryReceived}
               onChange={(event) => setForm({ ...form, priorBursaryReceived: event.target.checked })}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300"
+              className="mt-0.5 h-4 w-4 rounded border-border"
             />
             <span>I have previously received bursary support.</span>
           </label>
 
           {form.priorBursaryReceived ? (
             <div className="grid gap-3 md:grid-cols-2">
-              <label className="space-y-1 text-sm text-gray-700 md:col-span-2">
+              <label className="space-y-1 text-sm text-foreground/90 md:col-span-2">
                 <span className="font-medium">Prior Bursary Source</span>
                 <Input
                   value={form.priorBursarySource}
@@ -212,7 +212,7 @@ export default function ApplySectionBPage() {
                   placeholder="e.g. County Needy Students Fund"
                 />
               </label>
-              <label className="space-y-1 text-sm text-gray-700 md:max-w-sm">
+              <label className="space-y-1 text-sm text-foreground/90 md:max-w-sm">
                 <span className="font-medium">Prior Bursary Amount (KES)</span>
                 <Input
                   type="number"

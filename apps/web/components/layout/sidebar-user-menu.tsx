@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * Purpose: Sidebar footer block that shows the signed-in user and exposes
@@ -70,23 +70,23 @@ export function SidebarUserMenu() {
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="data-[state=open]:bg-brand-50 data-[state=open]:text-brand-900"
+							className="data-[state=open]:bg-secondary/10 data-[state=open]:text-primary"
 							tooltip={name || "Account"}
 							aria-label="Account menu"
 						>
 							<span
 								aria-hidden
-								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-brand-800 text-sm font-semibold text-white shadow-sm ring-1 ring-brand-900/10"
+								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary to-secondary text-sm font-semibold text-white shadow-sm ring-1 ring-primary/10"
 							>
 								{isLoading ? "…" : initialsFor(name, email)}
 							</span>
 							<span className="grid min-w-0 flex-1 text-left leading-tight">
-								<span className="truncate text-sm font-semibold text-brand-900">
+								<span className="truncate text-sm font-semibold text-primary">
 									{isLoading ? "Loading…" : name || "Account"}
 								</span>
-								<span className="truncate text-xs text-gray-500">{role || email}</span>
+								<span className="truncate text-xs text-muted-foreground">{role || email}</span>
 							</span>
-							<ChevronUp className="ml-auto h-4 w-4 shrink-0 text-gray-400" />
+							<ChevronUp className="ml-auto h-4 w-4 shrink-0 text-muted-foreground" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 
@@ -94,18 +94,18 @@ export function SidebarUserMenu() {
 						side="top"
 						align="end"
 						sideOffset={8}
-						className="w-[--radix-popper-anchor-width] min-w-[16rem] rounded-xl border-brand-100 bg-white p-1 shadow-lg"
+						className="w-[--radix-popper-anchor-width] min-w-[16rem] rounded-xl border-secondary/30 bg-background p-1 shadow-lg"
 					>
 						<DropdownMenuLabel className="flex items-center gap-3 px-2 py-2">
 							<span
 								aria-hidden
-								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-brand-800 text-sm font-semibold text-white shadow-sm ring-1 ring-brand-900/10"
+								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-secondary to-secondary text-sm font-semibold text-white shadow-sm ring-1 ring-primary/10"
 							>
 								{initialsFor(name, email)}
 							</span>
 							<span className="grid min-w-0 flex-1 leading-tight">
-								<span className="truncate text-sm font-semibold text-brand-900">{name || "Account"}</span>
-								<span className="truncate text-xs text-gray-500">{email}</span>
+								<span className="truncate text-sm font-semibold text-primary">{name || "Account"}</span>
+								<span className="truncate text-xs text-muted-foreground">{email}</span>
 								{role ? (
 									<span className="mt-1 truncate text-[11px] font-semibold uppercase tracking-[0.14em] text-county-primary">
 										{role}
@@ -121,7 +121,7 @@ export function SidebarUserMenu() {
 							return (
 								<>
 									<DropdownMenuItem
-										className="gap-2 rounded-md px-2 py-2 text-sm text-brand-900 focus:bg-brand-50 focus:text-brand-900"
+										className="gap-2 rounded-md px-2 py-2 text-sm text-primary focus:bg-secondary/10 focus:text-primary"
 										asChild
 									>
 										<Link href={accountLink.href}>
@@ -135,7 +135,7 @@ export function SidebarUserMenu() {
 						})() : null}
 
 						<DropdownMenuItem
-							className="gap-2 rounded-md px-2 py-2 text-sm text-danger-700 focus:bg-danger-50 focus:text-danger-700"
+							className="gap-2 rounded-md px-2 py-2 text-sm text-red-700 focus:bg-red-50 focus:text-red-700"
 							onSelect={(event) => {
 								event.preventDefault();
 								void signOut({ callbackUrl: "/login" });

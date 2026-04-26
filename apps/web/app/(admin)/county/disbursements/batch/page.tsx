@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -90,37 +90,37 @@ export default function CountyDisbursementBatchPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">EFT Batch Export</h1>
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h1 className="font-serif text-2xl font-semibold text-primary">EFT Batch Export</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Generate an RTGS-compatible payout file for approved applications in the current batch.
         </p>
       </section>
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <dl className="grid gap-3 text-sm sm:grid-cols-3">
           <div>
-            <dt className="text-gray-500">Batch Reference</dt>
-            <dd className="font-medium text-gray-900">AUTO-EFT-{new Date().toISOString().slice(0, 10)}</dd>
+            <dt className="text-muted-foreground">Batch Reference</dt>
+            <dd className="font-medium text-foreground">AUTO-EFT-{new Date().toISOString().slice(0, 10)}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Applications</dt>
-            <dd className="font-medium text-gray-900">{queue.length}</dd>
+            <dt className="text-muted-foreground">Applications</dt>
+            <dd className="font-medium text-foreground">{queue.length}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Total Amount</dt>
-            <dd className="font-medium text-gray-900">{formatCurrencyKes(totalKes)}</dd>
+            <dt className="text-muted-foreground">Total Amount</dt>
+            <dd className="font-medium text-foreground">{formatCurrencyKes(totalKes)}</dd>
           </div>
         </dl>
 
         {error ? (
-          <p className="mt-3 rounded-lg border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">{error}</p>
+          <p className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
         ) : null}
 
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-xs uppercase tracking-wide text-gray-500">
+              <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-2 py-2">Reference</th>
                 <th className="px-2 py-2">Applicant</th>
                 <th className="px-2 py-2">Ward</th>
@@ -129,17 +129,17 @@ export default function CountyDisbursementBatchPage() {
             </thead>
             <tbody>
               {queue.map((application) => (
-                <tr key={application.applicationId} className="border-b border-gray-100">
-                  <td className="px-2 py-2 font-medium text-brand-900">{application.reference}</td>
-                  <td className="px-2 py-2 text-gray-700">{application.applicantName}</td>
-                  <td className="px-2 py-2 text-gray-700">{application.wardName}</td>
-                  <td className="px-2 py-2 text-gray-700">{formatCurrencyKes(application.countyAllocationKes)}</td>
+                <tr key={application.applicationId} className="border-b border-border">
+                  <td className="px-2 py-2 font-medium text-primary">{application.reference}</td>
+                  <td className="px-2 py-2 text-foreground/90">{application.applicantName}</td>
+                  <td className="px-2 py-2 text-foreground/90">{application.wardName}</td>
+                  <td className="px-2 py-2 text-foreground/90">{formatCurrencyKes(application.countyAllocationKes)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
           {!isLoading && queue.length === 0 ? (
-            <p className="mt-3 text-sm text-gray-600">No approved applications are available for export.</p>
+            <p className="mt-3 text-sm text-muted-foreground">No approved applications are available for export.</p>
           ) : null}
         </div>
 

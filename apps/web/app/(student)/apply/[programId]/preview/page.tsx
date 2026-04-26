@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -172,7 +172,7 @@ export default function PreviewAndSubmitPage() {
 
 	if (!programState) {
 		return (
-			<section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+			<section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">
 				Loading preview...
 			</section>
 		);
@@ -180,7 +180,7 @@ export default function PreviewAndSubmitPage() {
 
 	if (isLoading) {
 		return (
-			<section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+			<section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">
 				Loading application context...
 			</section>
 		);
@@ -188,7 +188,7 @@ export default function PreviewAndSubmitPage() {
 
 	if (error) {
 		return (
-			<section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+			<section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
 				{error}
 			</section>
 		);
@@ -196,9 +196,9 @@ export default function PreviewAndSubmitPage() {
 
 	if (!program) {
 		return (
-			<section className="rounded-2xl border border-gray-200 bg-white p-6">
-				<h2 className="font-display text-xl font-semibold text-brand-900">Program not found</h2>
-				<p className="mt-2 text-sm text-gray-600">The requested program is unavailable.</p>
+			<section className="rounded-2xl border border-border bg-background p-6">
+				<h2 className="font-serif text-xl font-semibold text-primary">Program not found</h2>
+				<p className="mt-2 text-sm text-muted-foreground">The requested program is unavailable.</p>
 				<div className="mt-4">
 					<Link href="/programs">
 						<Button>Back to Programs</Button>
@@ -210,20 +210,20 @@ export default function PreviewAndSubmitPage() {
 
 	return (
 		<main className="space-y-4">
-			<section className="rounded-2xl border border-county-primary/20 bg-white p-5 shadow-xs">
-				<h2 className="font-display text-2xl font-semibold text-brand-900">Review Your Application</h2>
-				<p className="mt-2 text-sm text-gray-600">
+			<section className="rounded-2xl border border-county-primary/20 bg-background p-5 shadow-xs">
+				<h2 className="font-serif text-2xl font-semibold text-primary">Review Your Application</h2>
+				<p className="mt-2 text-sm text-muted-foreground">
 					This is how your completed form will look. Download a copy for your records before final submission.
 				</p>
 			</section>
 
 			{incompleteSections.length > 0 ? (
-				<section className="rounded-2xl border border-warning-100 bg-warning-50 p-5">
-					<h3 className="font-display text-lg font-semibold text-warning-700">
+				<section className="rounded-2xl border border-amber-100 bg-amber-50 p-5">
+					<h3 className="font-serif text-lg font-semibold text-amber-700">
 						Complete All Sections Before Submission
 					</h3>
-					<p className="mt-2 text-sm text-warning-700">Finish the sections below to unlock final submission.</p>
-					<ul className="mt-3 space-y-1 text-sm text-warning-700">
+					<p className="mt-2 text-sm text-amber-700">Finish the sections below to unlock final submission.</p>
+					<ul className="mt-3 space-y-1 text-sm text-amber-700">
 						{incompleteSections.map((section) => (
 							<li key={section}>- {sectionName[section]}</li>
 						))}
@@ -237,43 +237,43 @@ export default function PreviewAndSubmitPage() {
 			) : null}
 
 			<section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-				<article className="rounded-2xl border border-gray-200 bg-white p-4 shadow-xs">
+				<article className="rounded-2xl border border-border bg-background p-4 shadow-xs">
 					<div className="mb-3 flex items-center justify-between gap-2">
 						<p className="text-xs font-medium uppercase tracking-[0.14em] text-county-primary">Form Preview</p>
-						<p className="text-xs text-gray-500">Reference: {reference}</p>
+						<p className="text-xs text-muted-foreground">Reference: {reference}</p>
 					</div>
 
 					{isPreviewLoading ? (
-						<div className="flex h-[70dvh] items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-sm text-gray-500">
+						<div className="flex h-[70dvh] items-center justify-center rounded-xl border border-border bg-muted text-sm text-muted-foreground">
 							Generating PDF preview...
 						</div>
 					) : previewPdfUrl ? (
 						<iframe
 							title="Application PDF preview"
 							src={previewPdfUrl}
-							className="h-[70dvh] w-full rounded-xl border border-gray-200 bg-gray-50"
+							className="h-[70dvh] w-full rounded-xl border border-border bg-muted"
 						/>
 					) : (
-						<div className="flex h-[70dvh] items-center justify-center rounded-xl border border-danger-100 bg-danger-50 px-6 text-center text-sm text-danger-700">
+						<div className="flex h-[70dvh] items-center justify-center rounded-xl border border-red-100 bg-red-50 px-6 text-center text-sm text-red-700">
 							PDF preview is unavailable right now. You can still continue editing or try downloading again.
 						</div>
 					)}
 				</article>
 
-				<aside className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-xs lg:sticky lg:top-24 lg:h-fit">
-					<div className="rounded-xl bg-brand-50 p-3">
-						<p className="text-xs uppercase tracking-[0.12em] text-gray-500">Program</p>
-						<p className="mt-1 font-semibold text-brand-900">{program.name}</p>
-						<p className="mt-2 text-sm text-gray-600">Requested: {formatCurrencyKes(requestedKes)}</p>
+				<aside className="space-y-4 rounded-2xl border border-border bg-background p-4 shadow-xs lg:sticky lg:top-24 lg:h-fit">
+					<div className="rounded-xl bg-secondary/10 p-3">
+						<p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">Program</p>
+						<p className="mt-1 font-semibold text-primary">{program.name}</p>
+						<p className="mt-2 text-sm text-muted-foreground">Requested: {formatCurrencyKes(requestedKes)}</p>
 					</div>
 
-					<div className="space-y-2 text-sm text-gray-700">
+					<div className="space-y-2 text-sm text-foreground/90">
 						<label className="flex items-start gap-2">
 							<input
 								type="checkbox"
 								checked={agreedToDeclaration}
 								onChange={(event) => setAgreedToDeclaration(event.target.checked)}
-								className="mt-0.5 h-4 w-4 rounded border-gray-300"
+								className="mt-0.5 h-4 w-4 rounded border-border"
 								disabled={isAlreadySubmitted}
 							/>
 							<span>I declare that the information given is true to the best of my knowledge.</span>
@@ -281,7 +281,7 @@ export default function PreviewAndSubmitPage() {
 					</div>
 
 					{submissionError ? (
-						<p className="rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-xs text-danger-700">
+						<p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
 							{submissionError}
 						</p>
 					) : null}
@@ -334,7 +334,7 @@ export default function PreviewAndSubmitPage() {
 						</Button>
 
 						{isAlreadySubmitted ? (
-							<p className="text-xs text-success-700">This application was already submitted on your account.</p>
+							<p className="text-xs text-emerald-700">This application was already submitted on your account.</p>
 						) : null}
 					</div>
 

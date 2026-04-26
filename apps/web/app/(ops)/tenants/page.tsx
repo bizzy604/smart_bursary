@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
@@ -183,7 +183,7 @@ export default function OpsTenantsPage() {
           title="Plan tier distribution"
           description="A quick view of how many counties sit in each commercial tier."
           aside={
-            <div className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+            <div className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-primary">
               {tenants.length} tenants
             </div>
           }
@@ -240,16 +240,16 @@ export default function OpsTenantsPage() {
                   </BarChart>
                 )}
               </ChartContainer>
-              <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 text-sm text-gray-700">
+              <div className="rounded-xl border border-border bg-muted/80 p-3 text-sm text-foreground/90">
                 Enterprise counties account for{" "}
-                <span className="font-semibold text-brand-900">
+                <span className="font-semibold text-primary">
                   {stats.enterprise}
                 </span>{" "}
                 of the currently provisioned tenants.
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               No tenant distribution is available yet.
             </p>
           )}
@@ -260,7 +260,7 @@ export default function OpsTenantsPage() {
           title="Largest counties by active user base"
           description="Focus operations attention on the counties carrying the heaviest day-to-day usage."
           aside={
-            <div className="rounded-full border border-accent-100 bg-accent-50 px-3 py-1 text-xs font-semibold text-accent-700">
+            <div className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
               Top 5 counties
             </div>
           }
@@ -303,8 +303,8 @@ export default function OpsTenantsPage() {
                 </BarChart>
               </ChartContainer>
               {topTenant ? (
-                <div className="rounded-xl border border-accent-100 bg-accent-50/70 p-3 text-sm text-gray-700">
-                  <span className="font-semibold text-brand-900">
+                <div className="rounded-xl border border-accent/20 bg-accent/10 p-3 text-sm text-foreground/90">
+                  <span className="font-semibold text-primary">
                     {topTenant.fullName}
                   </span>{" "}
                   currently has the widest operational footprint with{" "}
@@ -316,7 +316,7 @@ export default function OpsTenantsPage() {
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Tenant footprint data will appear here once counties are
               provisioned.
             </p>
@@ -330,7 +330,7 @@ export default function OpsTenantsPage() {
           description="No county tenants are currently provisioned in this environment."
         />
       ) : (
-        <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+        <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
           <DataTable
             columns={opsTenantColumns}
             data={tenants}

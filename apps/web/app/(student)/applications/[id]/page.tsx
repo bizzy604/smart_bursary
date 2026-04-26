@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -77,7 +77,7 @@ export default function ApplicationDetailPage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border bg-background p-6 text-sm text-muted-foreground">
         Loading application details...
       </section>
     );
@@ -85,7 +85,7 @@ export default function ApplicationDetailPage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-6 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
         {error}
       </section>
     );
@@ -107,27 +107,27 @@ export default function ApplicationDetailPage() {
 
   return (
     <main className="space-y-6">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-6 shadow-xs">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-xs uppercase tracking-wide text-gray-500">{application.reference}</p>
-            <h1 className="mt-2 font-display text-2xl font-bold text-brand-900">{application.programName}</h1>
+            <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">{application.reference}</p>
+            <h1 className="mt-2 font-serif text-2xl font-bold text-primary">{application.programName}</h1>
           </div>
           <StatusBadge status={application.status} />
         </div>
 
-        <dl className="mt-5 grid gap-3 text-sm text-gray-700 sm:grid-cols-3">
+        <dl className="mt-5 grid gap-3 text-sm text-foreground/90 sm:grid-cols-3">
           <div>
-            <dt className="text-xs uppercase tracking-wide text-gray-500">Requested</dt>
-            <dd className="mt-1 font-semibold text-brand-900">{formatCurrencyKes(application.requestedKes)}</dd>
+            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Requested</dt>
+            <dd className="mt-1 font-semibold text-primary">{formatCurrencyKes(application.requestedKes)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-gray-500">Submitted</dt>
-            <dd className="mt-1 font-semibold text-brand-900">{formatShortDate(application.submittedAt)}</dd>
+            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Submitted</dt>
+            <dd className="mt-1 font-semibold text-primary">{formatShortDate(application.submittedAt)}</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wide text-gray-500">Updated</dt>
-            <dd className="mt-1 font-semibold text-brand-900">{formatShortDate(application.updatedAt)}</dd>
+            <dt className="text-xs uppercase tracking-wide text-muted-foreground">Updated</dt>
+            <dd className="mt-1 font-semibold text-primary">{formatShortDate(application.updatedAt)}</dd>
           </div>
         </dl>
 
@@ -153,7 +153,7 @@ export default function ApplicationDetailPage() {
       </section>
 
       <section className="rounded-2xl border border-info-100 bg-info-50 p-5">
-        <h2 className="font-display text-lg font-semibold text-info-700">Current Status</h2>
+        <h2 className="font-serif text-lg font-semibold text-info-700">Current Status</h2>
         <p className="mt-2 text-sm text-info-700">
           {application.status === "DRAFT"
             ? "Your application is still in draft. Complete all sections and submit to move into committee review."
@@ -178,7 +178,7 @@ export default function ApplicationDetailPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-display text-xl font-semibold text-brand-900">Status Timeline</h2>
+        <h2 className="font-serif text-xl font-semibold text-primary">Status Timeline</h2>
         <Timeline events={timeline} />
       </section>
     </main>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { toast } from "sonner";
@@ -99,17 +99,17 @@ export function ReviewPanel({
 	};
 
 	return (
-		<section className="space-y-4 rounded-2xl border border-brand-100 bg-white p-5 shadow-xs">
+		<section className="space-y-4 rounded-2xl border border-secondary/30 bg-background p-5 shadow-xs">
 			<div>
-				<h3 className="font-display text-lg font-semibold text-brand-900">
+				<h3 className="font-serif text-lg font-semibold text-primary">
 					{mode === "ward" ? "Ward Review Decision" : "County Final Decision"}
 				</h3>
-				<p className="mt-1 text-sm text-gray-600">
+				<p className="mt-1 text-sm text-muted-foreground">
 					Maximum allowed by program rules: {formatCurrencyKes(maxAmountKes)}
 				</p>
 			</div>
 
-			<div className="space-y-2 text-sm text-gray-700">
+			<div className="space-y-2 text-sm text-foreground/90">
 				{decisionOptions[mode].map((option) => (
 					<label key={option.value} className="flex items-start gap-2">
 						<input
@@ -117,7 +117,7 @@ export function ReviewPanel({
 							name={`review-${mode}`}
 							checked={decision === option.value}
 							onChange={() => setDecision(option.value)}
-							className="mt-0.5 h-4 w-4 border-gray-300"
+							className="mt-0.5 h-4 w-4 border-border"
 						/>
 						<span>{option.label}</span>
 					</label>
@@ -125,7 +125,7 @@ export function ReviewPanel({
 			</div>
 
 			<div className="space-y-1">
-				<label htmlFor={`${mode}-recommended-amount`} className="text-sm font-medium text-gray-700">
+				<label htmlFor={`${mode}-recommended-amount`} className="text-sm font-medium text-foreground/90">
 					Recommended Amount (KES)
 				</label>
 				<Input
@@ -135,21 +135,21 @@ export function ReviewPanel({
 					onChange={(event) => setRecommendedAmount(event.target.value)}
 				/>
 				{!amountIsValid ? (
-					<p className="text-xs text-danger-700">
+					<p className="text-xs text-red-700">
 						Enter an amount between 1 and {formatCurrencyKes(maxAmountKes)}.
 					</p>
 				) : null}
 			</div>
 
 			<div className="space-y-1">
-				<label htmlFor={`${mode}-review-note`} className="text-sm font-medium text-gray-700">
+				<label htmlFor={`${mode}-review-note`} className="text-sm font-medium text-foreground/90">
 					Review Note
 				</label>
 				<textarea
 					id={`${mode}-review-note`}
 					value={reviewNote}
 					onChange={(event) => setReviewNote(event.target.value)}
-					className="min-h-[110px] w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-xs transition-colors placeholder:text-gray-400 focus-visible:border-brand-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-100"
+					className="min-h-[110px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
 					placeholder="Capture committee rationale for audit and timeline history."
 				/>
 			</div>

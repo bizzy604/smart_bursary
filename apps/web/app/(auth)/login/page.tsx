@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { FormEvent, Suspense, useState } from "react";
 import Link from "next/link";
@@ -76,14 +76,14 @@ function LoginForm() {
 	return (
 		<form className="space-y-4" method="post" onSubmit={handleSubmit}>
 			<div className="space-y-2">
-				<label htmlFor="email" className="text-sm font-medium text-gray-700">
+				<label htmlFor="email" className="text-sm font-medium text-foreground/90">
 					Email address
 				</label>
 				<Input id="email" name="email" type="email" autoComplete="email" placeholder="aisha@example.com" required />
 			</div>
 
 			<div className="space-y-2">
-				<label htmlFor="password" className="text-sm font-medium text-gray-700">
+				<label htmlFor="password" className="text-sm font-medium text-foreground/90">
 					Password
 				</label>
 				<Input
@@ -97,7 +97,7 @@ function LoginForm() {
 			</div>
 
 			<div className="space-y-2">
-				<label htmlFor="county" className="text-sm font-medium text-gray-700">
+				<label htmlFor="county" className="text-sm font-medium text-foreground/90">
 					County slug
 				</label>
 				<Input id="county" name="county_slug" placeholder="turkana" required />
@@ -108,7 +108,7 @@ function LoginForm() {
 			</Button>
 
 			{errorMessage ? (
-				<p role="alert" className="rounded-md border border-danger-200 bg-danger-50 px-3 py-2 text-sm text-danger-700">
+				<p role="alert" className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
 					{errorMessage}
 				</p>
 			) : null}
@@ -127,18 +127,18 @@ export default function LoginPage() {
 			</CardHeader>
 
 			<CardContent>
-				<Suspense fallback={<div className="py-6 text-sm text-gray-500">Loading…</div>}>
+				<Suspense fallback={<div className="py-6 text-sm text-muted-foreground">Loading…</div>}>
 					<LoginForm />
 				</Suspense>
 			</CardContent>
 
-			<CardFooter className="space-y-2 text-center text-sm text-gray-600">
-				<Link href="/forgot-password" className="block text-brand-700 hover:underline">
+			<CardFooter className="space-y-2 text-center text-sm text-muted-foreground">
+				<Link href="/forgot-password" className="block text-secondary hover:underline">
 					Forgot your password?
 				</Link>
 				<p>
 					New to the portal?{" "}
-					<Link href="/register" className="font-semibold text-brand-700 hover:underline">
+					<Link href="/register" className="font-semibold text-secondary hover:underline">
 						Create account
 					</Link>
 				</p>

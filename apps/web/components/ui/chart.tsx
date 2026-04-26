@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import * as RechartsPrimitive from "recharts";
@@ -244,12 +244,12 @@ export function ChartTooltipContent({
   return (
     <div
       className={cn(
-        "grid min-w-[12rem] gap-2 rounded-xl border border-gray-200 bg-white/95 px-3 py-2 text-sm shadow-lg backdrop-blur",
+        "grid min-w-[12rem] gap-2 rounded-xl border border-border bg-background/95 px-3 py-2 text-sm shadow-lg backdrop-blur",
         className,
       )}
     >
       {!hideLabel && tooltipLabel ? (
-        <p className="font-medium text-brand-900">{tooltipLabel}</p>
+        <p className="font-medium text-primary">{tooltipLabel}</p>
       ) : null}
       <div className="grid gap-1.5">
         {payload.map((item) => {
@@ -305,7 +305,7 @@ export function ChartTooltipContent({
               key={`${item.dataKey ?? item.name ?? "item"}-${formattedValue}`}
               className="flex items-center justify-between gap-3"
             >
-              <div className="flex min-w-0 items-center gap-2 text-gray-600">
+              <div className="flex min-w-0 items-center gap-2 text-muted-foreground">
                 {Icon ? (
                   <Icon className="h-3.5 w-3.5 shrink-0" />
                 ) : hideIndicator ? null : (
@@ -313,7 +313,7 @@ export function ChartTooltipContent({
                 )}
                 <span className="truncate">{itemLabel}</span>
               </div>
-              <span className="font-semibold text-brand-900">
+              <span className="font-semibold text-primary">
                 {formattedValue}
               </span>
             </div>
@@ -347,7 +347,7 @@ export function ChartLegendContent({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-4 pt-2 text-sm text-gray-600",
+        "flex flex-wrap items-center gap-4 pt-2 text-sm text-muted-foreground",
         className,
       )}
     >

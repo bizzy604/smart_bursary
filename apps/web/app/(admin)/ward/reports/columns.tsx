@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { StatusBadge } from "@/components/application/status-badge";
@@ -114,7 +114,7 @@ export const wardReportColumns: ColumnDef<WardSummaryRow>[] = [
       />
     ),
     cell: ({ row }) => (
-      <div className="text-right font-medium tabular-nums text-brand-900">
+      <div className="text-right font-medium tabular-nums text-primary">
         {row.original.aiScore.toFixed(1)}
       </div>
     ),

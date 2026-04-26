@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ export default function VerifyEmailPage() {
 			<CardContent>
 				<form className="space-y-4">
 					<div className="space-y-2">
-						<label htmlFor="token" className="text-sm font-medium text-gray-700">
+						<label htmlFor="token" className="text-sm font-medium text-foreground/90">
 							Verification token
 						</label>
 						<Input id="token" name="token" placeholder="Enter token" required />
@@ -28,14 +28,14 @@ export default function VerifyEmailPage() {
 				</form>
 			</CardContent>
 
-			<CardFooter className="space-y-2 text-center text-sm text-gray-600">
+			<CardFooter className="space-y-2 text-center text-sm text-muted-foreground">
 				<p>
 					Did not receive email?{" "}
-					<button type="button" className="font-semibold text-brand-700 hover:underline">
+					<button type="button" className="font-semibold text-secondary hover:underline">
 						Resend verification
 					</button>
 				</p>
-				<Link href="/login" className="text-brand-700 hover:underline">
+				<Link href="/login" className="text-secondary hover:underline">
 					Return to sign in
 				</Link>
 			</CardFooter>

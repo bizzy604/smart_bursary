@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -60,7 +60,7 @@ export default function WardApplicationScorePage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
+      <section className="rounded-2xl border border-border bg-background p-5 text-sm text-muted-foreground shadow-xs">
         Loading AI score details...
       </section>
     );
@@ -68,7 +68,7 @@ export default function WardApplicationScorePage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
         {error}
       </section>
     );
@@ -90,9 +90,9 @@ export default function WardApplicationScorePage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">AI Score Breakdown • {application.reference}</h1>
-        <p className="mt-1 text-sm text-gray-600">Use this recommendation as guidance alongside committee judgement and document checks.</p>
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h1 className="font-serif text-2xl font-semibold text-primary">AI Score Breakdown • {application.reference}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Use this recommendation as guidance alongside committee judgement and document checks.</p>
         <div className="mt-3">
           <Link href={`/ward/applications/${application.applicationId}`}>
             <Button variant="ghost" size="sm">Back to Application</Button>

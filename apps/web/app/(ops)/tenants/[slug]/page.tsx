@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -15,14 +15,14 @@ import {
 
 function chipClasses(status: "healthy" | "degraded" | "down"): string {
   if (status === "healthy") {
-    return "border-success-100 bg-success-50 text-success-700";
+    return "border-emerald-100 bg-emerald-50 text-emerald-700";
   }
 
   if (status === "degraded") {
-    return "border-warning-100 bg-warning-50 text-warning-700";
+    return "border-amber-100 bg-amber-50 text-amber-700";
   }
 
-  return "border-danger-100 bg-danger-50 text-danger-700";
+  return "border-red-100 bg-red-50 text-red-700";
 }
 
 export default function TenantDetailPage() {
@@ -57,7 +57,7 @@ export default function TenantDetailPage() {
 
   if (isLoading) {
     return (
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 text-sm text-gray-600 shadow-xs">
+      <section className="rounded-2xl border border-border bg-background p-5 text-sm text-muted-foreground shadow-xs">
         Loading tenant detail...
       </section>
     );
@@ -65,7 +65,7 @@ export default function TenantDetailPage() {
 
   if (error) {
     return (
-      <section className="rounded-2xl border border-danger-200 bg-danger-50 p-5 text-sm text-danger-700">
+      <section className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
         {error}
       </section>
     );
@@ -87,76 +87,76 @@ export default function TenantDetailPage() {
 
   return (
     <main className="space-y-5">
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
-        <h1 className="font-display text-2xl font-semibold text-brand-900">{tenant.countyName}</h1>
-        <p className="mt-1 text-sm text-gray-600">{tenant.fundName}</p>
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <h1 className="font-serif text-2xl font-semibold text-primary">{tenant.countyName}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{tenant.fundName}</p>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-3">
           <div>
-            <dt className="text-gray-500">Slug</dt>
-            <dd className="font-medium text-gray-900">{tenant.slug}</dd>
+            <dt className="text-muted-foreground">Slug</dt>
+            <dd className="font-medium text-foreground">{tenant.slug}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Plan</dt>
-            <dd className="font-medium text-gray-900">{tenant.planTier}</dd>
+            <dt className="text-muted-foreground">Plan</dt>
+            <dd className="font-medium text-foreground">{tenant.planTier}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Provisioned</dt>
-            <dd className="font-medium text-gray-900">{formatShortDate(tenant.createdAt)}</dd>
+            <dt className="text-muted-foreground">Provisioned</dt>
+            <dd className="font-medium text-foreground">{formatShortDate(tenant.createdAt)}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Users</dt>
-            <dd className="font-medium text-gray-900">{tenant.userCount}</dd>
+            <dt className="text-muted-foreground">Users</dt>
+            <dd className="font-medium text-foreground">{tenant.userCount}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Wards</dt>
-            <dd className="font-medium text-gray-900">{tenant.wardCount}</dd>
+            <dt className="text-muted-foreground">Wards</dt>
+            <dd className="font-medium text-foreground">{tenant.wardCount}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Last Updated</dt>
-            <dd className="font-medium text-gray-900">{formatShortDate(tenant.updatedAt)}</dd>
+            <dt className="text-muted-foreground">Last Updated</dt>
+            <dd className="font-medium text-foreground">{formatShortDate(tenant.updatedAt)}</dd>
           </div>
         </dl>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">Tenant Configuration</h2>
+      <section className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">Tenant Configuration</h2>
         <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
           <div>
-            <dt className="text-gray-500">Fund Name</dt>
-            <dd className="font-medium text-gray-900">{tenant.fundName}</dd>
+            <dt className="text-muted-foreground">Fund Name</dt>
+            <dd className="font-medium text-foreground">{tenant.fundName}</dd>
           </div>
           <div>
-            <dt className="text-gray-500">Primary Color</dt>
-            <dd className="font-medium text-gray-900">{tenant.primaryColor}</dd>
+            <dt className="text-muted-foreground">Primary Color</dt>
+            <dd className="font-medium text-foreground">{tenant.primaryColor}</dd>
           </div>
           <div className="sm:col-span-2">
-            <dt className="text-gray-500">Legal Reference</dt>
-            <dd className="font-medium text-gray-900">{tenant.legalReference}</dd>
+            <dt className="text-muted-foreground">Legal Reference</dt>
+            <dd className="font-medium text-foreground">{tenant.legalReference}</dd>
           </div>
         </dl>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">Operational Signals</h2>
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">Operational Signals</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Shared platform health indicators available to operators while handling this tenant.
         </p>
         <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           {(health?.services ?? []).map((service) => (
-            <div key={service.name} className="rounded-xl border border-gray-200 bg-gray-50 p-3">
-              <p className="text-xs uppercase tracking-wide text-gray-500">{service.name}</p>
+            <div key={service.name} className="rounded-xl border border-border bg-muted p-3">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">{service.name}</p>
               <span className={`mt-2 inline-flex rounded-full border px-2 py-1 text-xs font-semibold uppercase ${chipClasses(service.status)}`}>
                 {service.status}
               </span>
-              <p className="mt-2 text-xs text-gray-600">{service.note}</p>
+              <p className="mt-2 text-xs text-muted-foreground">{service.note}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs">
-        <h2 className="font-display text-lg font-semibold text-brand-900">Operations Controls</h2>
-        <p className="mt-1 text-sm text-gray-600">
+      <section className="rounded-2xl border border-border bg-background p-5 shadow-xs">
+        <h2 className="font-serif text-lg font-semibold text-primary">Operations Controls</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Actions remain operator-controlled while provisioning and subscription flows are managed through platform APIs.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

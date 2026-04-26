@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { Route } from "next";
@@ -14,10 +14,10 @@ import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import type { ProgramListItem, ProgramStatus } from "@/lib/admin-programs";
 
 const statusBadgeClass: Record<ProgramStatus, string> = {
-  DRAFT: "bg-gray-100 text-gray-700 border border-gray-200",
-  ACTIVE: "bg-success-50 text-success-700 border border-success-200",
-  CLOSED: "bg-warning-50 text-warning-700 border border-warning-200",
-  SUSPENDED: "bg-danger-50 text-danger-700 border border-danger-200",
+  DRAFT: "bg-muted text-foreground/90 border border-border",
+  ACTIVE: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+  CLOSED: "bg-amber-50 text-amber-700 border border-amber-200",
+  SUSPENDED: "bg-red-50 text-red-700 border border-red-200",
 };
 
 type ProgramListColumnsOptions = {
@@ -45,11 +45,11 @@ export function buildProgramListColumns({
       filterFn: "includesString",
       cell: ({ row }) => (
         <div className="space-y-1">
-          <p className="font-medium text-brand-900">{row.original.name}</p>
-          <p className="text-xs text-gray-600">
+          <p className="font-medium text-primary">{row.original.name}</p>
+          <p className="text-xs text-muted-foreground">
             Year: {row.original.academicYear ?? "-"}
           </p>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-muted-foreground">
             Ward: {row.original.wardId ?? "County-wide"}
           </p>
         </div>

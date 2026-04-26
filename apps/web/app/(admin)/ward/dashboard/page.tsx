@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -267,7 +267,7 @@ export default function WardDashboardPage() {
       </section>
 
       {error ? (
-        <section className="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-700">
+        <section className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error}
         </section>
       ) : null}
@@ -278,7 +278,7 @@ export default function WardDashboardPage() {
           title="Review workload by AI priority band"
           description="Use urgency bands to assign attention before the committee queue starts to bottleneck."
           aside={
-            <div className="rounded-full border border-warning-100 bg-warning-50 px-3 py-1 text-xs font-semibold text-warning-700">
+            <div className="rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
               {queue.length} awaiting review
             </div>
           }
@@ -335,10 +335,10 @@ export default function WardDashboardPage() {
                   </BarChart>
                 )}
               </ChartContainer>
-              <div className="rounded-xl border border-gray-200 bg-gray-50/80 p-3 text-sm text-gray-700">
+              <div className="rounded-xl border border-border bg-muted/80 p-3 text-sm text-foreground/90">
                 {criticalQueueCount > 0 ? (
                   <>
-                    <span className="font-semibold text-brand-900">
+                    <span className="font-semibold text-primary">
                       {criticalQueueCount}
                     </span>{" "}
                     high-need application
@@ -351,7 +351,7 @@ export default function WardDashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               The ward queue is currently clear. Priority distribution will
               appear as soon as new applications arrive.
             </p>
@@ -363,7 +363,7 @@ export default function WardDashboardPage() {
           title="Queue composition by education level"
           description="This helps ward teams balance secondary, TVET, and university reviews during each sitting."
           aside={
-            <div className="rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-900">
+            <div className="rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1 text-xs font-semibold text-primary">
               {educationMixData.length} level groups
             </div>
           }
@@ -405,9 +405,9 @@ export default function WardDashboardPage() {
                   </Bar>
                 </BarChart>
               </ChartContainer>
-              <div className="rounded-xl border border-brand-100 bg-brand-50/70 p-3 text-sm text-gray-700">
+              <div className="rounded-xl border border-secondary/30 bg-secondary/10 p-3 text-sm text-foreground/90">
                 Recommended amount in the current ward pipeline totals{" "}
-                <span className="font-semibold text-brand-900">
+                <span className="font-semibold text-primary">
                   {formatCurrencyKes(stats.recommendedKes)}
                 </span>
                 , giving the committee an early signal on what it may escalate
@@ -415,7 +415,7 @@ export default function WardDashboardPage() {
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               No queued applications yet. Education-level mix will render here
               once students enter ward review.
             </p>
@@ -423,13 +423,13 @@ export default function WardDashboardPage() {
         </DashboardChartCard>
       </section>
 
-      <section className="rounded-2xl border border-gray-200/80 bg-white p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-semibold text-brand-900">
+            <h2 className="font-serif text-xl font-semibold text-primary">
               Top Priority Applications
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Sorted by AI score from highest need to lowest.
             </p>
           </div>

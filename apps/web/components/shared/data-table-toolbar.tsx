@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import { type Table } from "@tanstack/react-table";
@@ -86,7 +86,7 @@ export function DataTableToolbar<TData>({
       </div>
       <div className="flex flex-wrap items-center justify-end gap-2">
         {selectedCount > 0 ? (
-          <div className="flex flex-wrap items-center justify-end gap-2 rounded-lg border border-brand-100 bg-brand-50 px-3 py-2">
+          <div className="flex flex-wrap items-center justify-end gap-2 rounded-lg border border-secondary/30 bg-secondary/10 px-3 py-2">
             <Badge
               variant="info"
               className="border-info-200 bg-info-50 text-info-700"
@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 px-2 text-brand-700 lg:px-3"
+                className="h-8 px-2 text-secondary lg:px-3"
                 onClick={onClearSelection}
               >
                 Clear

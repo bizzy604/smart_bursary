@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import {
   Card,
   CardContent,
@@ -30,7 +30,7 @@ export function DashboardChartCard({
   return (
     <Card
       className={cn(
-        "border-brand-100/80 bg-white/95 shadow-xs backdrop-blur",
+        "border-secondary/30 bg-background/95 shadow-xs backdrop-blur",
         className,
       )}
     >
@@ -41,10 +41,10 @@ export function DashboardChartCard({
               {eyebrow}
             </p>
           ) : null}
-          <CardTitle className="font-display text-lg text-brand-900">
+          <CardTitle className="font-serif text-lg text-primary">
             {title}
           </CardTitle>
-          <CardDescription className="max-w-xl text-sm text-gray-600">
+          <CardDescription className="max-w-xl text-sm text-muted-foreground">
             {description}
           </CardDescription>
         </div>
