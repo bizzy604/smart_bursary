@@ -8,8 +8,10 @@
 import {
 	Body,
 	Controller,
+	ForbiddenException,
 	Get,
 	HttpCode,
+	NotFoundException,
 	Param,
 	Post,
 	UseGuards,
@@ -27,6 +29,7 @@ import { County } from '../../common/decorators/county.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PrismaService } from '../../database/prisma.service';
 import { AllocateToStudentDto } from './dto/allocate-to-student.dto';
 import { CreateWardAllocationDto } from './dto/create-ward-allocation.dto';
 import { DistributeVillageAllocationsDto } from './dto/distribute-village-allocations.dto';
@@ -43,6 +46,7 @@ export class AllocationController {
 		private readonly wardBudgetService: WardBudgetAllocationService,
 		private readonly villageBudgetService: VillageBudgetAllocationService,
 		private readonly studentAllocationService: StudentAllocationService,
+		private readonly prisma: PrismaService,
 	) {}
 
 	// ─── Stage 2: County → Ward ───────────────────────────────────────────
@@ -134,6 +138,98 @@ export class AllocationController {
 	}
 
 	// ─── Stage 4: Village → Student final allocation ──────────────────────
+
+	// ─── Village admin queue + self-info (Commit 5c support) ──────────────
+
+	@Get('village-admin/me')
+	@Roles(UserRole.VILLAGE_ADMIN)
+	@ApiOperation({
+		summary:
+			'Return the active village admin assignment(s) for the authenticated user. ' +
+			'Used by the village-admin allocation queue UI to discover its own village(s).',
+	})
+	async getMyVillageAssignments(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+	) {
+		const userId = user['userId'] as string;
+		const assignments = await this.prisma.villageAdminAssignment.findMany({
+			where: { userId, countyId, isActive: true },
+			select: {
+				id: true,
+				villageUnitId: true,
+				assignedAt: true,
+				villageUnit: {
+					select: {
+						id: true,
+						name: true,
+						code: true,
+						wardId: true,
+						ward: { select: { id: true, name: true, code: true } },
+					},
+				},
+			},
+		});
+		return { assignments };
+	}
+
+	@Get('villages/:villageUnitId/pending-allocations')
+	@Roles(
+		UserRole.VILLAGE_ADMIN,
+		UserRole.WARD_ADMIN,
+		UserRole.COUNTY_ADMIN,
+		UserRole.FINANCE_OFFICER,
+		UserRole.PLATFORM_OPERATOR,
+	)
+	@ApiOperation({
+		summary:
+			'List applications in VILLAGE_ALLOCATION_PENDING for a specific village, ' +
+			'with the active village_budget_allocation snapshot. Drives the §7 Stage 4 UI.',
+	})
+	@ApiParam({ name: 'villageUnitId', description: 'Village unit identifier' })
+	async listVillagePendingAllocations(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('villageUnitId') villageUnitId: string,
+	) {
+		const role = user['role'] as UserRole;
+		const userId = user['userId'] as string;
+		const userWardId = (user['wardId'] as string | null) ?? null;
+
+		// Authorization scoping (defense-in-depth on top of @Roles):
+		//   - VILLAGE_ADMIN: must hold an active assignment to this village.
+		//   - WARD_ADMIN: must own the ward containing this village.
+		//   - COUNTY_ADMIN / FINANCE / PLATFORM: any village in their tenant
+		//     (the @County decorator already pins countyId).
+		if (role === UserRole.VILLAGE_ADMIN) {
+			const owned = await this.prisma.villageAdminAssignment.count({
+				where: { userId, villageUnitId, countyId, isActive: true },
+			});
+			if (owned === 0) {
+				throw new ForbiddenException(
+					'You are not assigned to this village.',
+				);
+			}
+		} else if (role === UserRole.WARD_ADMIN) {
+			const village = await this.prisma.villageUnit.findFirst({
+				where: { id: villageUnitId, countyId },
+				select: { wardId: true },
+			});
+			if (!village) {
+				throw new NotFoundException('Village not found.');
+			}
+			if (village.wardId !== userWardId) {
+				throw new ForbiddenException(
+					'Ward admins can only view villages in their own ward.',
+				);
+			}
+		}
+
+		return this.studentAllocationService.listPendingForVillage(
+			countyId,
+			villageUnitId,
+		);
+	}
 
 	@Post('applications/:applicationId/allocate')
 	@HttpCode(200)

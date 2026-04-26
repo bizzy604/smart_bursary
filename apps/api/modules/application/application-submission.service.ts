@@ -250,7 +250,10 @@ export class ApplicationSubmissionService {
 	 * service starts populating it.
 	 */
 	private extractRawIdentity(
-		profile: { nationalId: Buffer | null; birthCertificateNumber: Buffer | null } | null,
+		profile: {
+			nationalId: Uint8Array | null;
+			birthCertificateNumber: Uint8Array | null;
+		} | null,
 	): { value: string; kind: IdentityKind } | null {
 		if (!profile) return null;
 

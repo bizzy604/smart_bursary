@@ -29,6 +29,9 @@ export async function seedArtifacts(
     });
   }
 
+  // These two rows represent legacy single-stage disbursements (no Phase-2
+  // ward/village FK chain). The disbursement_chain_integrity CHECK accepts
+  // them because both FK columns are null (the legacy branch of the OR).
   for (const row of [
     {
       applicationId: apps.eveDisbursed,

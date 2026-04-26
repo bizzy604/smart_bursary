@@ -1,0 +1,27 @@
+{
+  "name": "Smart Bursary",
+  "short_name": "Smart Bursary",
+  "description": "Bursary application, allocation, and disbursement portal for Kenyan counties.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a5f",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/logos/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logos/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "government", "productivity"]
+}

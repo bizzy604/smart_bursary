@@ -16,6 +16,7 @@ export type AppRole =
 	| "WARD_ADMIN"
 	| "FINANCE_OFFICER"
 	| "COUNTY_ADMIN"
+	| "VILLAGE_ADMIN"
 	| "PLATFORM_OPERATOR";
 
 declare module "next-auth" {

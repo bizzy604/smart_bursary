@@ -236,6 +236,180 @@ export async function distributeWardToVillages(
   };
 }
 
+// ─── Commit 5c support: village admin queue + per-student allocate ─────
+
+export interface VillageAdminAssignmentRow {
+  id: string;
+  villageUnitId: string;
+  assignedAt: string;
+  villageUnit: {
+    id: string;
+    name: string;
+    code: string | null;
+    wardId: string;
+    ward: { id: string; name: string; code: string | null };
+  };
+}
+
+export interface VillagePoolSnapshot {
+  id: string;
+  programId: string;
+  allocatedKes: number;
+  allocatedTotalKes: number;
+  disbursedTotalKes: number;
+  remainingKes: number;
+  distributionMethod: DistributionMethod;
+  villageAllocationDueAt: string | null;
+  program: { id: string; name: string; academicYear: string | null };
+}
+
+export interface VillagePendingApplication {
+  id: string;
+  submissionReference: string | null;
+  status: string;
+  amountRequested: number | null;
+  amountAllocated: number | null;
+  program: { id: string; name: string; academicYear: string | null } | null;
+  ward: { id: string; name: string; code: string | null } | null;
+  applicantName: string | null;
+  applicantPhone: string | null;
+  villageBudgetAllocationId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VillagePendingQueueResult {
+  village: {
+    id: string;
+    name: string;
+    code: string | null;
+    wardId: string;
+    ward: { id: string; name: string; code: string | null } | null;
+  };
+  villageAllocations: VillagePoolSnapshot[];
+  applications: VillagePendingApplication[];
+}
+
+export type AllocationOverrideReasonCode =
+  | "VILLAGE_VACANT"
+  | "INACTIVE"
+  | "DEADLINE_MISSED"
+  | "EXPLICITLY_DELEGATED";
+
+export interface AllocateToStudentInput {
+  amountKes: number;
+  overrideReasonCode?: AllocationOverrideReasonCode;
+  overrideReasonNote?: string;
+}
+
+export interface AllocateToStudentResult {
+  applicationId: string;
+  amountAllocated: number;
+  status: string;
+  allocationActorTier: "VILLAGE" | "WARD" | "COUNTY" | "FINANCE";
+  allocatedAt: string;
+}
+
+export async function fetchMyVillageAssignments(): Promise<{
+  assignments: VillageAdminAssignmentRow[];
+}> {
+  const payload = await apiRequestJson<unknown>("/village-admin/me", {
+    method: "GET",
+  });
+  return unwrap<{ assignments: VillageAdminAssignmentRow[] }>(payload);
+}
+
+export async function fetchVillagePendingQueue(
+  villageUnitId: string,
+): Promise<VillagePendingQueueResult> {
+  const payload = await apiRequestJson<unknown>(
+    `/villages/${villageUnitId}/pending-allocations`,
+    { method: "GET" },
+  );
+  const result = unwrap<{
+    village: VillagePendingQueueResult["village"];
+    villageAllocations: Array<{
+      id: string;
+      programId: string;
+      allocatedKes: unknown;
+      allocatedTotalKes: unknown;
+      disbursedTotalKes: unknown;
+      remainingKes: unknown;
+      distributionMethod: DistributionMethod;
+      villageAllocationDueAt: string | null;
+      program: { id: string; name: string; academicYear: string | null };
+    }>;
+    applications: Array<{
+      id: string;
+      submissionReference: string | null;
+      status: string;
+      amountRequested: unknown;
+      amountAllocated: unknown;
+      program: { id: string; name: string; academicYear: string | null } | null;
+      ward: { id: string; name: string; code: string | null } | null;
+      applicantName: string | null;
+      applicantPhone: string | null;
+      villageBudgetAllocationId: string | null;
+      createdAt: string;
+      updatedAt: string;
+    }>;
+  }>(payload);
+  return {
+    village: result.village,
+    villageAllocations: (result.villageAllocations ?? []).map((row) => ({
+      id: row.id,
+      programId: row.programId,
+      allocatedKes: toNumber(row.allocatedKes),
+      allocatedTotalKes: toNumber(row.allocatedTotalKes),
+      disbursedTotalKes: toNumber(row.disbursedTotalKes),
+      remainingKes: toNumber(row.remainingKes),
+      distributionMethod: row.distributionMethod,
+      villageAllocationDueAt: row.villageAllocationDueAt,
+      program: row.program,
+    })),
+    applications: (result.applications ?? []).map((row) => ({
+      id: row.id,
+      submissionReference: row.submissionReference,
+      status: row.status,
+      amountRequested:
+        row.amountRequested == null ? null : toNumber(row.amountRequested),
+      amountAllocated:
+        row.amountAllocated == null ? null : toNumber(row.amountAllocated),
+      program: row.program,
+      ward: row.ward,
+      applicantName: row.applicantName,
+      applicantPhone: row.applicantPhone,
+      villageBudgetAllocationId: row.villageBudgetAllocationId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    })),
+  };
+}
+
+export async function allocateToStudent(
+  applicationId: string,
+  input: AllocateToStudentInput,
+): Promise<AllocateToStudentResult> {
+  const payload = await apiRequestJson<unknown>(
+    `/applications/${applicationId}/allocate`,
+    { method: "POST", body: JSON.stringify(input) },
+  );
+  const result = unwrap<{
+    applicationId: string;
+    amountAllocated: unknown;
+    status: string;
+    allocationActorTier: AllocateToStudentResult["allocationActorTier"];
+    allocatedAt: string;
+  }>(payload);
+  return {
+    applicationId: result.applicationId,
+    amountAllocated: toNumber(result.amountAllocated),
+    status: result.status,
+    allocationActorTier: result.allocationActorTier,
+    allocatedAt: result.allocatedAt,
+  };
+}
+
 export async function fetchVillageAllocations(
   wardAllocationId: string,
 ): Promise<VillageAllocationListResult> {

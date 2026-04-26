@@ -56,7 +56,12 @@ describe('Review services', () => {
 			applicationTimeline: { create: jest.fn().mockResolvedValue({}) },
 		};
 		const prisma = {
-			application: { findFirst: jest.fn().mockResolvedValue({ id: 'app-1', status: 'WARD_REVIEW', wardId: 'ward-1', amountRequested: 30_000 }) },
+			application: { findFirst: jest.fn().mockResolvedValue({ id: 'app-1', status: 'WARD_REVIEW', wardId: 'ward-1', amountRequested: 30_000, programId: 'prog-1' }) },
+			// Commit 3 added a wardBudgetAllocation lookup to decide between the new
+			// distribution flow and the legacy single-stage flow. Returning 0 means
+			// "no Phase-2 ward allocation exists" so we expect the legacy COUNTY_REVIEW
+			// transition.
+			wardBudgetAllocation: { count: jest.fn().mockResolvedValue(0) },
 			$transaction: jest.fn(async (callback: (transaction: typeof tx) => Promise<unknown>) => callback(tx)),
 		} as any;
 

@@ -403,7 +403,7 @@ function ExistingAllocations({
         </table>
       </div>
       <p className="text-xs text-gray-500">
-        &quot;Distribute →&quot; opens the ward-committee village split screen (Commit 5b, coming next).
+        &quot;Distribute →&quot; opens the ward-committee village-split screen (§7 Stage 3).
       </p>
     </section>
   );

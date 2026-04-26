@@ -207,6 +207,8 @@ export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext>
     county: countyIds,
     wards: { lodwar: wards.lodwar, kanamkemer: wards.kanamkemer, kakuma: wards.kakuma },
     users: userIds,
+    subCounties,
+    villageUnits,
   };
 }
 
@@ -218,7 +220,7 @@ async function seedSubCounties(
   for (const sc of TURKANA_SUB_COUNTIES) {
     const countyId = countyIds[sc.county];
     const saved = await prisma.subCounty.upsert({
-      where: { idx_sub_counties_county_code_unique: { countyId, code: sc.code } },
+      where: { countyId_code: { countyId, code: sc.code } },
       update: { name: sc.name, isActive: true },
       create: { countyId, code: sc.code, name: sc.name, isActive: true },
       select: { id: true },
@@ -259,7 +261,7 @@ async function seedVillageUnits(
   for (const village of TURKANA_VILLAGES) {
     const wardId = wards[village.ward];
     const saved = await prisma.villageUnit.upsert({
-      where: { idx_village_units_ward_name_unique: { wardId, name: village.name } },
+      where: { wardId_name: { wardId, name: village.name } },
       update: { code: village.code, countyId, isActive: true },
       create: { countyId, wardId, name: village.name, code: village.code, isActive: true },
       select: { id: true },
@@ -279,7 +281,7 @@ async function seedVillageAdminAssignments(
     const villageUnitId = villageUnits[mapping.village];
     const userId = userIds[mapping.user];
     await prisma.villageAdminAssignment.upsert({
-      where: { idx_village_admin_unique: { villageUnitId, userId } },
+      where: { villageUnitId_userId: { villageUnitId, userId } },
       update: { countyId, isActive: true, unavailableUntil: null, unavailableReason: null },
       create: { countyId, villageUnitId, userId, isActive: true },
     });

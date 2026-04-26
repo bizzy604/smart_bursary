@@ -351,4 +351,106 @@ export class StudentAllocationService {
 		void tier;
 		void OverrideReasonCode;
 	}
+
+	/**
+	 * List applications pending the §7 Stage 4 final allocation in a given village.
+	 * Used by the village-admin allocation queue UI (Commit 5c). Includes the
+	 * active village_budget_allocation snapshot so the UI can render the pool
+	 * cap, allocated-so-far, and the running remaining-to-allocate without a
+	 * second roundtrip.
+	 *
+	 * Authorization is delegated to the controller's @Roles guard; service-level
+	 * defence: countyId scope is mandatory, and VILLAGE_ADMIN callers are
+	 * additionally pinned to their assigned village by the controller before
+	 * invocation. Other privileged tiers (WARD_ADMIN, COUNTY_ADMIN,
+	 * FINANCE_OFFICER) may inspect any village in their tenant.
+	 */
+	async listPendingForVillage(
+		countyId: string,
+		villageUnitId: string,
+	) {
+		const village = await this.prisma.villageUnit.findFirst({
+			where: { id: villageUnitId, countyId },
+			select: { id: true, name: true, code: true, wardId: true, ward: { select: { id: true, name: true, code: true } } },
+		});
+		if (!village) {
+			throw new NotFoundException('Village not found.');
+		}
+
+		// Most recent village_budget_allocation row for the village (across programs);
+		// the queue UI shows the pool snapshot for orientation. Multiple programs
+		// may have allocations to the same village concurrently — surface them all.
+		const villageAllocations = await this.prisma.villageBudgetAllocation.findMany({
+			where: { villageUnitId, countyId },
+			orderBy: { createdAt: 'desc' },
+			select: {
+				id: true,
+				programId: true,
+				allocatedKes: true,
+				allocatedTotalKes: true,
+				disbursedTotalKes: true,
+				distributionMethod: true,
+				villageAllocationDueAt: true,
+				program: { select: { id: true, name: true, academicYear: true } },
+			},
+		});
+
+		const applications = await this.prisma.application.findMany({
+			where: {
+				countyId,
+				status: ApplicationStatus.VILLAGE_ALLOCATION_PENDING,
+				applicant: { profile: { villageUnitId } },
+			},
+			orderBy: [{ createdAt: 'asc' }],
+			select: {
+				id: true,
+				submissionReference: true,
+				status: true,
+				amountRequested: true,
+				amountAllocated: true,
+				wardId: true,
+				programId: true,
+				villageBudgetAllocationId: true,
+				createdAt: true,
+				updatedAt: true,
+				applicant: {
+					select: {
+						profile: {
+							select: { fullName: true, phone: true, villageUnitId: true },
+						},
+					},
+				},
+				program: { select: { id: true, name: true, academicYear: true } },
+				ward: { select: { id: true, name: true, code: true } },
+			},
+		});
+
+		return {
+			village,
+			villageAllocations: villageAllocations.map((row) => ({
+				...row,
+				allocatedKes: Number(row.allocatedKes),
+				allocatedTotalKes: Number(row.allocatedTotalKes),
+				disbursedTotalKes: Number(row.disbursedTotalKes),
+				remainingKes:
+					Number(row.allocatedKes) - Number(row.allocatedTotalKes),
+			})),
+			applications: applications.map((app) => ({
+				id: app.id,
+				submissionReference: app.submissionReference,
+				status: app.status,
+				amountRequested:
+					app.amountRequested != null ? Number(app.amountRequested) : null,
+				amountAllocated:
+					app.amountAllocated != null ? Number(app.amountAllocated) : null,
+				program: app.program,
+				ward: app.ward,
+				applicantName: app.applicant?.profile?.fullName ?? null,
+				applicantPhone: app.applicant?.profile?.phone ?? null,
+				villageBudgetAllocationId: app.villageBudgetAllocationId,
+				createdAt: app.createdAt,
+				updatedAt: app.updatedAt,
+			})),
+		};
+	}
 }

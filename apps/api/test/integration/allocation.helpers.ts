@@ -63,13 +63,16 @@ export async function createAllocationFixture(args: {
 }): Promise<AllocationFixtureContext> {
 	const { prisma, jwtService, countyId } = args;
 	const unique = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+	// VARCHAR(20) ceilings on SubCounty.code and Ward.code force a short suffix
+	// (the longer `unique` is fine for names where the limit is 120 chars).
+	const shortSuffix = Math.random().toString(36).slice(2, 12); // 10 base36 chars
 
 	// ─── geographic scaffolding ───
 	const subCounty = await prisma.subCounty.create({
 		data: {
 			countyId,
 			name: `Test Sub-County ${unique}`,
-			code: `TSC-${unique}`,
+			code: `TSC-${shortSuffix}`,
 			isActive: true,
 		},
 	});
@@ -78,7 +81,7 @@ export async function createAllocationFixture(args: {
 		data: {
 			countyId,
 			name: `Test Ward ${unique}`,
-			code: `TW-${unique}`,
+			code: `TW-${shortSuffix}`,
 			subCountyId: subCounty.id,
 			isActive: true,
 		},

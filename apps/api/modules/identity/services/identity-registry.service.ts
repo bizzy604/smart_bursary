@@ -67,14 +67,17 @@ export class IdentityRegistryService {
 	 * The kind discriminator is folded into the HMAC input so a national_id "12345678" and a
 	 * NEMIS UPI "12345678" cannot collide.
 	 */
-	computeIdentityHash(rawIdentity: string, kind: IdentityKind): Buffer {
+	computeIdentityHash(rawIdentity: string, kind: IdentityKind): Uint8Array<ArrayBuffer> {
 		const normalised = rawIdentity.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
 		if (!normalised) {
 			throw new Error('Identity value is empty after normalisation.');
 		}
 		const hmac = createHmac('sha256', this.hmacSecret);
 		hmac.update(`${kind}:${normalised}`);
-		return hmac.digest();
+		// Prisma 6 requires Uint8Array<ArrayBuffer> for Bytes columns; Node's
+		// hmac.digest() returns Buffer<ArrayBufferLike> which TS rejects. Uint8Array.from
+		// produces a fresh ArrayBuffer-backed copy that matches Prisma's exact type.
+		return Uint8Array.from(hmac.digest());
 	}
 
 	/**
@@ -120,7 +123,7 @@ export class IdentityRegistryService {
 				return {
 					kind: 'CONFLICT',
 					conflict: {
-						identityHashHex: hash.toString('hex'),
+						identityHashHex: Buffer.from(hash).toString('hex'),
 						conflictingCountyId: existing.activeCountyId,
 						conflictingApplicationId: existing.activeApplicationId,
 						conflictingCycle: existing.activeCycle,
@@ -204,7 +207,7 @@ export class IdentityRegistryService {
 	}
 
 	private toResult(row: {
-		identityHash: Buffer;
+		identityHash: Uint8Array;
 		activeApplicationId: string | null;
 		activeCountyId: string;
 		activeCycle: string;
@@ -212,7 +215,7 @@ export class IdentityRegistryService {
 		firstRegisteredAt: Date;
 	}): IdentityClaimResult {
 		return {
-			identityHashHex: row.identityHash.toString('hex'),
+			identityHashHex: Buffer.from(row.identityHash).toString('hex'),
 			activeApplicationId: row.activeApplicationId ?? '',
 			activeCountyId: row.activeCountyId,
 			activeCycle: row.activeCycle,

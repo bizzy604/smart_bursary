@@ -12,7 +12,13 @@ import { tokenStore } from "@/lib/token-store";
 export interface AuthUser {
 	id: string;
 	email: string;
-	role: "STUDENT" | "WARD_ADMIN" | "FINANCE_OFFICER" | "COUNTY_ADMIN" | "PLATFORM_OPERATOR";
+	role:
+		| "STUDENT"
+		| "WARD_ADMIN"
+		| "FINANCE_OFFICER"
+		| "COUNTY_ADMIN"
+		| "VILLAGE_ADMIN"
+		| "PLATFORM_OPERATOR";
 	full_name: string;
 	profile_complete: boolean;
 }

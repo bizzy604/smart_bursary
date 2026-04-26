@@ -51,8 +51,10 @@ describe('IdentityRegistryService — cross-county active-cycle lock (e2e)', () 
 	 */
 	async function createApplicationFixture(countyId: string) {
 		const unique = `${Date.now()}-${Math.floor(Math.random() * 1_000_000)}`;
+		// Ward.code is VARCHAR(20); use a short base36 suffix.
+		const shortSuffix = Math.random().toString(36).slice(2, 12);
 		const ward = await prisma.ward.create({
-			data: { countyId, name: `Identity Ward ${unique}`, code: `IW-${unique}` },
+			data: { countyId, name: `Identity Ward ${unique}`, code: `IW-${shortSuffix}` },
 		});
 		const student = await prisma.user.create({
 			data: {
@@ -106,15 +108,16 @@ describe('IdentityRegistryService — cross-county active-cycle lock (e2e)', () 
 		const a = identityRegistry.computeIdentityHash('12345678', IdentityKind.NATIONAL_ID);
 		const b = identityRegistry.computeIdentityHash('12 345 678', IdentityKind.NATIONAL_ID);
 		const c = identityRegistry.computeIdentityHash('  12345678  ', IdentityKind.NATIONAL_ID);
-		expect(a.equals(b)).toBe(true);
-		expect(a.equals(c)).toBe(true);
+		// Prisma 6 returns Uint8Array (no .equals); compare via Buffer.compare.
+		expect(Buffer.compare(Buffer.from(a), Buffer.from(b))).toBe(0);
+		expect(Buffer.compare(Buffer.from(a), Buffer.from(c))).toBe(0);
 		expect(a.length).toBe(32); // SHA-256
 	});
 
 	it('does not collide across IdentityKinds for the same numeric value', () => {
 		const nationalId = identityRegistry.computeIdentityHash('98765432', IdentityKind.NATIONAL_ID);
 		const upi = identityRegistry.computeIdentityHash('98765432', IdentityKind.NEMIS_UPI);
-		expect(nationalId.equals(upi)).toBe(false);
+		expect(Buffer.compare(Buffer.from(nationalId), Buffer.from(upi))).not.toBe(0);
 	});
 
 	it('claims a fresh slot and stores ONLY the HMAC hash (no plaintext)', async () => {
@@ -134,8 +137,10 @@ describe('IdentityRegistryService — cross-county active-cycle lock (e2e)', () 
 		const row = await prisma.identityRegistry.findFirstOrThrow({
 			where: { activeApplicationId: fixture.applicationId },
 		});
-		expect(Buffer.isBuffer(row.identityHash)).toBe(true);
-		expect(row.identityHash.toString('utf8').includes(rawId)).toBe(false);
+		// Prisma 6 returns Bytes columns as Uint8Array; wrap in Buffer for assertions.
+		const hashBuffer = Buffer.from(row.identityHash);
+		expect(hashBuffer.length).toBe(32); // SHA-256 = 32 bytes
+		expect(hashBuffer.toString('utf8').includes(rawId)).toBe(false);
 		expect(row.activeCountyId).toBe(turkanaCountyId);
 		expect(row.firstRegisteredCountyId).toBe(turkanaCountyId);
 		expect(row.activeStatus).toBe(ApplicationStatus.SUBMITTED);

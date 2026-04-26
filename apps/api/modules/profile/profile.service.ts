@@ -41,7 +41,7 @@ export class ProfileService {
 				dateOfBirth: profile?.dateOfBirth ?? null,
 				gender: profile?.gender ?? null,
 				homeWard: profile?.homeWard ?? null,
-				villageUnit: profile?.villageUnit ?? null,
+				villageUnit: profile?.villageUnitName ?? null,
 				phone: profile?.phone ?? null,
 				profileComplete: profile?.profileComplete ?? false,
 			},
@@ -98,7 +98,7 @@ export class ProfileService {
 				dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
 				gender: dto.gender,
 				homeWard: dto.homeWard,
-				villageUnit: dto.villageUnit,
+				villageUnitName: dto.villageUnit,
 				phone: dto.phone,
 			},
 			create: {
@@ -109,7 +109,7 @@ export class ProfileService {
 				dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined,
 				gender: dto.gender,
 				homeWard: dto.homeWard,
-				villageUnit: dto.villageUnit,
+				villageUnitName: dto.villageUnit,
 				phone: dto.phone ?? existing?.phone,
 			},
 			select: {
@@ -118,7 +118,7 @@ export class ProfileService {
 				dateOfBirth: true,
 				gender: true,
 				homeWard: true,
-				villageUnit: true,
+				villageUnitName: true,
 				phone: true,
 				profileComplete: true,
 			},
@@ -126,8 +126,10 @@ export class ProfileService {
 
 		await this.completionService.getCompletionStatus(countyId, userId);
 
+		const { villageUnitName, ...rest } = profile;
 		return {
-			...profile,
+			...rest,
+			villageUnit: villageUnitName,
 			nationalId: profile.nationalId ? Buffer.from(profile.nationalId).toString('utf8') : null,
 		};
 	}

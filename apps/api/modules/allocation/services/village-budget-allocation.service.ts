@@ -189,7 +189,7 @@ export class VillageBudgetAllocationService {
 					for (const entry of dto.villageAllocations) {
 						const upserted = await tx.villageBudgetAllocation.upsert({
 							where: {
-								idx_village_alloc_program_village_unique: {
+								programId_villageUnitId: {
 									programId: wardAllocation.programId,
 									villageUnitId: entry.villageUnitId,
 								},

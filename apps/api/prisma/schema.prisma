@@ -227,7 +227,7 @@ model StudentProfile {
   dateOfBirth     DateTime? @map("date_of_birth") @db.Date
   gender          String?   @db.VarChar(10)
   homeWard        String?   @map("home_ward") @db.VarChar(120)
-  villageUnit     String?   @map("village_unit") @db.VarChar(120)
+  villageUnitName String?   @map("village_unit") @db.VarChar(120)
   phone           String?   @db.VarChar(20)
   profileComplete Boolean   @default(false) @map("profile_complete")
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)

@@ -82,7 +82,7 @@ export class WardBudgetAllocationService {
 					}
 
 					const allocation = await tx.wardBudgetAllocation.upsert({
-						where: { idx_ward_alloc_program_ward_unique: { programId, wardId: dto.wardId } },
+						where: { programId_wardId: { programId, wardId: dto.wardId } },
 						create: {
 							countyId,
 							programId,
