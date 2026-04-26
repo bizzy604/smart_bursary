@@ -21,22 +21,46 @@ type UserSeed = {
   ward?: WardKey;
 };
 
-const TURKANA_WARDS = [
-  { code: 'TRK-001', name: 'Lodwar Township', subCounty: 'Turkana Central' },
-  { code: 'TRK-002', name: 'Kanamkemer', subCounty: 'Turkana North' },
-  { code: 'TRK-003', name: 'Kakuma', subCounty: 'Turkana West' },
+type SubCountyKey = keyof SeedContext['subCounties'];
+
+const TURKANA_SUB_COUNTIES: ReadonlyArray<{ key: SubCountyKey; code: string; name: string; county: 'turkana' | 'nakuru' }> = [
+  { key: 'turkanaCentral', code: 'TRK-SC-CEN', name: 'Turkana Central', county: 'turkana' },
+  { key: 'turkanaNorth',   code: 'TRK-SC-NTH', name: 'Turkana North',   county: 'turkana' },
+  { key: 'turkanaWest',    code: 'TRK-SC-WST', name: 'Turkana West',    county: 'turkana' },
+  { key: 'nakuruTownEast', code: 'NKR-SC-NTE', name: 'Nakuru Town East', county: 'nakuru' },
 ] as const;
 
-const NAKURU_WARDS = [
-  { code: 'NKR-001', name: 'Biashara', subCounty: 'Nakuru Town East' },
-  { code: 'NKR-002', name: 'Kivumbini', subCounty: 'Nakuru Town East' },
-] as const;
+const TURKANA_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey }> = [
+  { code: 'TRK-001', name: 'Lodwar Township', subCounty: 'Turkana Central', subCountyKey: 'turkanaCentral' },
+  { code: 'TRK-002', name: 'Kanamkemer',      subCounty: 'Turkana North',   subCountyKey: 'turkanaNorth' },
+  { code: 'TRK-003', name: 'Kakuma',          subCounty: 'Turkana West',    subCountyKey: 'turkanaWest' },
+];
+
+const NAKURU_WARDS: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: SubCountyKey }> = [
+  { code: 'NKR-001', name: 'Biashara',  subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast' },
+  { code: 'NKR-002', name: 'Kivumbini', subCounty: 'Nakuru Town East', subCountyKey: 'nakuruTownEast' },
+];
+
+type VillageUnitKey = keyof SeedContext['villageUnits'];
+
+const TURKANA_VILLAGES: ReadonlyArray<{ key: VillageUnitKey; ward: keyof SeedContext['wards']; name: string; code: string }> = [
+  { key: 'lodwarTown',       ward: 'lodwar',     name: 'Lodwar Town',       code: 'TRK-001-VU-001' },
+  { key: 'nadapal',          ward: 'lodwar',     name: 'Nadapal',           code: 'TRK-001-VU-002' },
+  { key: 'napetet',          ward: 'lodwar',     name: 'Napetet',           code: 'TRK-001-VU-003' },
+  { key: 'kanamkemerCenter', ward: 'kanamkemer', name: 'Kanamkemer Centre', code: 'TRK-002-VU-001' },
+  { key: 'naipa',            ward: 'kanamkemer', name: 'Naipa',             code: 'TRK-002-VU-002' },
+  { key: 'kakumaOne',        ward: 'kakuma',     name: 'Kakuma One',        code: 'TRK-003-VU-001' },
+  { key: 'kalobeyei',        ward: 'kakuma',     name: 'Kalobeyei',         code: 'TRK-003-VU-002' },
+];
 
 const USERS: UserSeed[] = [
   { key: 'platformOperator', county: 'turkana', email: 'platform.operator@smartbursary.dev', role: UserRole.PLATFORM_OPERATOR, phone: '+254700010000' },
   { key: 'countyAdmin', county: 'turkana', email: 'county.admin@turkana.go.ke', role: UserRole.COUNTY_ADMIN, phone: '+254700010001' },
   { key: 'financeOfficer', county: 'turkana', email: 'finance.officer@turkana.go.ke', role: UserRole.FINANCE_OFFICER, phone: '+254700010002' },
   { key: 'wardAdmin', county: 'turkana', email: 'ward.admin@turkana.go.ke', role: UserRole.WARD_ADMIN, phone: '+254700010003', ward: 'lodwar' },
+  { key: 'villageAdminLodwar',     county: 'turkana', email: 'village.admin.lodwar@turkana.go.ke',     role: UserRole.VILLAGE_ADMIN, phone: '+254700010004', ward: 'lodwar' },
+  { key: 'villageAdminKanamkemer', county: 'turkana', email: 'village.admin.kanamkemer@turkana.go.ke', role: UserRole.VILLAGE_ADMIN, phone: '+254700010005', ward: 'kanamkemer' },
+  { key: 'villageAdminKakuma',     county: 'turkana', email: 'village.admin.kakuma@turkana.go.ke',     role: UserRole.VILLAGE_ADMIN, phone: '+254700010006', ward: 'kakuma' },
   { key: 'aisha', county: 'turkana', email: 'aisha.student@turkana.go.ke', role: UserRole.STUDENT, phone: '+254700020001', ward: 'lodwar' },
   { key: 'brian', county: 'turkana', email: 'brian.student@turkana.go.ke', role: UserRole.STUDENT, phone: '+254700020002', ward: 'lodwar' },
   { key: 'carol', county: 'turkana', email: 'carol.student@turkana.go.ke', role: UserRole.STUDENT, phone: '+254700020003', ward: 'kanamkemer' },
@@ -53,6 +77,9 @@ const PROFILE_NAMES: Record<UserKey, string> = {
   countyAdmin: 'County Administrator',
   financeOfficer: 'County Finance Officer',
   wardAdmin: 'Ward Committee Lead',
+  villageAdminLodwar: 'Lodwar Village Admin',
+  villageAdminKanamkemer: 'Kanamkemer Village Admin',
+  villageAdminKakuma: 'Kakuma Village Admin',
   aisha: 'Aisha Nareto',
   brian: 'Brian Ekal',
   carol: 'Carol Akiru',
@@ -65,6 +92,26 @@ const PROFILE_NAMES: Record<UserKey, string> = {
 };
 
 const STUDENT_KEYS: UserKey[] = ['aisha', 'brian', 'carol', 'dan', 'eve', 'fatma', 'gideon', 'hana'];
+
+// Mapping student → village_unit for backfill (one student per village pair to exercise distribution).
+const STUDENT_VILLAGE_BACKFILL: Partial<Record<UserKey, VillageUnitKey>> = {
+  aisha:  'lodwarTown',
+  brian:  'lodwarTown',
+  dan:    'nadapal',
+  carol:  'kanamkemerCenter',
+  fatma:  'naipa',
+  eve:    'kakumaOne',
+  gideon: 'kakumaOne',
+  hana:   'kalobeyei',
+};
+
+// Village admin assignments: 1:1 for the seeded admins, leaving some villages
+// admin-less so override-hierarchy tests can exercise the unavailable path.
+const VILLAGE_ADMIN_MAPPING: ReadonlyArray<{ user: UserKey; village: VillageUnitKey }> = [
+  { user: 'villageAdminLodwar',     village: 'lodwarTown' },
+  { user: 'villageAdminKanamkemer', village: 'kanamkemerCenter' },
+  { user: 'villageAdminKakuma',     village: 'kakumaOne' },
+];
 
 export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext> {
   const passwordHash = await hash(DEV_PASSWORD, 10);
@@ -94,12 +141,17 @@ export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext>
     create: { slug: 'nakuru', name: 'Nakuru County', fundName: 'Nakuru County Bursary Fund', legalReference: 'No. 2 of 2024', planTier: 'BASIC', isActive: false, primaryColor: '#0F766E' },
   });
 
-  const wards = {
-    ...await seedWards(prisma, turkana.id, TURKANA_WARDS),
-    ...(await seedWards(prisma, nakuru.id, NAKURU_WARDS)),
-  };
-
   const countyIds = { turkana: turkana.id, nakuru: nakuru.id };
+
+  const subCounties = await seedSubCounties(prisma, countyIds);
+
+  const wards = {
+    ...(await seedWards(prisma, turkana.id, TURKANA_WARDS, subCounties)),
+    ...(await seedWards(prisma, nakuru.id, NAKURU_WARDS, subCounties)),
+  } as SeedContext['wards'];
+
+  const villageUnits = await seedVillageUnits(prisma, turkana.id, wards);
+
   const userIds = {} as SeedContext['users'];
   for (const user of USERS) {
     const saved = await prisma.user.upsert({
@@ -111,12 +163,19 @@ export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext>
     userIds[user.key] = saved.id;
   }
 
+  await seedVillageAdminAssignments(prisma, turkana.id, villageUnits, userIds);
+
   for (const key of Object.keys(PROFILE_NAMES) as UserKey[]) {
     const user = USERS.find((entry) => entry.key === key)!;
+    const villageKey = STUDENT_VILLAGE_BACKFILL[key];
+    const villageUnitId = villageKey ? villageUnits[villageKey] : null;
+    const homeWardName = user.ward
+      ? (user.ward === 'lodwar' ? 'Lodwar Township' : user.ward === 'kanamkemer' ? 'Kanamkemer' : 'Kakuma')
+      : null;
     await prisma.studentProfile.upsert({
       where: { userId: userIds[key] },
-      update: { countyId: countyIds[user.county], fullName: PROFILE_NAMES[key], phone: user.phone ?? null, homeWard: user.ward ? TURKANA_WARDS.find((ward) => ward.code === (user.ward === 'lodwar' ? 'TRK-001' : user.ward === 'kanamkemer' ? 'TRK-002' : 'TRK-003'))?.name ?? null : null, profileComplete: STUDENT_KEYS.includes(key) },
-      create: { userId: userIds[key], countyId: countyIds[user.county], fullName: PROFILE_NAMES[key], phone: user.phone ?? null, homeWard: user.ward ? (user.ward === 'lodwar' ? 'Lodwar Township' : user.ward === 'kanamkemer' ? 'Kanamkemer' : 'Kakuma') : null, profileComplete: STUDENT_KEYS.includes(key) },
+      update: { countyId: countyIds[user.county], fullName: PROFILE_NAMES[key], phone: user.phone ?? null, homeWard: homeWardName, villageUnitId, profileComplete: STUDENT_KEYS.includes(key) },
+      create: { userId: userIds[key], countyId: countyIds[user.county], fullName: PROFILE_NAMES[key], phone: user.phone ?? null, homeWard: homeWardName, villageUnitId, profileComplete: STUDENT_KEYS.includes(key) },
     });
   }
 
@@ -151,17 +210,37 @@ export async function seedFoundation(prisma: PrismaClient): Promise<SeedContext>
   };
 }
 
+async function seedSubCounties(
+  prisma: PrismaClient,
+  countyIds: { turkana: string; nakuru: string },
+): Promise<SeedContext['subCounties']> {
+  const ids = {} as SeedContext['subCounties'];
+  for (const sc of TURKANA_SUB_COUNTIES) {
+    const countyId = countyIds[sc.county];
+    const saved = await prisma.subCounty.upsert({
+      where: { idx_sub_counties_county_code_unique: { countyId, code: sc.code } },
+      update: { name: sc.name, isActive: true },
+      create: { countyId, code: sc.code, name: sc.name, isActive: true },
+      select: { id: true },
+    });
+    ids[sc.key] = saved.id;
+  }
+  return ids;
+}
+
 async function seedWards(
   prisma: PrismaClient,
   countyId: string,
-  rows: ReadonlyArray<{ code: string; name: string; subCounty: string }>,
+  rows: ReadonlyArray<{ code: string; name: string; subCounty: string; subCountyKey: keyof SeedContext['subCounties'] }>,
+  subCounties: SeedContext['subCounties'],
 ): Promise<Record<string, string>> {
   const wardIds: Record<string, string> = {};
   for (const ward of rows) {
+    const subCountyId = subCounties[ward.subCountyKey];
     const saved = await prisma.ward.upsert({
       where: { countyId_code: { countyId, code: ward.code } },
-      update: { name: ward.name, subCounty: ward.subCounty, isActive: true },
-      create: { countyId, code: ward.code, name: ward.name, subCounty: ward.subCounty, isActive: true },
+      update: { name: ward.name, subCounty: ward.subCounty, subCountyId, isActive: true },
+      create: { countyId, code: ward.code, name: ward.name, subCounty: ward.subCounty, subCountyId, isActive: true },
       select: { id: true },
     });
     if (ward.code === 'TRK-001') wardIds.lodwar = saved.id;
@@ -169,4 +248,40 @@ async function seedWards(
     if (ward.code === 'TRK-003') wardIds.kakuma = saved.id;
   }
   return wardIds;
+}
+
+async function seedVillageUnits(
+  prisma: PrismaClient,
+  countyId: string,
+  wards: SeedContext['wards'],
+): Promise<SeedContext['villageUnits']> {
+  const ids = {} as SeedContext['villageUnits'];
+  for (const village of TURKANA_VILLAGES) {
+    const wardId = wards[village.ward];
+    const saved = await prisma.villageUnit.upsert({
+      where: { idx_village_units_ward_name_unique: { wardId, name: village.name } },
+      update: { code: village.code, countyId, isActive: true },
+      create: { countyId, wardId, name: village.name, code: village.code, isActive: true },
+      select: { id: true },
+    });
+    ids[village.key] = saved.id;
+  }
+  return ids;
+}
+
+async function seedVillageAdminAssignments(
+  prisma: PrismaClient,
+  countyId: string,
+  villageUnits: SeedContext['villageUnits'],
+  userIds: SeedContext['users'],
+): Promise<void> {
+  for (const mapping of VILLAGE_ADMIN_MAPPING) {
+    const villageUnitId = villageUnits[mapping.village];
+    const userId = userIds[mapping.user];
+    await prisma.villageAdminAssignment.upsert({
+      where: { idx_village_admin_unique: { villageUnitId, userId } },
+      update: { countyId, isActive: true, unavailableUntil: null, unavailableReason: null },
+      create: { countyId, villageUnitId, userId, isActive: true },
+    });
+  }
 }

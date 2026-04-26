@@ -17,6 +17,8 @@ enum UserRole {
   FINANCE_OFFICER
   COUNTY_ADMIN
   PLATFORM_OPERATOR
+  VILLAGE_ADMIN
+  FIELD_AGENT
 }
 
 enum ProgramStatus {
@@ -30,6 +32,9 @@ enum ApplicationStatus {
   DRAFT
   SUBMITTED
   WARD_REVIEW
+  WARD_DISTRIBUTION_PENDING
+  VILLAGE_ALLOCATION_PENDING
+  ALLOCATED
   COUNTY_REVIEW
   APPROVED
   REJECTED
@@ -81,6 +86,27 @@ enum NotificationDeliveryStatus {
   FAILED
 }
 
+enum SubmissionChannel {
+  WEB
+  PWA_OFFLINE
+  USSD
+  KIOSK
+  PAPER
+}
+
+enum DistributionMethod {
+  PROPORTIONAL
+  MANUAL_OVERRIDE
+  AI_WEIGHTED
+}
+
+enum AllocationActorTier {
+  VILLAGE
+  WARD
+  COUNTY
+  FINANCE
+}
+
 model County {
   id             String   @id @default(uuid()) @db.Uuid
   slug           String   @unique @db.VarChar(60)
@@ -95,41 +121,56 @@ model County {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  wards            Ward[]
-  users            User[]
-  studentProfiles  StudentProfile[]
-  academicInfos    AcademicInfo[]
-  familyInfos      FamilyFinancialInfo[]
-  programs         BursaryProgram[]
-  eligibilityRules EligibilityRule[]
-  applications     Application[]
-  sections         ApplicationSection[]
-  documents        Document[]
-  reviews          ApplicationReview[]
-  timeline         ApplicationTimeline[]
-  aiScoreCards     AIScoreCard[]
-  disbursements    DisbursementRecord[]
-  notifications    NotificationDelivery[]
+  wards                    Ward[]
+  users                    User[]
+  studentProfiles          StudentProfile[]
+  academicInfos            AcademicInfo[]
+  familyInfos              FamilyFinancialInfo[]
+  programs                 BursaryProgram[]
+  eligibilityRules         EligibilityRule[]
+  applications             Application[]
+  sections                 ApplicationSection[]
+  documents                Document[]
+  reviews                  ApplicationReview[]
+  timeline                 ApplicationTimeline[]
+  aiScoreCards             AIScoreCard[]
+  disbursements            DisbursementRecord[]
+  notifications            NotificationDelivery[]
+  subCounties              SubCounty[]
+  villageUnits             VillageUnit[]
+  villageAdminAssignments  VillageAdminAssignment[]
+  wardBudgetAllocations    WardBudgetAllocation[]
+  villageBudgetAllocations VillageBudgetAllocation[]
+  residenceAttestations    ResidenceAttestation[]
+  activeIdentityRegistry   IdentityRegistry[] @relation("IdentityActiveCounty")
+  firstRegisteredIdentity  IdentityRegistry[] @relation("IdentityFirstRegisteredCounty")
 
   @@map("counties")
 }
 
 model Ward {
-  id        String   @id @default(uuid()) @db.Uuid
-  countyId  String   @map("county_id") @db.Uuid
-  name      String   @db.VarChar(120)
-  code      String?  @db.VarChar(20)
-  subCounty String?  @map("sub_county") @db.VarChar(120)
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id          String   @id @default(uuid()) @db.Uuid
+  countyId    String   @map("county_id") @db.Uuid
+  subCountyId String?  @map("sub_county_id") @db.Uuid
+  name        String   @db.VarChar(120)
+  code        String?  @db.VarChar(20)
+  subCounty   String?  @map("sub_county") @db.VarChar(120)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  county       County           @relation(fields: [countyId], references: [id], onDelete: Cascade)
-  users        User[]
-  programs     BursaryProgram[]
-  applications Application[]
+  county                   County                    @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  subCountyRel             SubCounty?                @relation(fields: [subCountyId], references: [id])
+  users                    User[]
+  programs                 BursaryProgram[]
+  applications             Application[]
+  villageUnits             VillageUnit[]
+  wardBudgetAllocations    WardBudgetAllocation[]
+  villageBudgetAllocations VillageBudgetAllocation[]
+  residenceAttestations    ResidenceAttestation[]
 
   @@unique([countyId, code])
   @@index([countyId], map: "idx_wards_county")
+  @@index([subCountyId], map: "idx_wards_sub_county")
   @@map("wards")
 }
 
@@ -153,17 +194,23 @@ model User {
   updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  county                 County                @relation(fields: [countyId], references: [id])
-  ward                   Ward?                 @relation(fields: [wardId], references: [id])
-  profile                StudentProfile?
-  academicInfo           AcademicInfo?
-  familyInfo             FamilyFinancialInfo?
-  applications           Application[]         @relation("ApplicantApplications")
-  createdPrograms        BursaryProgram[]      @relation("ProgramCreator")
-  reviews                ApplicationReview[]
-  timelineEvents         ApplicationTimeline[] @relation("TimelineActor")
-  initiatedDisbursements DisbursementRecord[]  @relation("DisbursementInitiator")
-  receivedNotifications  NotificationDelivery[] @relation("NotificationRecipient")
+  county                       County                    @relation(fields: [countyId], references: [id])
+  ward                         Ward?                     @relation(fields: [wardId], references: [id])
+  profile                      StudentProfile?
+  academicInfo                 AcademicInfo?
+  familyInfo                   FamilyFinancialInfo?
+  applications                 Application[]             @relation("ApplicantApplications")
+  createdPrograms              BursaryProgram[]          @relation("ProgramCreator")
+  reviews                      ApplicationReview[]
+  timelineEvents               ApplicationTimeline[]     @relation("TimelineActor")
+  initiatedDisbursements       DisbursementRecord[]      @relation("DisbursementInitiator")
+  receivedNotifications        NotificationDelivery[]    @relation("NotificationRecipient")
+  villageAdminAssignments      VillageAdminAssignment[]  @relation("VillageAdminAssignments")
+  createdWardBudgetAllocations WardBudgetAllocation[]    @relation("WardBudgetCreator")
+  createdVillageBudgetAllocations VillageBudgetAllocation[] @relation("VillageBudgetCreator")
+  allocatedApplications        Application[]             @relation("AllocationActor")
+  attestedApplications         ResidenceAttestation[]    @relation("AttestedApplicant")
+  performedAttestations        ResidenceAttestation[]    @relation("ResidenceAttester")
 
   @@unique([email, countyId])
   @@index([countyId], map: "idx_users_county")
@@ -186,11 +233,16 @@ model StudentProfile {
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  county County @relation(fields: [countyId], references: [id])
+  villageUnitId           String?   @map("village_unit_id") @db.Uuid
+  birthCertificateNumber  Bytes?    @map("birth_certificate_number")
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  county      County       @relation(fields: [countyId], references: [id])
+  villageUnit VillageUnit? @relation(fields: [villageUnitId], references: [id])
 
   @@unique([countyId, nationalId], map: "idx_profile_county_national_id_unique")
   @@index([countyId], map: "idx_profile_county")
+  @@index([villageUnitId], map: "idx_profile_village_unit")
   @@map("student_profiles")
 }
 
@@ -264,12 +316,14 @@ model BursaryProgram {
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  county           County               @relation(fields: [countyId], references: [id])
-  ward             Ward?                @relation(fields: [wardId], references: [id])
-  creator          User                 @relation("ProgramCreator", fields: [createdBy], references: [id])
-  eligibilityRules EligibilityRule[]
-  applications     Application[]
-  disbursements    DisbursementRecord[]
+  county                   County                    @relation(fields: [countyId], references: [id])
+  ward                     Ward?                     @relation(fields: [wardId], references: [id])
+  creator                  User                      @relation("ProgramCreator", fields: [createdBy], references: [id])
+  eligibilityRules         EligibilityRule[]
+  applications             Application[]
+  disbursements            DisbursementRecord[]
+  wardBudgetAllocations    WardBudgetAllocation[]
+  villageBudgetAllocations VillageBudgetAllocation[]
 
   @@index([countyId], map: "idx_programs_county")
   @@index([countyId, status], map: "idx_programs_county_status")
@@ -292,46 +346,60 @@ model EligibilityRule {
 }
 
 model Application {
-  id                   String            @id @default(uuid()) @db.Uuid
-  countyId             String            @map("county_id") @db.Uuid
-  applicantId          String            @map("applicant_id") @db.Uuid
-  programId            String            @map("program_id") @db.Uuid
-  wardId               String            @map("ward_id") @db.Uuid
-  status               ApplicationStatus @default(DRAFT)
-  totalFeeKes          Decimal?          @map("total_fee_kes") @db.Decimal(12, 2)
-  outstandingBalance   Decimal?          @map("outstanding_balance") @db.Decimal(12, 2)
-  amountAbleToPay      Decimal?          @map("amount_able_to_pay") @db.Decimal(12, 2)
-  amountRequested      Decimal?          @map("amount_requested") @db.Decimal(12, 2)
-  amountAllocated      Decimal?          @map("amount_allocated") @db.Decimal(12, 2)
-  helbApplied          Boolean?          @map("helb_applied")
-  priorBursaryReceived Boolean           @default(false) @map("prior_bursary_received")
-  priorBursarySource   String?           @map("prior_bursary_source") @db.VarChar(255)
-  priorBursaryAmount   Decimal?          @map("prior_bursary_amount") @db.Decimal(12, 2)
-  reason               String?
-  submissionReference  String?           @unique @map("submission_reference") @db.VarChar(30)
-  pdfS3Key             String?           @map("pdf_s3_key")
-  submittedAt          DateTime?         @map("submitted_at") @db.Timestamptz(6)
-  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id                        String               @id @default(uuid()) @db.Uuid
+  countyId                  String               @map("county_id") @db.Uuid
+  applicantId               String               @map("applicant_id") @db.Uuid
+  programId                 String               @map("program_id") @db.Uuid
+  wardId                    String               @map("ward_id") @db.Uuid
+  status                    ApplicationStatus    @default(DRAFT)
+  totalFeeKes               Decimal?             @map("total_fee_kes") @db.Decimal(12, 2)
+  outstandingBalance        Decimal?             @map("outstanding_balance") @db.Decimal(12, 2)
+  amountAbleToPay           Decimal?             @map("amount_able_to_pay") @db.Decimal(12, 2)
+  amountRequested           Decimal?             @map("amount_requested") @db.Decimal(12, 2)
+  amountAllocated           Decimal?             @map("amount_allocated") @db.Decimal(12, 2)
+  helbApplied               Boolean?             @map("helb_applied")
+  priorBursaryReceived      Boolean              @default(false) @map("prior_bursary_received")
+  priorBursarySource        String?              @map("prior_bursary_source") @db.VarChar(255)
+  priorBursaryAmount        Decimal?             @map("prior_bursary_amount") @db.Decimal(12, 2)
+  reason                    String?
+  submissionReference       String?              @unique @map("submission_reference") @db.VarChar(30)
+  pdfS3Key                  String?              @map("pdf_s3_key")
+  submittedAt               DateTime?            @map("submitted_at") @db.Timestamptz(6)
+  clientIdempotencyKey      String?              @map("client_idempotency_key") @db.Uuid
+  submissionChannel         SubmissionChannel    @default(WEB) @map("submission_channel")
+  villageBudgetAllocationId String?              @map("village_budget_allocation_id") @db.Uuid
+  wardBudgetAllocationId    String?              @map("ward_budget_allocation_id") @db.Uuid
+  allocationActorId         String?              @map("allocation_actor_id") @db.Uuid
+  allocationActorTier       AllocationActorTier? @map("allocation_actor_tier")
+  allocatedAt               DateTime?            @map("allocated_at") @db.Timestamptz(6)
+  createdAt                 DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  county       County                @relation(fields: [countyId], references: [id])
-  applicant    User                  @relation("ApplicantApplications", fields: [applicantId], references: [id])
-  program      BursaryProgram        @relation(fields: [programId], references: [id])
-  ward         Ward                  @relation(fields: [wardId], references: [id])
-  sections     ApplicationSection[]
-  documents    Document[]
-  reviews      ApplicationReview[]
-  timeline     ApplicationTimeline[]
-  scoreCard    AIScoreCard?
-  disbursement DisbursementRecord?
-  notifications NotificationDelivery[]
+  county                  County                   @relation(fields: [countyId], references: [id])
+  applicant               User                     @relation("ApplicantApplications", fields: [applicantId], references: [id])
+  program                 BursaryProgram           @relation(fields: [programId], references: [id])
+  ward                    Ward                     @relation(fields: [wardId], references: [id])
+  villageBudgetAllocation VillageBudgetAllocation? @relation(fields: [villageBudgetAllocationId], references: [id])
+  wardBudgetAllocation    WardBudgetAllocation?    @relation(fields: [wardBudgetAllocationId], references: [id])
+  allocationActor         User?                    @relation("AllocationActor", fields: [allocationActorId], references: [id])
+  sections                ApplicationSection[]
+  documents               Document[]
+  reviews                 ApplicationReview[]
+  timeline                ApplicationTimeline[]
+  scoreCard               AIScoreCard?
+  disbursement            DisbursementRecord?
+  notifications           NotificationDelivery[]
+  residenceAttestations   ResidenceAttestation[]
+  identityRegistryEntry   IdentityRegistry?
 
   @@unique([applicantId, programId], map: "idx_applications_no_duplicate")
+  @@unique([clientIdempotencyKey], map: "idx_applications_idempotency")
   @@index([countyId], map: "idx_applications_county")
   @@index([countyId, status], map: "idx_applications_county_status")
   @@index([countyId, wardId], map: "idx_applications_county_ward")
   @@index([programId], map: "idx_applications_program")
   @@index([applicantId], map: "idx_applications_applicant")
+  @@index([villageBudgetAllocationId], map: "idx_applications_village_alloc")
   @@map("applications")
 }
 
@@ -440,32 +508,37 @@ model AIScoreCard {
 }
 
 model DisbursementRecord {
-  id                   String             @id @default(uuid()) @db.Uuid
-  applicationId        String             @unique @map("application_id") @db.Uuid
-  countyId             String             @map("county_id") @db.Uuid
-  programId            String             @map("program_id") @db.Uuid
-  disbursementMethod   DisbursementMethod @map("disbursement_method")
-  amountKes            Decimal            @map("amount_kes") @db.Decimal(12, 2)
-  recipientPhone       String?            @map("recipient_phone") @db.VarChar(20)
-  recipientBankAccount Bytes?             @map("recipient_bank_account")
-  recipientBankName    String?            @map("recipient_bank_name") @db.VarChar(120)
-  transactionId        String?            @map("transaction_id") @db.VarChar(120)
-  status               DisbursementStatus @default(PENDING)
-  failureReason        String?            @map("failure_reason")
-  retryCount           Int                @default(0) @map("retry_count")
-  initiatedBy          String             @map("initiated_by") @db.Uuid
-  initiatedAt          DateTime           @default(now()) @map("initiated_at") @db.Timestamptz(6)
-  confirmedAt          DateTime?          @map("confirmed_at") @db.Timestamptz(6)
-  receiptS3Key         String?            @map("receipt_s3_key")
+  id                        String             @id @default(uuid()) @db.Uuid
+  applicationId             String             @unique @map("application_id") @db.Uuid
+  countyId                  String             @map("county_id") @db.Uuid
+  programId                 String             @map("program_id") @db.Uuid
+  villageBudgetAllocationId String?            @map("village_budget_allocation_id") @db.Uuid
+  wardBudgetAllocationId    String?            @map("ward_budget_allocation_id") @db.Uuid
+  disbursementMethod        DisbursementMethod @map("disbursement_method")
+  amountKes                 Decimal            @map("amount_kes") @db.Decimal(12, 2)
+  recipientPhone            String?            @map("recipient_phone") @db.VarChar(20)
+  recipientBankAccount      Bytes?             @map("recipient_bank_account")
+  recipientBankName         String?            @map("recipient_bank_name") @db.VarChar(120)
+  transactionId             String?            @map("transaction_id") @db.VarChar(120)
+  status                    DisbursementStatus @default(PENDING)
+  failureReason             String?            @map("failure_reason")
+  retryCount                Int                @default(0) @map("retry_count")
+  initiatedBy               String             @map("initiated_by") @db.Uuid
+  initiatedAt               DateTime           @default(now()) @map("initiated_at") @db.Timestamptz(6)
+  confirmedAt               DateTime?          @map("confirmed_at") @db.Timestamptz(6)
+  receiptS3Key              String?            @map("receipt_s3_key")
 
-  application Application    @relation(fields: [applicationId], references: [id])
-  county      County         @relation(fields: [countyId], references: [id])
-  program     BursaryProgram @relation(fields: [programId], references: [id])
-  initiator   User           @relation("DisbursementInitiator", fields: [initiatedBy], references: [id])
+  application             Application              @relation(fields: [applicationId], references: [id])
+  county                  County                   @relation(fields: [countyId], references: [id])
+  program                 BursaryProgram           @relation(fields: [programId], references: [id])
+  villageBudgetAllocation VillageBudgetAllocation? @relation(fields: [villageBudgetAllocationId], references: [id])
+  wardBudgetAllocation    WardBudgetAllocation?    @relation(fields: [wardBudgetAllocationId], references: [id])
+  initiator               User                     @relation("DisbursementInitiator", fields: [initiatedBy], references: [id])
 
   @@index([applicationId], map: "idx_disbursement_application")
   @@index([countyId, status], map: "idx_disbursement_county_status")
   @@index([status, retryCount], map: "idx_disbursement_pending")
+  @@index([villageBudgetAllocationId], map: "idx_disbursement_village_alloc")
   @@map("disbursement_records")
 }
 
@@ -496,4 +569,201 @@ model NotificationDelivery {
   @@index([applicationId, queuedAt(sort: Desc)], map: "idx_notification_application")
   @@index([status, queuedAt(sort: Desc)], map: "idx_notification_status")
   @@map("notification_deliveries")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Geographic hierarchy (Phase 1: §4 of 12-DATA-INTEGRITY-AND-OFFLINE-DESIGN.md)
+// ────────────────────────────────────────────────────────────────────────────
+
+model SubCounty {
+  id        String   @id @default(uuid()) @db.Uuid
+  countyId  String   @map("county_id") @db.Uuid
+  name      String   @db.VarChar(120)
+  code      String?  @db.VarChar(20)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  county County @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  wards  Ward[]
+
+  @@unique([countyId, code], map: "idx_sub_counties_county_code_unique")
+  @@unique([countyId, name], map: "idx_sub_counties_county_name_unique")
+  @@index([countyId], map: "idx_sub_counties_county")
+  @@map("sub_counties")
+}
+
+model VillageUnit {
+  id        String   @id @default(uuid()) @db.Uuid
+  countyId  String   @map("county_id") @db.Uuid
+  wardId    String   @map("ward_id") @db.Uuid
+  name      String   @db.VarChar(120)
+  code      String?  @db.VarChar(40)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  county                   County                    @relation(fields: [countyId], references: [id], onDelete: Cascade)
+  ward                     Ward                      @relation(fields: [wardId], references: [id], onDelete: Cascade)
+  studentProfiles          StudentProfile[]
+  villageBudgetAllocations VillageBudgetAllocation[]
+  residenceAttestations    ResidenceAttestation[]
+  villageAdminAssignments  VillageAdminAssignment[]
+
+  @@unique([wardId, name], map: "idx_village_units_ward_name_unique")
+  @@index([countyId], map: "idx_village_units_county")
+  @@index([wardId], map: "idx_village_units_ward")
+  @@map("village_units")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Village admin role assignments (Phase 3: §5.3 L5 + §7 of design doc)
+// One village can have one or more village admins; one user can be a village
+// admin for one or more villages. unavailable_until / unavailable_reason
+// support the override-hierarchy detection logic in §7.4.
+// ────────────────────────────────────────────────────────────────────────────
+
+model VillageAdminAssignment {
+  id                String    @id @default(uuid()) @db.Uuid
+  countyId          String    @map("county_id") @db.Uuid
+  villageUnitId     String    @map("village_unit_id") @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  isActive          Boolean   @default(true) @map("is_active")
+  assignedAt        DateTime  @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  unavailableUntil  DateTime? @map("unavailable_until") @db.Timestamptz(6)
+  unavailableReason String?   @map("unavailable_reason") @db.VarChar(255)
+
+  county      County      @relation(fields: [countyId], references: [id])
+  villageUnit VillageUnit @relation(fields: [villageUnitId], references: [id], onDelete: Cascade)
+  user        User        @relation("VillageAdminAssignments", fields: [userId], references: [id])
+
+  @@unique([villageUnitId, userId], map: "idx_village_admin_unique")
+  @@index([countyId], map: "idx_village_admin_county")
+  @@index([userId], map: "idx_village_admin_user")
+  @@index([villageUnitId, isActive], map: "idx_village_admin_active")
+  @@map("village_admin_assignments")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Money integrity: Ward → Village → Student allocation tables (§7 of design)
+// Three nested invariants enforced via DB CHECK constraints + advisory locks:
+//   1. Σ(ward_pools)              ≤ program.budget_ceiling
+//   2. Σ(village_pools_in_ward)   ≤ ward.allocated_kes
+//   3. Σ(student_allocations)     ≤ village.allocated_kes
+// ────────────────────────────────────────────────────────────────────────────
+
+model WardBudgetAllocation {
+  id                String   @id @default(uuid()) @db.Uuid
+  countyId          String   @map("county_id") @db.Uuid
+  programId         String   @map("program_id") @db.Uuid
+  wardId            String   @map("ward_id") @db.Uuid
+  allocatedKes      Decimal  @map("allocated_kes") @db.Decimal(15, 2)
+  allocatedTotalKes Decimal  @default(0) @map("allocated_total_kes") @db.Decimal(15, 2)
+  disbursedTotalKes Decimal  @default(0) @map("disbursed_total_kes") @db.Decimal(15, 2)
+  createdBy         String   @map("created_by") @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  county                   County                    @relation(fields: [countyId], references: [id])
+  program                  BursaryProgram            @relation(fields: [programId], references: [id])
+  ward                     Ward                      @relation(fields: [wardId], references: [id])
+  creator                  User                      @relation("WardBudgetCreator", fields: [createdBy], references: [id])
+  villageBudgetAllocations VillageBudgetAllocation[]
+  applications             Application[]
+  disbursements            DisbursementRecord[]
+
+  @@unique([programId, wardId], map: "idx_ward_alloc_program_ward_unique")
+  @@index([countyId], map: "idx_ward_alloc_county")
+  @@index([programId], map: "idx_ward_alloc_program")
+  @@map("ward_budget_allocations")
+}
+
+model VillageBudgetAllocation {
+  id                           String             @id @default(uuid()) @db.Uuid
+  countyId                     String             @map("county_id") @db.Uuid
+  programId                    String             @map("program_id") @db.Uuid
+  wardBudgetAllocationId       String             @map("ward_budget_allocation_id") @db.Uuid
+  wardId                       String             @map("ward_id") @db.Uuid
+  villageUnitId                String             @map("village_unit_id") @db.Uuid
+  allocatedKes                 Decimal            @map("allocated_kes") @db.Decimal(15, 2)
+  allocatedTotalKes            Decimal            @default(0) @map("allocated_total_kes") @db.Decimal(15, 2)
+  disbursedTotalKes            Decimal            @default(0) @map("disbursed_total_kes") @db.Decimal(15, 2)
+  applicantCountAtDistribution Int                @map("applicant_count_at_distribution")
+  distributionMethod           DistributionMethod @map("distribution_method")
+  villageAllocationDueAt       DateTime?          @map("village_allocation_due_at") @db.Timestamptz(6)
+  createdBy                    String             @map("created_by") @db.Uuid
+  createdAt                    DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                    DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  county               County               @relation(fields: [countyId], references: [id])
+  program              BursaryProgram       @relation(fields: [programId], references: [id])
+  wardBudgetAllocation WardBudgetAllocation @relation(fields: [wardBudgetAllocationId], references: [id])
+  ward                 Ward                 @relation(fields: [wardId], references: [id])
+  villageUnit          VillageUnit          @relation(fields: [villageUnitId], references: [id])
+  creator              User                 @relation("VillageBudgetCreator", fields: [createdBy], references: [id])
+  applications         Application[]
+  disbursements        DisbursementRecord[]
+
+  @@unique([programId, villageUnitId], map: "idx_village_alloc_program_village_unique")
+  @@index([countyId], map: "idx_village_alloc_county")
+  @@index([wardBudgetAllocationId], map: "idx_village_alloc_ward")
+  @@index([villageAllocationDueAt], map: "idx_village_alloc_due")
+  @@map("village_budget_allocations")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Residence attestations performed by VILLAGE_ADMIN (§5.3 L5)
+// ────────────────────────────────────────────────────────────────────────────
+
+model ResidenceAttestation {
+  id             String    @id @default(uuid()) @db.Uuid
+  countyId       String    @map("county_id") @db.Uuid
+  applicantId    String    @map("applicant_id") @db.Uuid
+  applicationId  String?   @map("application_id") @db.Uuid
+  attesterId     String    @map("attester_id") @db.Uuid
+  villageUnitId  String    @map("village_unit_id") @db.Uuid
+  wardId         String    @map("ward_id") @db.Uuid
+  attestedAt     DateTime  @default(now()) @map("attested_at") @db.Timestamptz(6)
+  expiresAt      DateTime  @map("expires_at") @db.Timestamptz(6)
+  signatureS3Key String?   @map("signature_s3_key")
+  notes          String?
+
+  county      County       @relation(fields: [countyId], references: [id])
+  applicant   User         @relation("AttestedApplicant", fields: [applicantId], references: [id])
+  application Application? @relation(fields: [applicationId], references: [id])
+  attester    User         @relation("ResidenceAttester", fields: [attesterId], references: [id])
+  villageUnit VillageUnit  @relation(fields: [villageUnitId], references: [id])
+  ward        Ward         @relation(fields: [wardId], references: [id])
+
+  @@index([countyId], map: "idx_attestations_county")
+  @@index([applicantId], map: "idx_attestations_applicant")
+  @@index([attesterId], map: "idx_attestations_attester")
+  @@index([villageUnitId, expiresAt], map: "idx_attestations_village_expiry")
+  @@map("residence_attestations")
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Cross-county identity registry (Phase 2 / §5.3 L2 of design doc)
+// Platform-scoped: NO county_id discriminator on the row's identity (the
+// identity_hash IS the discriminator), and RLS is intentionally NOT enabled.
+// Stores HMAC-SHA256 hashes only — never plaintext national IDs / birth certs.
+// ────────────────────────────────────────────────────────────────────────────
+
+model IdentityRegistry {
+  identityHash             Bytes              @id @map("identity_hash")
+  activeApplicationId      String?            @unique @map("active_application_id") @db.Uuid
+  activeCountyId           String             @map("active_county_id") @db.Uuid
+  activeCycle              String             @map("active_cycle") @db.VarChar(20)
+  activeStatus             ApplicationStatus? @map("active_status")
+  firstRegisteredCountyId  String             @map("first_registered_county_id") @db.Uuid
+  firstRegisteredAt        DateTime           @default(now()) @map("first_registered_at") @db.Timestamptz(6)
+  releasedAt               DateTime?          @map("released_at") @db.Timestamptz(6)
+  updatedAt                DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  activeCounty           County       @relation("IdentityActiveCounty",          fields: [activeCountyId],          references: [id])
+  firstRegisteredCounty  County       @relation("IdentityFirstRegisteredCounty", fields: [firstRegisteredCountyId], references: [id])
+  activeApplication      Application? @relation(fields: [activeApplicationId], references: [id], onDelete: SetNull)
+
+  @@index([activeCycle], map: "idx_identity_registry_active_cycle")
+  @@map("identity_registry")
 }

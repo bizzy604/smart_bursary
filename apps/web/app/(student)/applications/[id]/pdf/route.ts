@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+import { auth } from "@/auth";
 import { getPdfPayloadByApplicationId } from "@/lib/application-pdf-data";
 import { buildApplicationPreviewHtml } from "@/lib/application-preview";
 import { renderApplicationPdf } from "@/lib/application-pdf";
@@ -6,8 +8,13 @@ import { renderApplicationPdf } from "@/lib/application-pdf";
 export const runtime = "nodejs";
 
 export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
+  const session = await auth();
+  if (!session?.accessToken) {
+    return NextResponse.json({ message: "Authentication required" }, { status: 401 });
+  }
+
   const { id } = await context.params;
-  const payload = getPdfPayloadByApplicationId(id);
+  const payload = await getPdfPayloadByApplicationId(id, session.accessToken);
 
   if (!payload) {
     return NextResponse.json({ message: "Application not found" }, { status: 404 });

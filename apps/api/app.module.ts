@@ -22,7 +22,9 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
 import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { AllocationModule } from './modules/allocation/allocation.module';
 import { ApplicationModule } from './modules/application/application.module';
+import { IdentityModule } from './modules/identity/identity.module';
 import { ProgramModule } from './modules/program/program.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { DocumentModule } from './modules/document/document.module';
@@ -49,6 +51,8 @@ import { QueueModule } from './queue/queue.module';
 		RedisModule,
 		QueueModule,
 		AuthModule,
+		AllocationModule,
+		IdentityModule,
 		ApplicationModule,
 		ProgramModule,
 		ProfileModule,

@@ -35,6 +35,7 @@ export class WardReviewService {
 				id: true,
 				status: true,
 				wardId: true,
+				programId: true,
 				amountRequested: true,
 			},
 		});
@@ -64,8 +65,18 @@ export class WardReviewService {
 			throw new BadRequestException('Recommended amount cannot exceed requested amount.');
 		}
 
-		const nextStatus = this.resolveNextStatus(dto.decision);
-		const eventType = this.resolveEventType(dto.decision);
+		// Detect whether the new ward → village → student allocation flow is active for this
+		// (program, ward). The signal is the existence of a WardBudgetAllocation row, which means
+		// the county admin has already pushed a pool to this ward. If so, RECOMMENDED routes to
+		// WARD_DISTRIBUTION_PENDING (awaiting ward committee village split). Otherwise the legacy
+		// single-stage flow is preserved: RECOMMENDED → COUNTY_REVIEW.
+		const wardAllocationExists =
+			(await this.prisma.wardBudgetAllocation.count({
+				where: { programId: application.programId, wardId: application.wardId, countyId },
+			})) > 0;
+
+		const nextStatus = this.resolveNextStatus(dto.decision, wardAllocationExists);
+		const eventType = this.resolveEventType(dto.decision, wardAllocationExists);
 
 		const result = await this.prisma.$transaction(async (tx) => {
 			const review = await tx.applicationReview.create({
@@ -130,9 +141,14 @@ export class WardReviewService {
 		};
 	}
 
-	private resolveNextStatus(decision: WardReviewDecision): ApplicationStatus {
+	private resolveNextStatus(
+		decision: WardReviewDecision,
+		newFlowActive: boolean,
+	): ApplicationStatus {
 		if (decision === WardReviewDecision.RECOMMENDED) {
-			return ApplicationStatus.COUNTY_REVIEW;
+			return newFlowActive
+				? ApplicationStatus.WARD_DISTRIBUTION_PENDING
+				: ApplicationStatus.COUNTY_REVIEW;
 		}
 		if (decision === WardReviewDecision.REJECTED) {
 			return ApplicationStatus.REJECTED;
@@ -140,9 +156,11 @@ export class WardReviewService {
 		return ApplicationStatus.WARD_REVIEW;
 	}
 
-	private resolveEventType(decision: WardReviewDecision): string {
+	private resolveEventType(decision: WardReviewDecision, newFlowActive: boolean): string {
 		if (decision === WardReviewDecision.RECOMMENDED) {
-			return 'WARD_REVIEW_RECOMMENDED';
+			return newFlowActive
+				? 'WARD_REVIEW_RECOMMENDED_AWAITING_DISTRIBUTION'
+				: 'WARD_REVIEW_RECOMMENDED';
 		}
 		if (decision === WardReviewDecision.REJECTED) {
 			return 'WARD_REVIEW_REJECTED';

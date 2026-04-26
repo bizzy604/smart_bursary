@@ -40,6 +40,9 @@ export class DisbursementService {
 				status: true,
 				programId: true,
 				submissionReference: true,
+				amountAllocated: true,
+				villageBudgetAllocationId: true,
+				wardBudgetAllocationId: true,
 				applicant: { select: { phone: true } },
 				reviews: {
 					where: { stage: 'COUNTY_REVIEW' },
@@ -52,11 +55,15 @@ export class DisbursementService {
 			throw new BadRequestException('Application not in this county.');
 		}
 
-		if (application.status !== 'APPROVED') {
-			throw new BadRequestException('Application must be approved before disbursement.');
+		if (application.status !== 'APPROVED' && application.status !== 'ALLOCATED') {
+			throw new BadRequestException('Application must be approved or allocated before disbursement.');
 		}
 
-		const allocatedAmount = application.reviews[0]?.allocatedAmount;
+		// Resolve the allocated amount: prefer the new flow's `application.amountAllocated`
+		// (set by StudentAllocationService) and fall back to the legacy `applicationReview.allocatedAmount`
+		// so existing programs without ward distribution still disburse correctly.
+		const allocatedAmount =
+			application.amountAllocated ?? application.reviews[0]?.allocatedAmount ?? null;
 		if (!allocatedAmount) {
 			throw new BadRequestException('No allocated amount found for this application.');
 		}
@@ -66,6 +73,11 @@ export class DisbursementService {
 			applicationId: data.applicationId,
 			countyId: data.countyId,
 			programId: application.programId,
+			// FK chain back to the authorising allocations (§7.6 of design doc).
+			// Null for legacy single-stage applications; the CHECK constraint allows
+			// null only while status = PENDING.
+			villageBudgetAllocationId: application.villageBudgetAllocationId,
+			wardBudgetAllocationId: application.wardBudgetAllocationId,
 			disbursementMethod: data.disbursementMethod,
 			amountKes: allocatedAmount,
 			recipientPhone: resolvedPhone,
@@ -158,7 +170,14 @@ export class DisbursementService {
 	) {
 		const disbursement = await this.prisma.disbursementRecord.findUniqueOrThrow({
 			where: { id: disbursementId },
-			select: { countyId: true, applicationId: true },
+			select: {
+				countyId: true,
+				applicationId: true,
+				amountKes: true,
+				status: true,
+				villageBudgetAllocationId: true,
+				wardBudgetAllocationId: true,
+			},
 		});
 
 		const updateData: any = { status };
@@ -172,10 +191,35 @@ export class DisbursementService {
 			updateData.confirmedAt = new Date();
 		}
 
-		await this.prisma.disbursementRecord.update({
-			where: { id: disbursementId },
-			data: updateData,
-		});
+		// On a SUCCESS confirmation, propagate the disbursed amount up the FK chain so the
+		// invariants `disbursed_total_kes ≤ allocated_total_kes ≤ allocated_kes` stay valid
+		// at both village and ward levels. We do this only when transitioning INTO SUCCESS
+		// from a non-SUCCESS state to keep the propagation idempotent across retries.
+		const transitioningToSuccess =
+			status === DisbursementStatus.SUCCESS && disbursement.status !== DisbursementStatus.SUCCESS;
+
+		await this.prisma.$transaction(async (tx) => {
+			await tx.disbursementRecord.update({
+				where: { id: disbursementId },
+				data: updateData,
+			});
+
+			if (transitioningToSuccess) {
+				const amount = disbursement.amountKes;
+				if (disbursement.villageBudgetAllocationId) {
+					await tx.villageBudgetAllocation.update({
+						where: { id: disbursement.villageBudgetAllocationId },
+						data: { disbursedTotalKes: { increment: amount } },
+					});
+				}
+				if (disbursement.wardBudgetAllocationId) {
+					await tx.wardBudgetAllocation.update({
+						where: { id: disbursement.wardBudgetAllocationId },
+						data: { disbursedTotalKes: { increment: amount } },
+					});
+				}
+			}
+		}, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
 		if (status === DisbursementStatus.SUCCESS) {
 			await this.notificationLifecycleService.queueStatusChange({

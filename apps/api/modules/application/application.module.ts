@@ -5,6 +5,7 @@
  */
 import { Module } from '@nestjs/common';
 
+import { IdentityModule } from '../identity/identity.module';
 import { NotificationModule } from '../notification/notification.module';
 import { ProfileModule } from '../profile/profile.module';
 import { ProgramModule } from '../program/program.module';
@@ -17,7 +18,7 @@ import { ApplicationService } from './application.service';
 import { SectionService } from './section.service';
 
 @Module({
-	imports: [ProgramModule, ProfileModule, QueueModule, NotificationModule],
+	imports: [ProgramModule, ProfileModule, QueueModule, NotificationModule, IdentityModule],
 	controllers: [ApplicationController],
 	providers: [
 		ApplicationAuditService,

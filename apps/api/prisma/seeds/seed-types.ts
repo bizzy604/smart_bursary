@@ -10,16 +10,34 @@ export type SeedContext = {
     turkana: string;
     nakuru: string;
   };
+  subCounties: {
+    turkanaCentral: string;
+    turkanaNorth: string;
+    turkanaWest: string;
+    nakuruTownEast: string;
+  };
   wards: {
     lodwar: string;
     kanamkemer: string;
     kakuma: string;
+  };
+  villageUnits: {
+    lodwarTown: string;
+    nadapal: string;
+    napetet: string;
+    kanamkemerCenter: string;
+    naipa: string;
+    kakumaOne: string;
+    kalobeyei: string;
   };
   users: {
     platformOperator: string;
     countyAdmin: string;
     financeOfficer: string;
     wardAdmin: string;
+    villageAdminLodwar: string;
+    villageAdminKanamkemer: string;
+    villageAdminKakuma: string;
     aisha: string;
     brian: string;
     carol: string;

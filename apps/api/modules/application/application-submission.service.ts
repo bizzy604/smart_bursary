@@ -6,10 +6,13 @@
 import {
 	ConflictException,
 	Injectable,
+	Logger,
 	UnprocessableEntityException,
 } from '@nestjs/common';
 
 import { PrismaService } from '../../database/prisma.service';
+import { IdentityKind } from '../identity/dto/identity-claim.types';
+import { IdentityRegistryService } from '../identity/services/identity-registry.service';
 import { NotificationLifecycleService } from '../notification/notification-lifecycle.service';
 import { ProfileCompletionService } from '../profile/profile-completion.service';
 import { EligibilityService } from '../program/eligibility.service';
@@ -20,6 +23,8 @@ import { ApplicationService } from './application.service';
 
 @Injectable()
 export class ApplicationSubmissionService {
+	private readonly logger = new Logger(ApplicationSubmissionService.name);
+
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly eligibilityService: EligibilityService,
@@ -27,6 +32,7 @@ export class ApplicationSubmissionService {
 		private readonly applicationService: ApplicationService,
 		private readonly applicationAiScoringService: ApplicationAiScoringService,
 		private readonly notificationLifecycleService: NotificationLifecycleService,
+		private readonly identityRegistryService: IdentityRegistryService,
 	) {}
 
 	async createDraft(
@@ -130,11 +136,35 @@ export class ApplicationSubmissionService {
 
 		await this.profileCompletionService.assertSubmissionReady(countyId, applicantId);
 
-		const submitted = await this.applicationService.submitApplication(
+		// Cross-county active-cycle lock (§5.3 L2 of design doc).
+		// Claim the identity slot BEFORE the submit so a CONFLICT keeps the application
+		// in DRAFT and the student gets a clear 409 they can act on.
+		const identityClaimed = await this.claimIdentityForCycle(
 			countyId,
 			applicantId,
-			dto,
+			dto.applicationId,
+			draftApplication.programId,
 		);
+
+		let submitted;
+		try {
+			submitted = await this.applicationService.submitApplication(
+				countyId,
+				applicantId,
+				dto,
+			);
+		} catch (err) {
+			// Submit failed AFTER we claimed the identity slot — release it so the student
+			// can retry without being self-blocked by their own previous claim.
+			if (identityClaimed) {
+				await this.identityRegistryService.release(dto.applicationId).catch((releaseErr) => {
+					this.logger.error(
+						`Failed to release identity slot after submit failure for ${dto.applicationId}: ${(releaseErr as Error).message}`,
+					);
+				});
+			}
+			throw err;
+		}
 
 		await this.applicationAiScoringService.enqueue(
 			submitted.id,
@@ -150,6 +180,93 @@ export class ApplicationSubmissionService {
 		});
 
 		return submitted;
+	}
+
+	/**
+	 * Claim the cross-county identity slot for this submission. Returns true if a
+	 * claim row was created/refreshed, false if the student has no usable identity
+	 * value yet (no national_id and no birth_certificate_number) — in which case we
+	 * skip the lock and rely on AI similarity (L6) + village admin attestation (L5)
+	 * downstream.
+	 *
+	 * Throws 409 ConflictException with a structured payload on cross-county collision.
+	 */
+	private async claimIdentityForCycle(
+		countyId: string,
+		applicantId: string,
+		applicationId: string,
+		programId: string,
+	): Promise<boolean> {
+		const [profile, program] = await Promise.all([
+			this.prisma.studentProfile.findUnique({
+				where: { userId: applicantId },
+				select: { nationalId: true, birthCertificateNumber: true },
+			}),
+			this.prisma.bursaryProgram.findUnique({
+				where: { id: programId },
+				select: { academicYear: true },
+			}),
+		]);
+
+		const rawIdentity = this.extractRawIdentity(profile);
+		if (!rawIdentity) {
+			this.logger.warn(
+				`Application ${applicationId} submitted without a usable identity value; cross-county lock skipped.`,
+			);
+			return false;
+		}
+
+		const cycle = program?.academicYear ?? 'UNSPECIFIED';
+
+		const outcome = await this.identityRegistryService.claim({
+			rawIdentity: rawIdentity.value,
+			kind: rawIdentity.kind,
+			cycle,
+			applicationId,
+			countyId,
+		});
+
+		if (outcome.kind === 'CONFLICT') {
+			throw new ConflictException({
+				code: 'DUPLICATE_IDENTITY_ACROSS_COUNTIES',
+				message:
+					'This identity is already locked to another active application in the same intake cycle. ' +
+					'Withdraw the existing application before applying again.',
+				details: {
+					conflictingCountyId: outcome.conflict.conflictingCountyId,
+					conflictingApplicationId: outcome.conflict.conflictingApplicationId,
+					cycle: outcome.conflict.conflictingCycle,
+				},
+			});
+		}
+
+		return true;
+	}
+
+	/**
+	 * Pick the highest-priority identity value off the student profile.
+	 * Priority order matches §5.3 L2: national_id > birth_certificate_number.
+	 * NEMIS UPI is reserved for a future integration when the verification
+	 * service starts populating it.
+	 */
+	private extractRawIdentity(
+		profile: { nationalId: Buffer | null; birthCertificateNumber: Buffer | null } | null,
+	): { value: string; kind: IdentityKind } | null {
+		if (!profile) return null;
+
+		if (profile.nationalId && profile.nationalId.length > 0) {
+			return {
+				value: Buffer.from(profile.nationalId).toString('utf8'),
+				kind: IdentityKind.NATIONAL_ID,
+			};
+		}
+		if (profile.birthCertificateNumber && profile.birthCertificateNumber.length > 0) {
+			return {
+				value: Buffer.from(profile.birthCertificateNumber).toString('utf8'),
+				kind: IdentityKind.BIRTH_CERTIFICATE,
+			};
+		}
+		return null;
 	}
 
 	private throwIneligible(reason: string): never {

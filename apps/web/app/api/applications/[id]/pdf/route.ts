@@ -28,7 +28,7 @@ async function handle(request: Request, context: { params: Promise<{ id: string 
 	}
 
 	const { id } = await context.params;
-	const payload = getPdfPayloadByApplicationId(id);
+	const payload = await getPdfPayloadByApplicationId(id, session.accessToken);
 
 	if (!payload) {
 		return NextResponse.json({ message: "Application not found" }, { status: 404 });

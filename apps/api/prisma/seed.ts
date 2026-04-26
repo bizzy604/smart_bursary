@@ -26,6 +26,9 @@ async function main(): Promise<void> {
   console.log(' - county.admin@turkana.go.ke (COUNTY_ADMIN)');
   console.log(' - finance.officer@turkana.go.ke (FINANCE_OFFICER)');
   console.log(' - ward.admin@turkana.go.ke (WARD_ADMIN)');
+  console.log(' - village.admin.lodwar@turkana.go.ke (VILLAGE_ADMIN, Lodwar Town)');
+  console.log(' - village.admin.kanamkemer@turkana.go.ke (VILLAGE_ADMIN, Kanamkemer Centre)');
+  console.log(' - village.admin.kakuma@turkana.go.ke (VILLAGE_ADMIN, Kakuma One)');
   console.log(' - aisha.student@turkana.go.ke (STUDENT)');
 }
 
