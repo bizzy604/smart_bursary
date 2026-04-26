@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { type ColumnDef } from "@tanstack/react-table";
+import { MoreHorizontal } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table-column-header";
 import {
   arrayIncludesFilterFn,
@@ -10,6 +11,14 @@ import {
   numberRangeFilterFn,
 } from "@/components/shared/data-table-column-filter";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import type { ProgramListItem, ProgramStatus } from "@/lib/admin-programs";
 
@@ -18,18 +27,24 @@ const statusBadgeClass: Record<ProgramStatus, string> = {
   ACTIVE: "bg-emerald-50 text-emerald-700 border border-emerald-200",
   CLOSED: "bg-amber-50 text-amber-700 border border-amber-200",
   SUSPENDED: "bg-red-50 text-red-700 border border-red-200",
+  ARCHIVED: "bg-muted text-muted-foreground border border-border",
 };
+
+export type ProgramRowAction =
+  | "publish"
+  | "close"
+  | "archive"
+  | "unarchive"
+  | "delete";
 
 type ProgramListColumnsOptions = {
   mutatingProgramIds: Set<string>;
-  onRequestPublish: (program: ProgramListItem) => void;
-  onRequestClose: (program: ProgramListItem) => void;
+  onRequestAction: (action: ProgramRowAction, program: ProgramListItem) => void;
 };
 
 export function buildProgramListColumns({
   mutatingProgramIds,
-  onRequestPublish,
-  onRequestClose,
+  onRequestAction,
 }: ProgramListColumnsOptions): ColumnDef<ProgramListItem>[] {
   return [
     {
@@ -69,6 +84,7 @@ export function buildProgramListColumns({
               { label: "Active", value: "ACTIVE" },
               { label: "Closed", value: "CLOSED" },
               { label: "Suspended", value: "SUSPENDED" },
+              { label: "Archived", value: "ARCHIVED" },
             ],
           }}
         />
@@ -173,37 +189,84 @@ export function buildProgramListColumns({
     {
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <div className="flex flex-wrap justify-end gap-2">
-          <Link href={`/county/programs/${row.original.id}` as Route}>
-            <Button variant="outline" size="sm">
-              Open
-            </Button>
-          </Link>
-          {row.original.status === "DRAFT" ? (
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => onRequestPublish(row.original)}
-              disabled={mutatingProgramIds.has(row.original.id)}
-            >
-              {mutatingProgramIds.has(row.original.id)
-                ? "Publishing..."
-                : "Publish"}
-            </Button>
-          ) : null}
-          {row.original.status === "ACTIVE" ? (
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => onRequestClose(row.original)}
-              disabled={mutatingProgramIds.has(row.original.id)}
-            >
-              {mutatingProgramIds.has(row.original.id) ? "Closing..." : "Close"}
-            </Button>
-          ) : null}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const program = row.original;
+        const isMutating = mutatingProgramIds.has(program.id);
+        return (
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Link href={`/county/programs/${program.id}` as Route}>
+              <Button variant="outline" size="sm">
+                Open
+              </Button>
+            </Link>
+            {program.status === "DRAFT" ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => onRequestAction("publish", program)}
+                disabled={isMutating}
+              >
+                {isMutating ? "Publishing..." : "Publish"}
+              </Button>
+            ) : null}
+            {program.status === "ACTIVE" ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => onRequestAction("close", program)}
+                disabled={isMutating}
+              >
+                {isMutating ? "Closing..." : "Close"}
+              </Button>
+            ) : null}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="More actions"
+                  disabled={isMutating}
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>More</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {program.status === "ARCHIVED" ? (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      onRequestAction("unarchive", program);
+                    }}
+                  >
+                    Restore from archive
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      onRequestAction("archive", program);
+                    }}
+                  >
+                    Archive
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-700 focus:bg-red-50 focus:text-red-700"
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    onRequestAction("delete", program);
+                  }}
+                >
+                  Delete program
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
     },
   ];
 }

@@ -26,6 +26,7 @@ enum ProgramStatus {
   ACTIVE
   CLOSED
   SUSPENDED
+  ARCHIVED
 }
 
 enum ApplicationStatus {
@@ -116,10 +117,11 @@ model County {
   logoS3Key      String?  @map("logo_s3_key")
   primaryColor   String   @default("#1E3A5F") @map("primary_color") @db.VarChar(7)
   planTier       String   @default("BASIC") @map("plan_tier") @db.VarChar(30)
-  isActive       Boolean  @default(true) @map("is_active")
-  settings       Json     @default("{}")
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  isActive       Boolean   @default(true) @map("is_active")
+  settings       Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   wards                    Ward[]
   users                    User[]
@@ -315,6 +317,7 @@ model BursaryProgram {
   createdBy      String        @map("created_by") @db.Uuid
   createdAt      DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz(6)
 
   county                   County                    @relation(fields: [countyId], references: [id])
   ward                     Ward?                     @relation(fields: [wardId], references: [id])

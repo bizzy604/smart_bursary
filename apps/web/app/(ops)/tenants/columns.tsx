@@ -34,7 +34,17 @@ export const opsTenantStatusOptions = [
 	{ label: "Inactive", value: "inactive" },
 ];
 
-export const opsTenantColumns: ColumnDef<OpsTenantSummary>[] = [
+export type OpsTenantAction = "deactivate" | "reactivate" | "delete";
+
+export interface OpsTenantActionHandlers {
+	onAction: (action: OpsTenantAction, tenant: OpsTenantSummary) => void;
+	pendingTenantId?: string | null;
+}
+
+export function createOpsTenantColumns(
+	handlers: OpsTenantActionHandlers,
+): ColumnDef<OpsTenantSummary>[] {
+	return [
 	{
 		accessorKey: "countyName",
 		header: ({ column }) => (
@@ -128,6 +138,7 @@ export const opsTenantColumns: ColumnDef<OpsTenantSummary>[] = [
 		header: () => <span className="sr-only">Actions</span>,
 		cell: ({ row }) => {
 			const tenant = row.original;
+			const isBusy = handlers.pendingTenantId === tenant.id;
 			return (
 				<div className="flex items-center justify-end gap-2">
 					<Button asChild size="sm">
@@ -135,7 +146,7 @@ export const opsTenantColumns: ColumnDef<OpsTenantSummary>[] = [
 					</Button>
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" size="icon" aria-label="Row actions">
+							<Button variant="ghost" size="icon" aria-label="Row actions" disabled={isBusy}>
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</DropdownMenuTrigger>
@@ -152,10 +163,40 @@ export const opsTenantColumns: ColumnDef<OpsTenantSummary>[] = [
 							>
 								Copy tenant ID
 							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							{tenant.isActive ? (
+								<DropdownMenuItem
+									onSelect={(event) => {
+										event.preventDefault();
+										handlers.onAction("deactivate", tenant);
+									}}
+								>
+									Deactivate
+								</DropdownMenuItem>
+							) : (
+								<DropdownMenuItem
+									onSelect={(event) => {
+										event.preventDefault();
+										handlers.onAction("reactivate", tenant);
+									}}
+								>
+									Reactivate
+								</DropdownMenuItem>
+							)}
+							<DropdownMenuItem
+								className="text-red-700 focus:text-red-700"
+								onSelect={(event) => {
+									event.preventDefault();
+									handlers.onAction("delete", tenant);
+								}}
+							>
+								Delete tenant
+							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
 			);
 		},
 	},
-];
+	];
+}

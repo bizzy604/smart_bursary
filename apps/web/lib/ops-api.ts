@@ -166,6 +166,59 @@ export async function fetchOpsTenantById(tenantId: string): Promise<OpsTenantDet
   return mapTenantDetail(payload.data);
 }
 
+type TenantLifecycleApiRow = {
+  id: string;
+  slug: string;
+  name: string;
+  isActive: boolean;
+  deletedAt: string | null;
+  updatedAt: string;
+};
+
+export interface OpsTenantLifecycleResult {
+  id: string;
+  slug: string;
+  name: string;
+  isActive: boolean;
+  deletedAt: string | null;
+  updatedAt: string;
+}
+
+function mapTenantLifecycle(row: TenantLifecycleApiRow): OpsTenantLifecycleResult {
+  return {
+    id: row.id,
+    slug: row.slug,
+    name: row.name,
+    isActive: Boolean(row.isActive),
+    deletedAt: row.deletedAt ?? null,
+    updatedAt: row.updatedAt,
+  };
+}
+
+export async function deactivateOpsTenant(tenantId: string): Promise<OpsTenantLifecycleResult> {
+  const payload = await requestJson<{ data: TenantLifecycleApiRow }>(
+    `/platform/tenants/${tenantId}/deactivate`,
+    { method: "POST" },
+  );
+  return mapTenantLifecycle(payload.data);
+}
+
+export async function reactivateOpsTenant(tenantId: string): Promise<OpsTenantLifecycleResult> {
+  const payload = await requestJson<{ data: TenantLifecycleApiRow }>(
+    `/platform/tenants/${tenantId}/reactivate`,
+    { method: "POST" },
+  );
+  return mapTenantLifecycle(payload.data);
+}
+
+export async function deleteOpsTenant(tenantId: string): Promise<OpsTenantLifecycleResult> {
+  const payload = await requestJson<{ data: TenantLifecycleApiRow }>(
+    `/platform/tenants/${tenantId}`,
+    { method: "DELETE" },
+  );
+  return mapTenantLifecycle(payload.data);
+}
+
 export async function fetchOpsTenantBySlug(slug: string): Promise<OpsTenantDetail | null> {
   const list = await fetchOpsTenants();
   const match = list.find((tenant) => tenant.slug === slug);

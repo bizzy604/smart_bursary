@@ -9,6 +9,7 @@ import {
 	Injectable,
 	NotFoundException,
 } from '@nestjs/common';
+import type { Prisma } from '@prisma/client';
 import { UserRole } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
@@ -34,6 +35,7 @@ export class ProvisioningService {
 
 	async listCounties() {
 		const counties = await this.prisma.county.findMany({
+			where: { deletedAt: null },
 			orderBy: { createdAt: 'desc' },
 			select: {
 				id: true,
@@ -61,8 +63,8 @@ export class ProvisioningService {
 	}
 
 	async getCounty(countyId: string) {
-		const county = await this.prisma.county.findUnique({
-			where: { id: countyId },
+		const county = await this.prisma.county.findFirst({
+			where: { id: countyId, deletedAt: null },
 			select: {
 				id: true,
 				slug: true,
@@ -166,10 +168,7 @@ export class ProvisioningService {
 	}
 
 	async updateCountyPlanTier(countyId: string, dto: UpdateCountyPlanDto) {
-		const county = await this.prisma.county.findUnique({ where: { id: countyId } });
-		if (!county) {
-			throw new NotFoundException('County not found.');
-		}
+		await this.requireLiveCounty(countyId);
 
 		const updated = await this.prisma.county.update({
 			where: { id: countyId },
@@ -183,6 +182,89 @@ export class ProvisioningService {
 				slug: updated.slug,
 				planTier: updated.planTier,
 				updatedAt: updated.updatedAt.toISOString(),
+			},
+		};
+	}
+
+	async deactivateCounty(countyId: string) {
+		const county = await this.requireLiveCounty(countyId);
+		if (!county.isActive) {
+			return this.toLifecycleResult(county);
+		}
+
+		const updated = await this.prisma.county.update({
+			where: { id: countyId },
+			data: { isActive: false },
+			select: this.lifecycleSelect,
+		});
+		return this.toLifecycleResult(updated);
+	}
+
+	async reactivateCounty(countyId: string) {
+		const county = await this.requireLiveCounty(countyId);
+		if (county.isActive) {
+			return this.toLifecycleResult(county);
+		}
+
+		const updated = await this.prisma.county.update({
+			where: { id: countyId },
+			data: { isActive: true },
+			select: this.lifecycleSelect,
+		});
+		return this.toLifecycleResult(updated);
+	}
+
+	async softDeleteCounty(countyId: string) {
+		await this.requireLiveCounty(countyId);
+
+		const updated = await this.prisma.county.update({
+			where: { id: countyId },
+			data: { isActive: false, deletedAt: new Date() },
+			select: this.lifecycleSelect,
+		});
+		return this.toLifecycleResult(updated);
+	}
+
+	private async requireLiveCounty(countyId: string) {
+		const county = await this.prisma.county.findFirst({
+			where: { id: countyId, deletedAt: null },
+			select: this.lifecycleSelect,
+		});
+
+		if (!county) {
+			throw new NotFoundException('County not found.');
+		}
+
+		return county;
+	}
+
+	private get lifecycleSelect(): Prisma.CountySelect {
+		return {
+			id: true,
+			slug: true,
+			name: true,
+			isActive: true,
+			deletedAt: true,
+			updatedAt: true,
+		};
+	}
+
+	private toLifecycleResult(county: {
+		id: string;
+		slug: string;
+		name: string;
+		isActive: boolean;
+		deletedAt: Date | null;
+		updatedAt: Date;
+	}) {
+		return {
+			data: {
+				id: county.id,
+				slug: county.slug,
+				name: county.name,
+				isActive: county.isActive,
+				deletedAt: county.deletedAt ? county.deletedAt.toISOString() : null,
+				updatedAt: county.updatedAt.toISOString(),
 			},
 		};
 	}
