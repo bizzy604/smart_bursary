@@ -26,6 +26,8 @@ import {
 	type ChartConfig,
 } from "@/components/ui/chart";
 import { formatCurrencyKes } from "@/lib/format";
+import { fetchVillageSummaryReport } from "@/lib/reporting-api";
+import { fetchWorkflowQueueByStatus } from "@/lib/review-workflow-api";
 import type { ReviewQueueItem } from "@/lib/review-types";
 
 const villagePriorityConfig = {
@@ -54,17 +56,34 @@ export default function VillageDashboardPage() {
 		const loadDashboard = async () => {
 			setIsLoading(true);
 			try {
-				// TODO: Replace with village-specific API when available
-				// For now, using placeholder empty data
-				const villageQueue: ReviewQueueItem[] = [];
-				const reportRows: ReviewQueueItem[] = [];
+				const [villageQueue, report] = await Promise.all([
+					fetchWorkflowQueueByStatus("VILLAGE_REVIEW"),
+					fetchVillageSummaryReport({}),
+				]);
 
 				if (!mounted) {
 					return;
 				}
 
 				setQueue(villageQueue);
-				setAllRows(reportRows);
+				setAllRows(
+					report.rows.map((row) => ({
+						applicationId: row.applicationId,
+						reference: row.reference,
+						applicantName: row.applicantName,
+						wardName: row.wardName,
+						programName: row.programName,
+						academicYear: row.academicYear,
+						educationLevel: row.educationLevel,
+						status: row.status as ReviewQueueItem["status"],
+						aiScore: row.aiScore,
+						wardRecommendationKes: row.villageRecommendationKes,
+						countyAllocationKes: row.countyAllocationKes,
+						reviewerName: row.reviewerName,
+						reviewerStage: row.reviewerStage,
+						reviewedAt: row.reviewedAt,
+					})),
+				);
 				setError(null);
 			} catch (reason: unknown) {
 				if (!mounted) {

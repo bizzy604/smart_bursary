@@ -120,23 +120,25 @@ export class ReportingController {
 	}
 
 	@Get('ward-summary')
-	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN)
 	@ApiOperation({ summary: 'Get ward-level application reporting dataset' })
 	async getWardSummary(@Req() req: any, @Query() query: ReportScopeQueryDto) {
 		const report = await this.reportingAnalyticsService.getWardSummary(req.user.countyId, query, {
 			role: req.user.role,
 			wardId: req.user.wardId,
+			villageUnitId: req.user.villageUnitId,
 		});
 		return { success: true, data: report };
 	}
 
 	@Get('ward-summary/export')
-	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN)
 	@ApiOperation({ summary: 'Download ward-level application report as CSV or PDF' })
 	async exportWardSummary(@Req() req: any, @Query() query: ReportExportQueryDto) {
 		const report = await this.reportingAnalyticsService.getWardSummary(req.user.countyId, query, {
 			role: req.user.role,
 			wardId: req.user.wardId,
+			villageUnitId: req.user.villageUnitId,
 		});
 		const headers = [
 			'Reference',
@@ -184,6 +186,76 @@ export class ReportingController {
 		return new StreamableFile(buffer, {
 			type: 'text/csv; charset=utf-8',
 			disposition: 'attachment; filename="ward-summary-report.csv"',
+		});
+	}
+
+	@Get('village-summary')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.VILLAGE_ADMIN)
+	@ApiOperation({ summary: 'Get village-level application reporting dataset' })
+	async getVillageSummary(@Req() req: any, @Query() query: ReportScopeQueryDto) {
+		const report = await this.reportingAnalyticsService.getVillageSummary(req.user.countyId, query, {
+			role: req.user.role,
+			villageUnitId: req.user.villageUnitId,
+		});
+		return { success: true, data: report };
+	}
+
+	@Get('village-summary/export')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.VILLAGE_ADMIN)
+	@ApiOperation({ summary: 'Download village-level application report as CSV or PDF' })
+	async exportVillageSummary(@Req() req: any, @Query() query: ReportExportQueryDto) {
+		const report = await this.reportingAnalyticsService.getVillageSummary(req.user.countyId, query, {
+			role: req.user.role,
+			villageUnitId: req.user.villageUnitId,
+		});
+		const headers = [
+			'Reference',
+			'Applicant',
+			'Village Unit',
+			'Ward',
+			'Program',
+			'Academic Year',
+			'Education Level',
+			'AI Score',
+			'Recommendation (KES)',
+			'Allocation (KES)',
+			'Reviewer',
+			'Reviewer Stage',
+			'Reviewed At',
+		];
+		const rows = report.rows.map((row) => [
+			row.reference,
+			row.applicantName,
+			row.villageUnitName,
+			row.wardName,
+			row.programName,
+			row.academicYear,
+			row.educationLevel,
+			row.aiScore.toFixed(2),
+			row.villageRecommendationKes,
+			row.countyAllocationKes,
+			row.reviewerName,
+			row.reviewerStage,
+			row.reviewedAt ?? '',
+		]);
+
+		if (query.format === 'pdf') {
+			const buffer = await this.exportService.toPdf({
+				title: 'Village Summary Report',
+				subtitle: `Generated ${report.generatedAt}`,
+				headers,
+				rows,
+			});
+			return new StreamableFile(buffer, {
+				type: 'application/pdf',
+				disposition: 'attachment; filename="village-summary-report.pdf"',
+			});
+		}
+
+		const buffer = this.exportService.toCsv(headers, rows);
+		return new StreamableFile(buffer, {
+			type: 'text/csv; charset=utf-8',
+			disposition: 'attachment; filename="village-summary-report.csv"',
 		});
 	}
 

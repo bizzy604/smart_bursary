@@ -22,7 +22,7 @@ export class TenantController {
 	constructor(private readonly tenantService: TenantService) {}
 
 	@Get('branding')
-	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN)
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.FINANCE_OFFICER, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN)
 	@ApiOperation({ summary: 'Get county branding settings for authenticated admin surfaces' })
 	getBranding(@County() countyId: string) {
 		return this.tenantService.getBranding(countyId);

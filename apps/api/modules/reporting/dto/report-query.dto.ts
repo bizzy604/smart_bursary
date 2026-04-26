@@ -18,6 +18,11 @@ export class ReportScopeQueryDto {
 	@IsUUID()
 	wardId?: string;
 
+	@ApiPropertyOptional({ description: 'Filter by village unit id' })
+	@IsOptional()
+	@IsUUID()
+	villageUnitId?: string;
+
 	@ApiPropertyOptional({ description: 'Filter by program academic year', example: '2026' })
 	@IsOptional()
 	@IsString()

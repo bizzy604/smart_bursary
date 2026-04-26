@@ -60,10 +60,14 @@ export class LocationController {
 	@Get('village-units')
 	@UseGuards(JwtAuthGuard)
 	@ApiBearerAuth()
-	@ApiOperation({ summary: 'List village units for a ward' })
-	async listVillageUnits(@Query('wardId') wardId: string) {
+	@ApiOperation({ summary: 'List village units for a ward or all village units for the county' })
+	async listVillageUnits(
+		@County() countyId: string,
+		@Query('wardId') wardId?: string,
+	) {
+		const where: Record<string, unknown> = wardId ? { wardId } : { countyId };
 		const rows = await this.prisma.villageUnit.findMany({
-			where: { wardId },
+			where,
 			orderBy: { name: 'asc' },
 			select: { id: true, name: true, code: true, wardId: true },
 		});
@@ -79,15 +83,22 @@ export class LocationController {
 		@County() countyId: string,
 		@Body() body: { name: string; code?: string },
 	) {
-		const row = await this.prisma.subCounty.create({
-			data: {
-				countyId,
-				name: body.name,
-				code: body.code ?? null,
-			},
-			select: { id: true, name: true, code: true },
-		});
-		return { data: row };
+		try {
+			const row = await this.prisma.subCounty.create({
+				data: {
+					countyId,
+					name: body.name,
+					code: body.code ?? null,
+				},
+				select: { id: true, name: true, code: true },
+			});
+			return { data: row };
+		} catch (error: unknown) {
+			if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+				return { error: 'A sub-county with this code already exists in this county.' };
+			}
+			throw error;
+		}
 	}
 
 	@Post('wards')
@@ -99,16 +110,23 @@ export class LocationController {
 		@County() countyId: string,
 		@Body() body: { name: string; code?: string; subCountyId?: string },
 	) {
-		const row = await this.prisma.ward.create({
-			data: {
-				countyId,
-				name: body.name,
-				code: body.code ?? null,
-				subCountyId: body.subCountyId ?? null,
-			},
-			select: { id: true, name: true, code: true, subCountyId: true },
-		});
-		return { data: row };
+		try {
+			const row = await this.prisma.ward.create({
+				data: {
+					countyId,
+					name: body.name,
+					code: body.code ?? null,
+					subCountyId: body.subCountyId ?? null,
+				},
+				select: { id: true, name: true, code: true, subCountyId: true },
+			});
+			return { data: row };
+		} catch (error: unknown) {
+			if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+				return { error: 'A ward with this code already exists in this county.' };
+			}
+			throw error;
+		}
 	}
 
 	@Post('village-units')
@@ -128,15 +146,22 @@ export class LocationController {
 		if (!ward) {
 			return { error: 'Ward not found in this county.' };
 		}
-		const row = await this.prisma.villageUnit.create({
-			data: {
-				countyId,
-				wardId: body.wardId,
-				name: body.name,
-				code: body.code ?? null,
-			},
-			select: { id: true, name: true, code: true, wardId: true },
-		});
-		return { data: row };
+		try {
+			const row = await this.prisma.villageUnit.create({
+				data: {
+					countyId,
+					wardId: body.wardId,
+					name: body.name,
+					code: body.code ?? null,
+				},
+				select: { id: true, name: true, code: true, wardId: true },
+			});
+			return { data: row };
+		} catch (error: unknown) {
+			if (error && typeof error === 'object' && 'code' in error && error.code === 'P2002') {
+				return { error: 'A village unit with this name already exists in this ward.' };
+			}
+			throw error;
+		}
 	}
 }

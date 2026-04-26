@@ -23,6 +23,7 @@ import {
   type InviteUserResult,
   type TenantWard,
 } from "@/lib/admin-users";
+import { useSubCounties, useWards, useVillageUnits } from "@/hooks/use-locations";
 
 const INVITABLE_ROLES: { value: AdminUserRole; label: string; wardScoped: boolean }[] = [
   { value: "COUNTY_ADMIN", label: "County Admin", wardScoped: false },
@@ -36,13 +37,24 @@ export default function NewUserPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState<AdminUserRole>("WARD_ADMIN");
-  const [wardId, setWardId] = useState<string>("");
+  const [subCountyId, setSubCountyId] = useState<string | undefined>(undefined);
+  const [wardId, setWardId] = useState<string | undefined>(undefined);
+  const [villageUnitId, setVillageUnitId] = useState<string | undefined>(undefined);
   const [wards, setWards] = useState<TenantWard[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<InviteUserResult | null>(null);
 
+  const { subCounties } = useSubCounties();
+  const { wards: allWards } = useWards();
+  const { villages } = useVillageUnits(wardId || null);
+
   const roleConfig = INVITABLE_ROLES.find((entry) => entry.value === role);
   const requiresWard = roleConfig?.wardScoped ?? false;
+  const requiresVillageUnit = role === "VILLAGE_ADMIN";
+
+  const filteredWards = subCountyId
+    ? allWards.filter((w) => w.subCountyId === subCountyId)
+    : allWards;
 
   useEffect(() => {
     void fetchTenantWards()
@@ -53,6 +65,18 @@ export default function NewUserPage() {
         });
       });
   }, []);
+
+  useEffect(() => {
+    if (subCountyId && !filteredWards.some((w) => w.id === wardId)) {
+      setWardId("");
+    }
+  }, [subCountyId, filteredWards, wardId]);
+
+  useEffect(() => {
+    if (wardId && !villages.some((v) => v.id === villageUnitId)) {
+      setVillageUnitId("");
+    }
+  }, [wardId, villages, villageUnitId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -65,6 +89,10 @@ export default function NewUserPage() {
       toast.error("Ward required", { description: "Pick a ward for this ward-scoped role." });
       return;
     }
+    if (requiresVillageUnit && !villageUnitId) {
+      toast.error("Village unit required", { description: "Pick a village unit for the village admin." });
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -73,6 +101,7 @@ export default function NewUserPage() {
         role,
         phone: phone.trim() || undefined,
         wardId: requiresWard ? wardId : undefined,
+        villageUnitId: requiresVillageUnit ? villageUnitId : undefined,
       });
       setResult(invite);
       toast.success("User invited", {
@@ -164,22 +193,58 @@ export default function NewUserPage() {
             </div>
 
             {requiresWard ? (
-              <div className="space-y-1.5">
-                <Label htmlFor="ward">Ward</Label>
-                <Select value={wardId} onValueChange={setWardId}>
-                  <SelectTrigger id="ward">
-                    <SelectValue placeholder={wards.length === 0 ? "Loading wards…" : "Select a ward"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {wards.map((ward) => (
-                      <SelectItem key={ward.id} value={ward.id}>
-                        {ward.name}
-                        {ward.code ? ` (${ward.code})` : ""}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="sub-county">Sub-County</Label>
+                  <Select value={subCountyId} onValueChange={setSubCountyId}>
+                    <SelectTrigger id="sub-county">
+                      <SelectValue placeholder="Select a sub-county (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subCounties.map((sc) => (
+                        <SelectItem key={sc.id} value={sc.id}>
+                          {sc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="ward">Ward</Label>
+                  <Select value={wardId} onValueChange={setWardId} disabled={filteredWards.length === 0}>
+                    <SelectTrigger id="ward">
+                      <SelectValue placeholder={filteredWards.length === 0 ? "No wards available" : "Select a ward"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredWards.map((ward) => (
+                        <SelectItem key={ward.id} value={ward.id}>
+                          {ward.name}
+                          {ward.code ? ` (${ward.code})` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {requiresVillageUnit ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="village-unit">Village Unit</Label>
+                    <Select value={villageUnitId} onValueChange={setVillageUnitId} disabled={!wardId || villages.length === 0}>
+                      <SelectTrigger id="village-unit">
+                        <SelectValue placeholder={!wardId ? "Select a ward first" : villages.length === 0 ? "No village units available" : "Select a village unit"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {villages.map((village) => (
+                          <SelectItem key={village.id} value={village.id}>
+                            {village.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : null}
+              </>
             ) : null}
 
             <div className="space-y-1.5">

@@ -13,6 +13,7 @@ import { ReportScopeQueryDto, TrendReportQueryDto } from './dto/report-query.dto
 export type WardReportActor = {
 	role: UserRole;
 	wardId?: string | null;
+	villageUnitId?: string | null;
 };
 
 @Injectable()
@@ -94,11 +95,13 @@ export class ReportingAnalyticsService {
 			status: { not: 'DRAFT' },
 			...(scope.programId ? { programId: scope.programId } : {}),
 			...(scope.academicYear ? { program: { academicYear: scope.academicYear } } : {}),
-			...(actor.role === UserRole.WARD_ADMIN && actor.wardId
-				? { wardId: actor.wardId }
-				: scope.wardId
-					? { wardId: scope.wardId }
-					: {}),
+			...(actor.role === UserRole.VILLAGE_ADMIN && actor.villageUnitId
+				? { applicant: { profile: { villageUnitId: actor.villageUnitId } } }
+				: actor.role === UserRole.WARD_ADMIN && actor.wardId
+					? { wardId: actor.wardId }
+					: scope.wardId
+						? { wardId: scope.wardId }
+						: {}),
 		};
 
 		const applications = await this.prisma.application.findMany({
@@ -145,6 +148,85 @@ export class ReportingAnalyticsService {
 					status: application.status,
 					aiScore: Number(application.scoreCard?.totalScore ?? 0),
 					wardRecommendationKes: Number(wardReview?.recommendedAmount ?? 0),
+					countyAllocationKes: Number(countyReview?.allocatedAmount ?? application.amountAllocated ?? 0),
+					reviewerName: finalReview?.reviewer.profile?.fullName ?? finalReview?.reviewer.email ?? 'N/A',
+					reviewerStage: finalReview?.stage ?? 'N/A',
+					reviewedAt: finalReview?.reviewedAt?.toISOString() ?? null,
+				};
+			});
+
+		return { generatedAt: new Date().toISOString(), rows };
+	}
+
+	async getVillageSummary(countyId: string, scope: ReportScopeQueryDto, actor: WardReportActor) {
+		const where: Prisma.ApplicationWhereInput = {
+			countyId,
+			status: { not: 'DRAFT' },
+			...(scope.programId ? { programId: scope.programId } : {}),
+			...(scope.academicYear ? { program: { academicYear: scope.academicYear } } : {}),
+			...(actor.role === UserRole.VILLAGE_ADMIN && actor.villageUnitId
+				? { applicant: { profile: { villageUnitId: actor.villageUnitId } } }
+				: scope.villageUnitId
+					? { applicant: { profile: { villageUnitId: scope.villageUnitId } } }
+					: {}),
+		};
+
+		const applications = await this.prisma.application.findMany({
+			where,
+			include: {
+				ward: { select: { name: true } },
+				program: { select: { name: true, academicYear: true } },
+				applicant: {
+					select: {
+						profile: {
+							select: {
+								fullName: true,
+								villageUnitId: true,
+								villageUnit: {
+									select: {
+										name: true,
+									},
+								},
+							},
+						},
+						academicInfo: { select: { institutionType: true } },
+					},
+				},
+				scoreCard: { select: { totalScore: true } },
+				reviews: {
+					orderBy: { reviewedAt: 'desc' },
+					select: {
+						stage: true,
+						recommendedAmount: true,
+						allocatedAmount: true,
+						reviewedAt: true,
+						reviewer: { select: { email: true, profile: { select: { fullName: true } } } },
+					},
+				},
+			},
+		});
+
+		const rows = applications
+			.filter((application) => this.matchesEducationLevel(application.applicant.academicInfo?.institutionType, scope.educationLevel))
+			.map((application) => {
+				const wardReview = application.reviews.find((review) => review.stage === 'WARD_REVIEW');
+				const countyReview = application.reviews.find((review) => review.stage === 'COUNTY_REVIEW');
+				const finalReview = countyReview ?? wardReview;
+				return {
+					applicationId: application.id,
+					programId: application.programId,
+					villageUnitId: application.applicant.profile?.villageUnitId ?? null,
+					wardId: application.wardId,
+					reference: application.submissionReference ?? application.id,
+					applicantName: application.applicant.profile?.fullName ?? 'Unknown Applicant',
+					villageUnitName: application.applicant.profile?.villageUnit?.name ?? 'Unknown',
+					wardName: application.ward.name,
+					programName: application.program.name,
+					academicYear: application.program.academicYear ?? 'N/A',
+					educationLevel: application.applicant.academicInfo?.institutionType ?? 'N/A',
+					status: application.status,
+					aiScore: Number(application.scoreCard?.totalScore ?? 0),
+					villageRecommendationKes: Number(wardReview?.recommendedAmount ?? 0),
 					countyAllocationKes: Number(countyReview?.allocatedAmount ?? application.amountAllocated ?? 0),
 					reviewerName: finalReview?.reviewer.profile?.fullName ?? finalReview?.reviewer.email ?? 'N/A',
 					reviewerStage: finalReview?.stage ?? 'N/A',

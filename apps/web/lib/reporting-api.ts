@@ -60,6 +60,27 @@ export interface WardSummaryRow {
   reviewedAt: string | null;
 }
 
+export interface VillageSummaryRow {
+  applicationId: string;
+  programId: string;
+  villageUnitId: string;
+  wardId: string;
+  reference: string;
+  applicantName: string;
+  villageUnitName: string;
+  wardName: string;
+  programName: string;
+  academicYear: string;
+  educationLevel: string;
+  status: string;
+  aiScore: number;
+  villageRecommendationKes: number;
+  countyAllocationKes: number;
+  reviewerName: string;
+  reviewerStage: string;
+  reviewedAt: string | null;
+}
+
 export interface TrendRow {
   academicYear: string;
   totalApplications: number;
@@ -72,6 +93,7 @@ export interface TrendRow {
 type ReportScope = {
   programId?: string;
   wardId?: string;
+  villageUnitId?: string;
   academicYear?: string;
   educationLevel?: string;
 };
@@ -132,4 +154,15 @@ export async function fetchTrendReport(scope: TrendScope): Promise<{ generatedAt
     `/reports/trends${buildQuery(scope)}`,
   );
   return payload.data;
+}
+
+export async function fetchVillageSummaryReport(scope: ReportScope): Promise<{ generatedAt: string; rows: VillageSummaryRow[] }> {
+  const payload = await requestJson<{ data: { generatedAt: string; rows: VillageSummaryRow[] } }>(
+    `/reports/village-summary${buildQuery(scope)}`,
+  );
+  return payload.data;
+}
+
+export async function downloadVillageSummaryExport(scope: ReportScope, format: "csv" | "pdf"): Promise<Blob> {
+  return requestFile(`/reports/village-summary/export${buildQuery({ ...scope, format })}`);
 }

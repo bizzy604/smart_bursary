@@ -12,7 +12,7 @@ import {
 import { DataTable } from "@/components/shared/data-table";
 import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { EmptyState } from "@/components/shared/empty-state";
-import { Building2, PauseCircle, Sparkles } from "lucide-react";
+import { Building2, PauseCircle, Plus, Sparkles } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { StatsCard } from "@/components/shared/stats-card";
@@ -409,13 +409,26 @@ export default function OpsTenantsPage() {
         </DashboardChartCard>
       </section>
 
-      {tenants.length === 0 && !isLoading && !error ? (
-        <EmptyState
-          title="No tenants available"
-          description="No county tenants are currently provisioned in this environment."
-        />
-      ) : (
-        <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+      <section className="rounded-2xl border border-border/80 bg-background p-5 shadow-xs">
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-primary">Tenant Directory</h2>
+            <p className="text-sm text-muted-foreground">
+              View and manage all county tenants in the system
+            </p>
+          </div>
+          <Button onClick={() => window.location.href = '/tenants/new'}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create County
+          </Button>
+        </div>
+
+        {tenants.length === 0 && !isLoading && !error ? (
+          <EmptyState
+            title="No tenants available"
+            description="No county tenants are currently provisioned in this environment."
+          />
+        ) : (
           <DataTable
             columns={columns}
             data={tenants}
@@ -436,8 +449,8 @@ export default function OpsTenantsPage() {
               />
             )}
           />
-        </section>
-      )}
+        )}
+      </section>
 
       <AlertDialog
         open={confirm !== null}

@@ -31,6 +31,11 @@ export class InviteUserDto {
 	@IsUUID()
 	wardId?: string;
 
+	@ApiPropertyOptional({ description: 'Village unit identifier (required for VILLAGE_ADMIN role).' })
+	@IsOptional()
+	@IsUUID()
+	villageUnitId?: string;
+
 	@ApiPropertyOptional({ example: '+254712345678' })
 	@IsOptional()
 	@IsString()

@@ -28,10 +28,6 @@ export function useSubCounties(countyId?: string) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const reload = useCallback(async () => {
-		if (!countyId) {
-			setSubCounties([]);
-			return;
-		}
 		setIsLoading(true);
 		try {
 			const res = await apiRequestJson<{ data: SubCountyOption[] }>("/locations/sub-counties");
@@ -58,7 +54,6 @@ export function useWards(countyId?: string, subCountyId?: string | null) {
 		setIsLoading(true);
 		try {
 			const parts: string[] = [];
-			if (countyId) parts.push(`countyId=${encodeURIComponent(countyId)}`);
 			if (subCountyId) parts.push(`subCountyId=${encodeURIComponent(subCountyId)}`);
 			const qs = parts.length > 0 ? `?${parts.join("&")}` : "";
 			const res = await apiRequestJson<{ data: WardOption[] }>(`/locations/wards${qs}`);
@@ -82,13 +77,10 @@ export function useVillageUnits(wardId?: string | null) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	const reload = useCallback(async () => {
-		if (!wardId) {
-			setVillages([]);
-			return;
-		}
 		setIsLoading(true);
 		try {
-			const res = await apiRequestJson<{ data: VillageOption[] }>(`/locations/village-units?wardId=${encodeURIComponent(wardId)}`);
+			const qs = wardId ? `?wardId=${encodeURIComponent(wardId)}` : "";
+			const res = await apiRequestJson<{ data: VillageOption[] }>(`/locations/village-units${qs}`);
 			setVillages(res.data ?? []);
 		} catch {
 			setVillages([]);

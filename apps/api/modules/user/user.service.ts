@@ -24,6 +24,10 @@ const WARD_SCOPED_ROLES: ReadonlySet<UserRole> = new Set([
 	UserRole.VILLAGE_ADMIN,
 ]);
 
+const VILLAGE_SCOPED_ROLES: ReadonlySet<UserRole> = new Set([
+	UserRole.VILLAGE_ADMIN,
+]);
+
 const STAFF_ROLES: ReadonlySet<UserRole> = new Set([
 	UserRole.COUNTY_ADMIN,
 	UserRole.WARD_ADMIN,
@@ -138,6 +142,7 @@ export class UserService {
 		}
 
 		this.assertWardScopeMatchesRole(dto.role, dto.wardId);
+		this.assertVillageScopeMatchesRole(dto.role, dto.villageUnitId, dto.wardId);
 
 		const existing = await this.prisma.user.findFirst({
 			where: { email: dto.email, countyId },
@@ -163,6 +168,16 @@ export class UserService {
 			}
 		}
 
+		if (dto.villageUnitId) {
+			const villageUnit = await this.prisma.villageUnit.findFirst({
+				where: { id: dto.villageUnitId, countyId, wardId: dto.wardId },
+				select: { id: true },
+			});
+			if (!villageUnit) {
+				throw new BadRequestException('Village unit does not belong to the selected ward in the current tenant.');
+			}
+		}
+
 		const tempPassword = randomBytes(18).toString('base64url');
 		const passwordHash = await hash(tempPassword, 12);
 		const verifyToken = randomBytes(32).toString('hex');
@@ -181,12 +196,30 @@ export class UserService {
 				emailVerifyToken: verifyTokenHash,
 				emailVerifyExpiry: verifyExpiry,
 				isActive: true,
+				...(dto.villageUnitId && dto.role === UserRole.VILLAGE_ADMIN
+					? {
+							villageAdminAssignments: {
+								create: {
+									countyId,
+									villageUnitId: dto.villageUnitId,
+								},
+							},
+						}
+					: {}),
 			},
+		});
+
+		const userWithRelations = await this.prisma.user.findFirst({
+			where: { id: created.id },
 			select: userRowSelect,
 		});
 
+		if (!userWithRelations) {
+			throw new NotFoundException('Failed to retrieve created user.');
+		}
+
 		return {
-			data: this.toResponse(created),
+			data: this.toResponse(userWithRelations),
 			invite: {
 				temporaryPassword: tempPassword,
 				verifyToken,
@@ -300,6 +333,18 @@ export class UserService {
 		}
 		if (!WARD_SCOPED_ROLES.has(role) && wardId) {
 			throw new BadRequestException(`Role ${role} must not be scoped to a ward.`);
+		}
+	}
+
+	private assertVillageScopeMatchesRole(role: UserRole, villageUnitId?: string | null, wardId?: string | null) {
+		if (VILLAGE_SCOPED_ROLES.has(role) && !villageUnitId) {
+			throw new BadRequestException(`Role ${role} requires a villageUnitId.`);
+		}
+		if (!VILLAGE_SCOPED_ROLES.has(role) && villageUnitId) {
+			throw new BadRequestException(`Role ${role} must not be scoped to a village unit.`);
+		}
+		if (villageUnitId && !wardId) {
+			throw new BadRequestException('Village unit assignment requires a wardId.');
 		}
 	}
 

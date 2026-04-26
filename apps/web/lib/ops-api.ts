@@ -219,6 +219,29 @@ export async function deleteOpsTenant(tenantId: string): Promise<OpsTenantLifecy
   return mapTenantLifecycle(payload.data);
 }
 
+export async function createOpsTenant(data: {
+  slug: string;
+  name: string;
+  planTier?: string;
+  fundName?: string;
+  legalReference?: string;
+  primaryColor?: string;
+  superAdmin: {
+    email: string;
+    password: string;
+    phone?: string;
+  };
+}): Promise<OpsTenantSummary> {
+  const payload = await requestJson<{ data: TenantListApiRow }>(
+    "/platform/tenants",
+    {
+      method: "POST",
+      body: JSON.stringify(data),
+    },
+  );
+  return mapTenantSummary(payload.data);
+}
+
 export async function fetchOpsTenantBySlug(slug: string): Promise<OpsTenantDetail | null> {
   const list = await fetchOpsTenants();
   const match = list.find((tenant) => tenant.slug === slug);

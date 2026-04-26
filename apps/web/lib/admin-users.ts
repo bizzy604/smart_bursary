@@ -87,6 +87,7 @@ export async function inviteAdminUser(input: {
   email: string;
   role: AdminUserRole;
   wardId?: string;
+  villageUnitId?: string;
   phone?: string;
 }): Promise<InviteUserResult> {
   const payload = await apiRequestJson<unknown>(`/users/invite`, {

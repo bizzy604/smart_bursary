@@ -21,6 +21,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/toast";
 import { createAdminProgram } from "@/lib/admin-programs";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useWards } from "@/hooks/use-locations";
 
 type ProgramFormState = {
   name: string;
@@ -52,6 +54,7 @@ export default function NewProgramSettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { wards, isLoading: wardsLoading } = useWards();
 
   const isValid = useMemo(() => {
     if (!form.name.trim() || !form.budgetCeiling.trim() || !form.opensAt?.getTime() || !form.closesAt?.getTime()) {
@@ -164,12 +167,25 @@ export default function NewProgramSettingsPage() {
             </label>
 
             <label className="space-y-2 text-sm">
-              <span className="font-medium text-foreground/90">Ward ID (Optional)</span>
-              <Input
-                value={form.wardId}
-                onChange={(event) => setForm((current) => ({ ...current, wardId: event.target.value }))}
-                placeholder="Leave blank for county-wide"
-              />
+              <span className="font-medium text-foreground/90">Ward (Optional)</span>
+              <Select value={form.wardId} onValueChange={(value) => setForm((current) => ({ ...current, wardId: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Leave blank for county-wide" />
+                </SelectTrigger>
+                <SelectContent>
+                  {wardsLoading ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">Loading wards...</div>
+                  ) : wards.length === 0 ? (
+                    <div className="px-3 py-2 text-sm text-muted-foreground">No wards available</div>
+                  ) : (
+                    wards.map((ward) => (
+                      <SelectItem key={ward.id} value={ward.id}>
+                        {ward.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </label>
 
             <label className="space-y-2 text-sm">

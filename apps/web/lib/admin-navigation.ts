@@ -39,19 +39,20 @@ const financeNavigationItems: AdminNavigationItem[] = [
 const countyAdminNavigationItems: AdminNavigationItem[] = [
 	{ href: "/county/dashboard", label: "Dashboard", icon: LayoutDashboard },
 	{ href: "/county/programs" as Route, label: "Program Management", icon: BadgeCheck },
+	{ href: "/county/locations", label: "Locations", icon: MapPin },
 	{ href: "/county/applications", label: "Applications", icon: ClipboardList },
 	{ href: "/county/review", label: "Review Queue", icon: FileSearch },
 	{ href: "/county/disbursements", label: "Disbursements", icon: Wallet },
 	{ href: "/county/reports", label: "Reports", icon: BarChart3 },
-	{ href: "/county/locations" as Route, label: "Locations", icon: MapPin },
-	{ href: "/settings/users" as Route, label: "Team", icon: Users },
-	{ href: "/settings", label: "Settings", icon: Settings },
+	{ href: "/settings/users", label: "Users", icon: Users },
+	{ href: "/settings/branding", label: "Settings", icon: Settings },
 ];
 
 const villageAdminNavigationItems: AdminNavigationItem[] = [
 	{ href: "/village/dashboard", label: "Dashboard", icon: LayoutDashboard },
 	{ href: "/village/applications", label: "Applications", icon: ClipboardList },
 	{ href: "/village/review", label: "Review Queue", icon: FileSearch },
+	{ href: "/village/reports", label: "Reports", icon: BarChart3 },
 	{ href: "/village/allocations", label: "Allocations", icon: Wallet },
 ];
 
