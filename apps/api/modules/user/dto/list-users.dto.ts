@@ -20,7 +20,10 @@ export class ListUsersDto {
 	@MaxLength(64)
 	wardId?: string;
 
-	@ApiPropertyOptional({ description: 'true / false; if omitted, returns active users only.' })
+	@ApiPropertyOptional({
+		description:
+			'true / false; if omitted, no isActive filter is applied (both active and inactive users are returned). Soft-deleted users are always excluded.',
+	})
 	@IsOptional()
 	@IsBooleanString()
 	isActive?: string;
