@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { Button } from "@/components/ui/button";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import {
   downloadOcobExport,
@@ -12,6 +14,17 @@ import {
   type OcobRow,
 } from "@/lib/reporting-api";
 import { ocobReportColumns } from "./columns";
+
+const OCOB_CSV_COLUMNS: SpreadsheetColumn<OcobRow>[] = [
+  { header: "Program", value: (row) => row.programName, width: 36 },
+  { header: "Academic Year", value: (row) => row.academicYear, width: 16 },
+  { header: "Budget Ceiling (KES)", value: (row) => row.budgetCeilingKes, type: "currency", width: 22 },
+  { header: "Applications", value: (row) => row.applications, type: "number", width: 14 },
+  { header: "Approved", value: (row) => row.approved, type: "number", width: 12 },
+  { header: "Allocated (KES)", value: (row) => row.allocatedKes, type: "currency", width: 18 },
+  { header: "Disbursed (KES)", value: (row) => row.disbursedKes, type: "currency", width: 18 },
+  { header: "Balance (KES)", value: (row) => row.balanceKes, type: "currency", width: 16 },
+];
 
 type OcobFilters = {
   programId: string;
@@ -203,6 +216,14 @@ export default function CountyOcobReportsPage() {
               </>
             )}
             emptyState="No OCOB report rows match the current scope."
+            renderSelectedActions={({ selectedRows }) => (
+              <DataTableCsvExportButton
+                selectedRows={selectedRows}
+                columns={OCOB_CSV_COLUMNS}
+                filenamePrefix="ocob-report-selection"
+                itemNoun="row"
+              />
+            )}
           />
         </div>
       </section>

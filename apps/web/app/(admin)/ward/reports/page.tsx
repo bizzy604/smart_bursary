@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { Button } from "@/components/ui/button";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import {
   downloadWardSummaryExport,
@@ -10,6 +12,22 @@ import {
   type WardSummaryRow,
 } from "@/lib/reporting-api";
 import { wardReportColumns } from "./columns";
+
+const WARD_SUMMARY_CSV_COLUMNS: SpreadsheetColumn<WardSummaryRow>[] = [
+  { header: "Reference", value: (row) => row.reference, width: 20 },
+  { header: "Applicant", value: (row) => row.applicantName, width: 28 },
+  { header: "Ward", value: (row) => row.wardName, width: 18 },
+  { header: "Program", value: (row) => row.programName, width: 32 },
+  { header: "Academic Year", value: (row) => row.academicYear, width: 14 },
+  { header: "Education Level", value: (row) => row.educationLevel, width: 16 },
+  { header: "Status", value: (row) => row.status, width: 16 },
+  { header: "AI Score", value: (row) => row.aiScore, type: "number", format: "0.0", width: 12 },
+  { header: "Recommended (KES)", value: (row) => row.wardRecommendationKes, type: "currency", width: 20 },
+  { header: "Allocated (KES)", value: (row) => row.countyAllocationKes, type: "currency", width: 18 },
+  { header: "Reviewer", value: (row) => row.reviewerName, width: 22 },
+  { header: "Reviewer Stage", value: (row) => row.reviewerStage, width: 18 },
+  { header: "Reviewed At", value: (row) => row.reviewedAt, type: "date", width: 14 },
+];
 
 type WardFilters = {
   programId: string;
@@ -258,6 +276,14 @@ export default function WardReportsPage() {
               </>
             )}
             emptyState="No ward report rows match the current scope."
+            renderSelectedActions={({ selectedRows }) => (
+              <DataTableCsvExportButton
+                selectedRows={selectedRows}
+                columns={WARD_SUMMARY_CSV_COLUMNS}
+                filenamePrefix="ward-summary-selection"
+                itemNoun="application"
+              />
+            )}
           />
         </div>
       </section>

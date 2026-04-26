@@ -509,6 +509,7 @@ export default function CountyDashboardPage() {
             initialSorting={[{ id: "aiScore", desc: true }]}
             initialPageSize={10}
             emptyState="No applications are currently waiting at county review stage."
+            enableRowSelection={false}
           />
         </div>
       </section>

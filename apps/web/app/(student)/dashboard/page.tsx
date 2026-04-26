@@ -435,6 +435,7 @@ export default function DashboardPage() {
             initialPageSize={5}
             initialSorting={[{ id: "updatedAt", desc: true }]}
             emptyState="No applications match your filters."
+            enableRowSelection={false}
           />
         )}
       </section>

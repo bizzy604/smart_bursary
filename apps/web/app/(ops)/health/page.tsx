@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from 
 import { DashboardChartCard } from "@/components/dashboard/dashboard-chart-card";
 import { shouldUsePieChart } from "@/components/dashboard/chart-utils";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { Activity, AlertTriangle, CheckCircle2, XOctagon } from "lucide-react";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,12 +16,22 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import { formatShortDate } from "@/lib/format";
 import {
   fetchOpsPlatformHealth,
   type OpsPlatformHealthSnapshot,
+  type OpsServiceHealthItem,
 } from "@/lib/ops-api";
 import { opsHealthColumns } from "./columns";
+
+const OPS_HEALTH_CSV_COLUMNS: SpreadsheetColumn<OpsServiceHealthItem>[] = [
+  { header: "Service", value: (row) => row.name, width: 28 },
+  { header: "Status", value: (row) => row.status, width: 14 },
+  { header: "Latency (ms)", value: (row) => row.latencyMs, type: "number", width: 14 },
+  { header: "Last Update", value: (row) => row.updatedAt, type: "date", width: 14 },
+  { header: "Note", value: (row) => row.note, width: 48 },
+];
 
 const opsHealthLatencyConfig = {
   latency: {
@@ -239,6 +250,14 @@ export default function OpsHealthPage() {
             initialPageSize={10}
             enablePagination={false}
             emptyState="No services are currently reporting health metrics."
+            renderSelectedActions={({ selectedRows }) => (
+              <DataTableCsvExportButton
+                selectedRows={selectedRows}
+                columns={OPS_HEALTH_CSV_COLUMNS}
+                filenamePrefix="ops-health-snapshot"
+                itemNoun="service"
+              />
+            )}
           />
         </div>
       </section>
