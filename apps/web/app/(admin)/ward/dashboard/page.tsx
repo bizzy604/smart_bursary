@@ -451,6 +451,7 @@ export default function WardDashboardPage() {
             initialSorting={[{ id: "aiScore", desc: true }]}
             initialPageSize={10}
             emptyState="No applications are currently waiting in the ward queue."
+            enableRowSelection={false}
           />
         </div>
       </section>

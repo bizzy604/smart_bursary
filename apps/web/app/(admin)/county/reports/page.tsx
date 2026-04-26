@@ -3,11 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import { formatShortDate } from "@/lib/format";
 import { fetchDashboardReport, fetchTrendReport, type DashboardReportData, type TrendRow } from "@/lib/reporting-api";
 import { countyTrendColumns } from "./columns";
+
+const COUNTY_TREND_CSV_COLUMNS: SpreadsheetColumn<TrendRow>[] = [
+  { header: "Academic Year", value: (row) => row.academicYear, width: 16 },
+  { header: "Total Applications", value: (row) => row.totalApplications, type: "number", width: 18 },
+  { header: "Approved Applications", value: (row) => row.approvedApplications, type: "number", width: 20 },
+  { header: "Disbursed Applications", value: (row) => row.disbursedApplications, type: "number", width: 22 },
+  { header: "Allocated (KES)", value: (row) => row.allocatedKes, type: "currency", width: 18 },
+  { header: "Disbursed (KES)", value: (row) => row.disbursedKes, type: "currency", width: 18 },
+];
 
 export default function CountyReportsPage() {
   const [dashboard, setDashboard] = useState<DashboardReportData | null>(null);
@@ -179,6 +190,14 @@ export default function CountyReportsPage() {
             initialSorting={[{ id: "academicYear", desc: true }]}
             initialPageSize={10}
             emptyState="No historical trends match the current filters."
+            renderSelectedActions={({ selectedRows }) => (
+              <DataTableCsvExportButton
+                selectedRows={selectedRows}
+                columns={COUNTY_TREND_CSV_COLUMNS}
+                filenamePrefix="county-trends"
+                itemNoun="year"
+              />
+            )}
           />
         </div>
       </section>

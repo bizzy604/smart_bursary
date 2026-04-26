@@ -3,10 +3,28 @@
 import type { Route } from "next";
 import { useEffect, useMemo, useState } from "react";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { buildReviewQueueColumns } from "@/components/shared/review-queue-columns";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import { fetchWardSummaryReport } from "@/lib/reporting-api";
 import { useAuthStore } from "@/store/auth-store";
 import type { ReviewQueueItem, ReviewQueueStatus } from "@/lib/review-types";
+
+const COUNTY_APPLICATION_CSV_COLUMNS: SpreadsheetColumn<ReviewQueueItem>[] = [
+  { header: "Reference", value: (row) => row.reference, width: 20 },
+  { header: "Applicant", value: (row) => row.applicantName, width: 28 },
+  { header: "Ward", value: (row) => row.wardName, width: 18 },
+  { header: "Program", value: (row) => row.programName, width: 32 },
+  { header: "Academic Year", value: (row) => row.academicYear, width: 14 },
+  { header: "Education Level", value: (row) => row.educationLevel, width: 16 },
+  { header: "Status", value: (row) => row.status, width: 16 },
+  { header: "AI Score", value: (row) => row.aiScore, type: "number", format: "0.0", width: 12 },
+  { header: "Ward Recommendation (KES)", value: (row) => row.wardRecommendationKes, type: "currency", width: 22 },
+  { header: "County Allocation (KES)", value: (row) => row.countyAllocationKes, type: "currency", width: 22 },
+  { header: "Reviewer", value: (row) => row.reviewerName, width: 22 },
+  { header: "Reviewer Stage", value: (row) => row.reviewerStage, width: 18 },
+  { header: "Reviewed At", value: (row) => row.reviewedAt, type: "date", width: 14 },
+];
 
 type WardSummaryReportRow = Awaited<ReturnType<typeof fetchWardSummaryReport>>["rows"][number];
 
@@ -153,6 +171,14 @@ export default function CountyApplicationsPage() {
           initialSorting={[{ id: "reviewedAt", desc: true }]}
           initialPageSize={10}
           emptyState="No county applications are available yet."
+          renderSelectedActions={({ selectedRows }) => (
+            <DataTableCsvExportButton
+              selectedRows={selectedRows}
+              columns={COUNTY_APPLICATION_CSV_COLUMNS}
+              filenamePrefix="county-applications"
+              itemNoun="application"
+            />
+          )}
         />
       </section>
     </main>

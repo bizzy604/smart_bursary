@@ -10,6 +10,7 @@ import {
   shouldUsePieChart,
 } from "@/components/dashboard/chart-utils";
 import { DataTable } from "@/components/shared/data-table";
+import { DataTableCsvExportButton } from "@/components/shared/data-table-csv-export-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Building2, PauseCircle, Sparkles } from "lucide-react";
 
@@ -32,6 +33,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { type SpreadsheetColumn } from "@/lib/csv-export";
 import {
   deactivateOpsTenant,
   deleteOpsTenant,
@@ -40,6 +42,17 @@ import {
   type OpsTenantSummary,
 } from "@/lib/ops-api";
 import { createOpsTenantColumns, type OpsTenantAction } from "./columns";
+
+const OPS_TENANT_CSV_COLUMNS: SpreadsheetColumn<OpsTenantSummary>[] = [
+  { header: "County", value: (row) => row.countyName, width: 24 },
+  { header: "Slug", value: (row) => row.slug, width: 20 },
+  { header: "Plan", value: (row) => row.planTier, width: 14 },
+  { header: "Status", value: (row) => (row.isActive ? "Active" : "Inactive"), width: 12 },
+  { header: "Users", value: (row) => row.userCount, type: "number", width: 10 },
+  { header: "Wards", value: (row) => row.wardCount, type: "number", width: 10 },
+  { header: "Provisioned", value: (row) => row.createdAt, type: "date", width: 14 },
+  { header: "Tenant ID", value: (row) => row.id, width: 38 },
+];
 
 const opsTenantPlanConfig = {
   tenants: {
@@ -414,6 +427,14 @@ export default function OpsTenantsPage() {
             initialSorting={[{ id: "countyName", desc: false }]}
             initialPageSize={10}
             emptyState="No tenants match your filters."
+            renderSelectedActions={({ selectedRows }) => (
+              <DataTableCsvExportButton
+                selectedRows={selectedRows}
+                columns={OPS_TENANT_CSV_COLUMNS}
+                filenamePrefix="ops-tenants"
+                itemNoun="tenant"
+              />
+            )}
           />
         </section>
       )}
