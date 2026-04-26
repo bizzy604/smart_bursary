@@ -250,4 +250,93 @@ describe('Program Lifecycle (e2e)', () => {
 		expect(Array.isArray(response.body)).toBe(true);
 		expect(response.body.some((program: { id: string }) => program.id === programId)).toBe(true);
 	});
+
+	it('county admin archives a closed program (excluded from default listing)', async () => {
+		const response = await request(app.getHttpServer())
+			.post(`/api/v1/programs/${programId}/archive`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(201);
+
+		expect(response.body.id).toBe(programId);
+		expect(response.body.status).toBe('ARCHIVED');
+
+		const defaultList = await request(app.getHttpServer())
+			.get('/api/v1/programs')
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(200);
+		expect(defaultList.body.some((p: { id: string }) => p.id === programId)).toBe(false);
+
+		const archivedList = await request(app.getHttpServer())
+			.get('/api/v1/programs?status=ARCHIVED')
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(200);
+		expect(archivedList.body.some((p: { id: string }) => p.id === programId)).toBe(true);
+	});
+
+	it('county admin unarchives a program back to DRAFT', async () => {
+		const response = await request(app.getHttpServer())
+			.post(`/api/v1/programs/${programId}/unarchive`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(201);
+
+		expect(response.body.id).toBe(programId);
+		expect(response.body.status).toBe('DRAFT');
+	});
+
+	it('rejects unarchive when program is not archived', async () => {
+		await request(app.getHttpServer())
+			.post(`/api/v1/programs/${programId}/unarchive`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(400);
+	});
+
+	it('students cannot archive or delete programs', async () => {
+		await request(app.getHttpServer())
+			.post(`/api/v1/programs/${programId}/archive`)
+			.set('Authorization', `Bearer ${studentToken}`)
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.delete(`/api/v1/programs/${programId}`)
+			.set('Authorization', `Bearer ${studentToken}`)
+			.expect(403);
+	});
+
+	it('cross-tenant admin cannot delete a program', async () => {
+		await request(app.getHttpServer())
+			.delete(`/api/v1/programs/${programId}`)
+			.set('Authorization', `Bearer ${otherCountyAdminToken}`)
+			.expect(404);
+	});
+
+	it('county admin soft-deletes a program (removed from all listings)', async () => {
+		const response = await request(app.getHttpServer())
+			.delete(`/api/v1/programs/${programId}`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(200);
+
+		expect(response.body.deleted).toBe(true);
+		expect(response.body.id).toBe(programId);
+
+		await request(app.getHttpServer())
+			.get(`/api/v1/programs/${programId}`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(404);
+
+		const allStatuses = ['DRAFT', 'ACTIVE', 'CLOSED', 'SUSPENDED', 'ARCHIVED'];
+		for (const status of allStatuses) {
+			const list = await request(app.getHttpServer())
+				.get(`/api/v1/programs?status=${status}`)
+				.set('Authorization', `Bearer ${countyAdminToken}`)
+				.expect(200);
+			expect(list.body.some((p: { id: string }) => p.id === programId)).toBe(false);
+		}
+	});
+
+	it('cannot archive a soft-deleted program', async () => {
+		await request(app.getHttpServer())
+			.post(`/api/v1/programs/${programId}/archive`)
+			.set('Authorization', `Bearer ${countyAdminToken}`)
+			.expect(404);
+	});
 });

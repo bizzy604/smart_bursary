@@ -30,7 +30,12 @@ export class ProgramService {
 		const programs = await this.prisma.bursaryProgram.findMany({
 			where: {
 				countyId,
-				...(status ? { status } : {}),
+				deletedAt: null,
+				...(status
+					? { status }
+					: isStudent
+						? {}
+						: { status: { not: ProgramStatus.ARCHIVED } }),
 				...(isStudent ? { opensAt: { lte: now }, closesAt: { gte: now } } : {}),
 				...(dto.academicYear ? { academicYear: dto.academicYear } : {}),
 			},
@@ -72,6 +77,7 @@ export class ProgramService {
 		const programs = await this.prisma.bursaryProgram.findMany({
 			where: {
 				countyId,
+				deletedAt: null,
 				status: ProgramStatus.ACTIVE,
 				opensAt: { lte: now },
 				closesAt: { gte: now },
@@ -113,6 +119,7 @@ export class ProgramService {
 			where: {
 				id: programId,
 				countyId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,

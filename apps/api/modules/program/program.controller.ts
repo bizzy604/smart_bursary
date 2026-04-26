@@ -3,7 +3,7 @@
  * Why important: Supports student discovery and county-admin program lifecycle actions.
  * Used by: Frontend student portal and county settings workflows.
  */
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -112,5 +112,38 @@ export class ProgramController {
 		@Param('id') programId: string,
 	) {
 		return this.programLifecycleService.closeProgram(countyId, programId);
+	}
+
+	@Post(':id/archive')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Archive a program (hides from default listings)' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	archiveProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+	) {
+		return this.programLifecycleService.archiveProgram(countyId, programId);
+	}
+
+	@Post(':id/unarchive')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Restore an archived program back to DRAFT' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	unarchiveProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+	) {
+		return this.programLifecycleService.unarchiveProgram(countyId, programId);
+	}
+
+	@Delete(':id')
+	@Roles(UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
+	@ApiOperation({ summary: 'Soft-delete a program (removes it from all listings)' })
+	@ApiParam({ name: 'id', description: 'Program identifier' })
+	deleteProgram(
+		@County() countyId: string,
+		@Param('id') programId: string,
+	) {
+		return this.programLifecycleService.deleteProgram(countyId, programId);
 	}
 }
