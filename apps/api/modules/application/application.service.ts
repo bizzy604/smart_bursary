@@ -69,6 +69,7 @@ export class ApplicationService {
 			where: {
 				applicantId,
 				programId: dto.programId,
+				deletedAt: null,
 			},
 		});
 
@@ -236,6 +237,7 @@ export class ApplicationService {
 				countyId,
 				applicantId,
 				status: 'DRAFT',
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -371,10 +373,19 @@ export class ApplicationService {
 			);
 		}
 
-		await this.prisma.application.update({
-			where: { id: applicationId },
-			data: { deletedAt: new Date() },
-		});
+		// Hard-delete drafts: the @@unique([applicantId, programId]) constraint on
+		// applications is unconditional, so a soft-deleted row would permanently
+		// block the student from re-applying to the same program. Sections cascade
+		// via onDelete: Cascade. Timeline rows reference applicationId without a FK
+		// cascade, so we clear them explicitly to avoid orphans.
+		await this.prisma.$transaction([
+			this.prisma.applicationTimeline.deleteMany({
+				where: { applicationId },
+			}),
+			this.prisma.application.delete({
+				where: { id: applicationId },
+			}),
+		]);
 
 		return { id: applicationId, deleted: true };
 	}

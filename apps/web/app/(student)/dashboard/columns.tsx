@@ -34,6 +34,8 @@ export interface BuildStudentApplicationColumnsOptions {
 const WITHDRAWABLE_STATUSES: ReadonlyArray<StudentApplicationSummary["status"]> = [
 	"SUBMITTED",
 	"WARD_REVIEW",
+	"WARD_DISTRIBUTION_PENDING",
+	"VILLAGE_ALLOCATION_PENDING",
 	"COUNTY_REVIEW",
 	"WAITLISTED",
 ];
@@ -190,10 +192,14 @@ export const studentApplicationStatusOptions = [
 	{ label: "Draft", value: "DRAFT" },
 	{ label: "Submitted", value: "SUBMITTED" },
 	{ label: "Ward Review", value: "WARD_REVIEW" },
+	{ label: "Ward Distribution", value: "WARD_DISTRIBUTION_PENDING" },
+	{ label: "Village Allocation", value: "VILLAGE_ALLOCATION_PENDING" },
+	{ label: "Allocated", value: "ALLOCATED" },
 	{ label: "County Review", value: "COUNTY_REVIEW" },
 	{ label: "Approved", value: "APPROVED" },
 	{ label: "Rejected", value: "REJECTED" },
 	{ label: "Waitlisted", value: "WAITLISTED" },
 	{ label: "Disbursed", value: "DISBURSED" },
+	{ label: "Withdrawn", value: "WITHDRAWN" },
 ];
 

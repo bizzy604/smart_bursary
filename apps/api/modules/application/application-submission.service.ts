@@ -45,6 +45,7 @@ export class ApplicationSubmissionService {
 				countyId,
 				applicantId,
 				programId: dto.programId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -99,6 +100,7 @@ export class ApplicationSubmissionService {
 				countyId,
 				applicantId,
 				status: 'DRAFT',
+				deletedAt: null,
 			},
 			select: { programId: true },
 		});
