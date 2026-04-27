@@ -219,6 +219,41 @@ describe('Application Lifecycle (e2e)', () => {
 		expect(timeline).toHaveLength(1);
 	});
 
+	it('withdraw releases the cross-county identity-registry slot', async () => {
+		const draft = await createDraftDirect(studentUserId, countyId, wardId);
+		await setStatus(draft.id, ApplicationStatus.SUBMITTED);
+
+		// Simulate ApplicationSubmissionService.claimIdentityForCycle: insert
+		// a registry row that holds the SUBMITTED slot for this application.
+		const identityHash = Buffer.from(`hash-${draft.id}`.padEnd(32, '0').slice(0, 32));
+		await prisma.identityRegistry.create({
+			data: {
+				identityHash,
+				activeApplicationId: draft.id,
+				activeCountyId: countyId,
+				activeCycle: '2025/2026',
+				activeStatus: ApplicationStatus.SUBMITTED,
+				firstRegisteredCountyId: countyId,
+			},
+		});
+
+		await request(app.getHttpServer())
+			.post(`/api/v1/applications/${draft.id}/withdraw`)
+			.set('Authorization', `Bearer ${studentToken}`)
+			.expect(200);
+
+		// After withdrawal the registry slot must be released so the student
+		// can re-apply elsewhere in the same cycle. release() nulls the
+		// active* fields and stamps releasedAt.
+		const registry = await prisma.identityRegistry.findUnique({
+			where: { identityHash },
+		});
+		expect(registry).not.toBeNull();
+		expect(registry?.activeApplicationId).toBeNull();
+		expect(registry?.activeStatus).toBeNull();
+		expect(registry?.releasedAt).not.toBeNull();
+	});
+
 	it('student cannot withdraw a DRAFT application', async () => {
 		const draft = await createDraftDirect(studentUserId, countyId, wardId);
 		const response = await request(app.getHttpServer())

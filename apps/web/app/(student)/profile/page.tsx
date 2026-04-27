@@ -26,10 +26,17 @@ export default function ProfileOverviewPage() {
   return (
     <main className="space-y-6">
       <section className="rounded-2xl border border-border/80 bg-background p-6 shadow-xs">
-        <h1 className="font-serif text-2xl font-bold text-primary">Profile Overview</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Keep your profile details accurate to improve eligibility checks and speed up review.
-        </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="font-serif text-2xl font-bold text-primary">Profile Overview</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Keep your profile details accurate to improve eligibility checks and speed up review.
+            </p>
+          </div>
+          <Link href="/profile/personal">
+            <Button>Edit Profile</Button>
+          </Link>
+        </div>
 
         <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>

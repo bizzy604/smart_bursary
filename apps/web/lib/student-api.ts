@@ -80,11 +80,13 @@ type TimelineApiEnvelope = {
 type ProfileApiRow = {
   personal?: {
     fullName?: string | null;
+    nationalId?: string | null;
     homeWard?: string | null;
     phone?: string | null;
   };
   academic?: {
     institutionName?: string | null;
+    admissionNumber?: string | null;
     courseName?: string | null;
     yearFormClass?: string | null;
   };
@@ -336,6 +338,8 @@ export async function fetchStudentProfile(): Promise<StudentProfileSnapshot> {
 
   return {
     fullName: toOptionalText(profile.personal?.fullName) ?? "Not provided",
+    nationalId: toOptionalText(profile.personal?.nationalId) ?? "Not provided",
+    admissionNumber: toOptionalText(profile.academic?.admissionNumber) ?? "Not provided",
     email: toOptionalText(me.email) ?? "Not provided",
     phone: toOptionalText(profile.personal?.phone) ?? "Not provided",
     county: toOptionalText(me.countyId) ?? "Current county",

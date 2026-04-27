@@ -81,15 +81,34 @@ export default function ApplySectionAPage() {
     didHydrate.current = true;
   }, [programState, profile]);
 
-  // If profile loads later, update the form with profile data
+  // If profile loads after the first hydration, fill any fields the user has
+  // not yet typed into. Precedence (highest wins) is: what the user has typed
+  // in this session > what was previously saved in the wizard store > what we
+  // can infer from their profile. Order matters: `prev` first, then profile,
+  // then stored — so prev only wins for fields the user has already filled in.
   useEffect(() => {
     if (!didHydrate.current || !profile || profileLoading) {
       return;
     }
 
-    const stored = programState?.sectionData["section-a"] as Partial<SectionAForm> || {};
+    const stored = (programState?.sectionData["section-a"] as Partial<SectionAForm>) ?? {};
     const profileData = mapProfileToSectionA(profile);
-    setForm(prev => ({ ...defaultForm, ...profileData, ...stored, ...prev }));
+    setForm((prev) => {
+      const next = { ...defaultForm, ...profileData };
+      // Overlay stored / prev only where they hold a real value, so that
+      // profile values aren't blown away by empty strings from defaultForm.
+      for (const [key, value] of Object.entries(stored)) {
+        if (typeof value === "string" && value.length > 0) {
+          (next as Record<string, unknown>)[key] = value;
+        }
+      }
+      for (const [key, value] of Object.entries(prev)) {
+        if (typeof value === "string" && value.length > 0) {
+          (next as Record<string, unknown>)[key] = value;
+        }
+      }
+      return next;
+    });
   }, [profile, profileLoading, programState]);
 
   const isValid = applicationSectionASchema.safeParse(form).success;

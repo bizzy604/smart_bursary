@@ -67,6 +67,8 @@ export interface TimelineEvent {
 
 export interface StudentProfileSnapshot {
   fullName: string;
+  nationalId: string;
+  admissionNumber: string;
   email: string;
   phone: string;
   county: string;

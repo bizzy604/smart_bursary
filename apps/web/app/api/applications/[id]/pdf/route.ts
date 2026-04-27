@@ -49,6 +49,12 @@ async function handle(request: Request, context: { params: Promise<{ id: string 
 			},
 		});
 	} catch {
+		// PDF rendering failed — return an HTML fallback for inline viewing.
+		// Crucially we use `.html` (not `.pdf`) for the filename so that if a
+		// browser does save it, the file extension matches the actual content
+		// type. Callers asking for `application/pdf` should treat anything
+		// other than that content type as a failure.
+		const htmlFilename = `${payload.application.reference.replace(/[^A-Za-z0-9_-]/g, "_")}.html`;
 		const html = buildApplicationPreviewHtml({
 			countyName: payload.pdfPayload.countyName,
 			fundName: payload.pdfPayload.fundName,
@@ -64,7 +70,7 @@ async function handle(request: Request, context: { params: Promise<{ id: string 
 			status: 200,
 			headers: {
 				"Content-Type": "text/html; charset=utf-8",
-				"Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename=\"${filename}\"`,
+				"Content-Disposition": `${forceDownload ? "attachment" : "inline"}; filename=\"${htmlFilename}\"`,
 				"X-PDF-Fallback": "true",
 			},
 		});

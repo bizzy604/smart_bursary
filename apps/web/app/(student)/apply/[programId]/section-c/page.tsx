@@ -90,21 +90,35 @@ export default function ApplySectionCPage() {
     didHydrate.current = true;
   }, [programState, profile]);
 
-  // If profile loads later, update the form with profile data
+  // If profile loads after the first hydration, fill any fields the user has
+  // not yet typed into. See section-a/page.tsx for the precedence rationale.
   useEffect(() => {
     if (!didHydrate.current || !profile || profileLoading) {
       return;
     }
 
-    const stored = programState?.sectionData["section-c"] as Partial<SectionCForm> || {};
+    const stored = (programState?.sectionData["section-c"] as Partial<SectionCForm>) ?? {};
     const profileData = mapProfileToSectionC(profile);
-    setForm(prev => ({
-      ...defaultForm,
-      ...profileData,
-      ...stored,
-      ...prev,
-      siblings: Array.isArray(stored.siblings) ? stored.siblings : [],
-    }));
+    setForm((prev) => {
+      const next: SectionCForm = { ...defaultForm, ...profileData, siblings: [] };
+      const writable = next as unknown as Record<string, unknown>;
+      for (const [key, value] of Object.entries(stored)) {
+        if (key === "siblings") continue;
+        if (typeof value === "string" && value.length > 0) {
+          writable[key] = value;
+        }
+      }
+      for (const [key, value] of Object.entries(prev)) {
+        if (key === "siblings") continue;
+        if (typeof value === "string" && value.length > 0) {
+          writable[key] = value;
+        }
+      }
+      next.siblings = Array.isArray(stored.siblings)
+        ? stored.siblings
+        : prev.siblings ?? [];
+      return next;
+    });
   }, [profile, profileLoading, programState]);
 
   const isUnlocked = Boolean(programState?.completion["section-b"]);

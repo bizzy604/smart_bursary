@@ -12,6 +12,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApplicationAuditService } from './application-audit.service';
+import { ApplicationLifecycleService } from './application-lifecycle.service';
 import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -27,6 +28,7 @@ import { SectionService } from './section.service';
 export class ApplicationController {
 	constructor(
 		private readonly applicationAuditService: ApplicationAuditService,
+		private readonly applicationLifecycleService: ApplicationLifecycleService,
 		private readonly applicationService: ApplicationService,
 		private readonly applicationSubmissionService: ApplicationSubmissionService,
 		private readonly sectionService: SectionService,
@@ -134,7 +136,7 @@ export class ApplicationController {
 		@Param('id') applicationId: string,
 	) {
 		const applicantId = user['userId'] as string;
-		return this.applicationService.withdrawApplication(countyId, applicantId, applicationId);
+		return this.applicationLifecycleService.withdrawApplication(countyId, applicantId, applicationId);
 	}
 
 	@Delete(':id/draft')
@@ -146,6 +148,6 @@ export class ApplicationController {
 		@Param('id') applicationId: string,
 	) {
 		const applicantId = user['userId'] as string;
-		return this.applicationService.deleteDraftApplication(countyId, applicantId, applicationId);
+		return this.applicationLifecycleService.deleteDraftApplication(countyId, applicantId, applicationId);
 	}
 }
