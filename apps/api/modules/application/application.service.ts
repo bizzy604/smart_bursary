@@ -101,6 +101,7 @@ export class ApplicationService {
 			where: {
 				countyId,
 				applicantId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -129,6 +130,7 @@ export class ApplicationService {
 				id: applicationId,
 				countyId,
 				applicantId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -282,6 +284,99 @@ export class ApplicationService {
 		);
 
 		return submitted;
+	}
+
+	async withdrawApplication(
+		countyId: string,
+		applicantId: string,
+		applicationId: string,
+	) {
+		const application = await this.prisma.application.findFirst({
+			where: {
+				id: applicationId,
+				countyId,
+				applicantId,
+				deletedAt: null,
+			},
+			select: { id: true, status: true },
+		});
+
+		if (!application) {
+			throw new NotFoundException('Application not found.');
+		}
+
+		const withdrawableStatuses: Array<typeof application.status> = [
+			'SUBMITTED',
+			'WARD_REVIEW',
+			'WARD_DISTRIBUTION_PENDING',
+			'VILLAGE_ALLOCATION_PENDING',
+			'COUNTY_REVIEW',
+			'WAITLISTED',
+		];
+
+		if (application.status === 'DRAFT') {
+			throw new BadRequestException(
+				'Drafts cannot be withdrawn. Use delete draft instead.',
+			);
+		}
+
+		if (!withdrawableStatuses.includes(application.status)) {
+			throw new BadRequestException(
+				`Applications in status ${application.status} cannot be withdrawn.`,
+			);
+		}
+
+		const fromStatus = application.status;
+
+		const updated = await this.prisma.application.update({
+			where: { id: applicationId },
+			data: { status: 'WITHDRAWN' },
+			select: { id: true, status: true },
+		});
+
+		await this.recordTimeline(
+			countyId,
+			applicationId,
+			applicantId,
+			'APPLICATION_WITHDRAWN',
+			fromStatus,
+			'WITHDRAWN',
+		);
+
+		return updated;
+	}
+
+	async deleteDraftApplication(
+		countyId: string,
+		applicantId: string,
+		applicationId: string,
+	) {
+		const application = await this.prisma.application.findFirst({
+			where: {
+				id: applicationId,
+				countyId,
+				applicantId,
+				deletedAt: null,
+			},
+			select: { id: true, status: true },
+		});
+
+		if (!application) {
+			throw new NotFoundException('Application not found.');
+		}
+
+		if (application.status !== 'DRAFT') {
+			throw new BadRequestException(
+				'Only draft applications can be deleted. Use withdraw to cancel a submitted application.',
+			);
+		}
+
+		await this.prisma.application.update({
+			where: { id: applicationId },
+			data: { deletedAt: new Date() },
+		});
+
+		return { id: applicationId, deleted: true };
 	}
 
 	private async recordTimeline(

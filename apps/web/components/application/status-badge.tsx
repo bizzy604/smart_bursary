@@ -10,6 +10,7 @@ const statusStyleMap: Record<ApplicationStatus, "neutral" | "info" | "success" |
 	REJECTED: "danger",
 	WAITLISTED: "neutral",
 	DISBURSED: "success",
+	WITHDRAWN: "neutral",
 };
 
 const statusLabelMap: Record<ApplicationStatus, string> = {
@@ -21,6 +22,7 @@ const statusLabelMap: Record<ApplicationStatus, string> = {
 	REJECTED: "Rejected",
 	WAITLISTED: "Waitlisted",
 	DISBURSED: "Disbursed",
+	WITHDRAWN: "Withdrawn",
 };
 
 export function StatusBadge({ status }: { status: ApplicationStatus }) {

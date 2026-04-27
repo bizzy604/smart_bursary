@@ -6,7 +6,8 @@ export type ApplicationStatus =
   | "APPROVED"
   | "REJECTED"
   | "WAITLISTED"
-  | "DISBURSED";
+  | "DISBURSED"
+  | "WITHDRAWN";
 
 export type TimelineState = "complete" | "current" | "upcoming";
 
