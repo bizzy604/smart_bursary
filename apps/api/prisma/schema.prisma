@@ -354,15 +354,15 @@ model Application {
   programId                 String               @map("program_id") @db.Uuid
   wardId                    String               @map("ward_id") @db.Uuid
   status                    ApplicationStatus    @default(DRAFT)
-  totalFeeKes               Decimal?             @map("total_fee_kes") @db.Decimal(12, 2)
-  outstandingBalance        Decimal?             @map("outstanding_balance") @db.Decimal(12, 2)
-  amountAbleToPay           Decimal?             @map("amount_able_to_pay") @db.Decimal(12, 2)
-  amountRequested           Decimal?             @map("amount_requested") @db.Decimal(12, 2)
-  amountAllocated           Decimal?             @map("amount_allocated") @db.Decimal(12, 2)
+  totalFeeKes               Decimal?             @map("total_fee_kes") @db.Decimal(15, 2)
+  outstandingBalance        Decimal?             @map("outstanding_balance") @db.Decimal(15, 2)
+  amountAbleToPay           Decimal?             @map("amount_able_to_pay") @db.Decimal(15, 2)
+  amountRequested           Decimal?             @map("amount_requested") @db.Decimal(15, 2)
+  amountAllocated           Decimal?             @map("amount_allocated") @db.Decimal(15, 2)
   helbApplied               Boolean?             @map("helb_applied")
   priorBursaryReceived      Boolean              @default(false) @map("prior_bursary_received")
   priorBursarySource        String?              @map("prior_bursary_source") @db.VarChar(255)
-  priorBursaryAmount        Decimal?             @map("prior_bursary_amount") @db.Decimal(12, 2)
+  priorBursaryAmount        Decimal?             @map("prior_bursary_amount") @db.Decimal(15, 2)
   reason                    String?
   submissionReference       String?              @unique @map("submission_reference") @db.VarChar(30)
   pdfS3Key                  String?              @map("pdf_s3_key")

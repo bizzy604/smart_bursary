@@ -1,7 +1,7 @@
 /**
- * Purpose: Orchestrate document persistence, storage, and scan status updates.
+ * Purpose: Orchestrate document persistence, storage, and access rules.
  * Why important: Keeps file handling and application-scoped access rules out of controllers.
- * Used by: DocumentController and the virus-scan queue adapter.
+ * Used by: DocumentController and tenant branding surfaces.
  */
 
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
@@ -9,7 +9,6 @@ import { UserRole } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import { PrismaService } from '../../database/prisma.service';
-import { QueueService } from '../../queue/queue.service';
 import {
   ALLOWED_DOCUMENT_TYPES,
   ALLOWED_UPLOAD_CONTENT_TYPES,
@@ -53,7 +52,6 @@ type ScopedApplication = {
 export class DocumentService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly queueService: QueueService,
     private readonly s3Service: S3Service,
   ) {}
 
@@ -87,12 +85,6 @@ export class DocumentService {
         fileSizeBytes: file.size,
         scanStatus: 'PENDING',
       },
-    });
-
-    await this.queueService.getVirusScanQueue().add('scan', {
-      documentId: document.id,
-      fileName: file.originalname,
-      filePath: s3Key,
     });
 
     return this.mapDocument(document);
@@ -226,5 +218,22 @@ export class DocumentService {
     const hash = crypto.randomBytes(8).toString('hex');
     const extension = path.extname(originalName).toLowerCase() || '.bin';
     return path.posix.join(userId, applicationId, `${docType.toLowerCase()}-${hash}${extension}`);
+  }
+
+  async uploadCountyLogo(
+    countyId: string,
+    file: UploadedDocumentFile,
+  ): Promise<{ s3Key: string }> {
+    this.validateUpload(file);
+    const extension = path.extname(file.originalname).toLowerCase() || '.png';
+    const s3Key = path.posix.join('county-assets', countyId, `logo-${crypto.randomBytes(8).toString('hex')}${extension}`);
+
+    await this.s3Service.uploadObject({
+      key: s3Key,
+      contentType: file.mimetype,
+      body: file.buffer,
+    });
+
+    return { s3Key };
   }
 }

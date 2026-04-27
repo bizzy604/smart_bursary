@@ -24,6 +24,19 @@ const FAMILY_STATUS_VALUES = [
 	'PERSON_WITH_DISABILITY',
 ] as const;
 
+const GUARDIAN_RELATIONSHIP_VALUES = [
+	'Father',
+	'Mother',
+	'Uncle',
+	'Aunt',
+	'Grandparent',
+	'Brother',
+	'Sister',
+	'Relative',
+	'Guardian',
+	'Sponsor',
+] as const;
+
 export class SectionCSiblingDto {
 	@ApiProperty({ example: 'Akinyi Ekiru' })
 	@IsString()
@@ -59,6 +72,8 @@ export class SectionCSiblingDto {
 export class SectionCDto {
 	@ApiProperty({ enum: FAMILY_STATUS_VALUES, example: 'SINGLE_PARENT' })
 	@IsIn(FAMILY_STATUS_VALUES)
+	@IsString()
+	@IsNotEmpty()
 	familyStatus!: (typeof FAMILY_STATUS_VALUES)[number];
 
 	@ApiProperty({ example: 'Mary Akiru' })
@@ -67,11 +82,12 @@ export class SectionCDto {
 	@MaxLength(255)
 	guardianName!: string;
 
-	@ApiProperty({ example: 'Mother' })
+	@ApiProperty({ enum: GUARDIAN_RELATIONSHIP_VALUES, example: 'Mother' })
+	@IsIn(GUARDIAN_RELATIONSHIP_VALUES)
 	@IsString()
 	@IsNotEmpty()
 	@MaxLength(80)
-	guardianRelationship!: string;
+	guardianRelationship!: (typeof GUARDIAN_RELATIONSHIP_VALUES)[number];
 
 	@ApiProperty({ example: '+254700000002' })
 	@IsString()

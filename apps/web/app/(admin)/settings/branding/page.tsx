@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useCounty } from "@/hooks/use-county";
+import { API_BASE_URL } from "@/lib/constants";
 import {
   fetchAdminSettings,
   type BrandingSettings,
   updateAdminSettings,
 } from "@/lib/admin-settings";
+import { waitForToken } from "@/lib/api-client";
 
 const defaultBranding: BrandingSettings = {
   countyName: "",
@@ -27,6 +29,7 @@ export default function BrandingSettingsPage() {
   const [branding, setBranding] = useState<BrandingSettings>(defaultBranding);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
@@ -59,12 +62,63 @@ export default function BrandingSettingsPage() {
     };
   }, []);
 
+  async function handleLogoUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingLogo(true);
+    setFeedback(null);
+
+    try {
+      const token = await waitForToken();
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${API_BASE_URL}/documents/county-logo`, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        console.error("Upload failed:", body);
+        const message = body?.error?.message || body?.message || "Failed to upload logo.";
+        throw new Error(message);
+      }
+
+      const result = (await response.json()) as { s3Key?: string };
+      console.log("Upload result:", result);
+      if (!result.s3Key) {
+        throw new Error("Upload completed but no key was returned.");
+      }
+
+      // Update local state with the S3 key - user must click Save to persist
+      setBranding((current) => ({ ...current, logoS3Key: result.s3Key as string }));
+      setFeedback({ type: "success", message: "Logo uploaded. Click 'Save Branding' to persist." });
+      toast.success("Logo uploaded", { description: "Click 'Save Branding' to save the logo to your settings." });
+    } catch (error: unknown) {
+      console.error("Logo upload error:", error);
+      const message = error instanceof Error ? error.message : "Logo upload failed.";
+      setFeedback({ type: "error", message });
+      toast.error("Upload failed", { description: message });
+    } finally {
+      setIsUploadingLogo(false);
+      // Reset the input so the same file can be selected again
+      event.target.value = "";
+    }
+  }
+
   async function saveBrandingSettings() {
     setIsSaving(true);
     setFeedback(null);
 
     try {
-      const updated = await updateAdminSettings({ branding });
+      // Remove logoUrl from branding before sending to backend (it's computed, not persisted)
+      const { logoUrl, ...brandingToSave } = branding;
+      const updated = await updateAdminSettings({ branding: brandingToSave });
       setBranding(updated.branding);
       setCounty({
         name: updated.branding.countyName,
@@ -146,15 +200,35 @@ export default function BrandingSettingsPage() {
               />
             </label>
 
-            <label className="space-y-2 text-sm md:col-span-2">
-              <span className="font-medium text-foreground/90">Logo Storage Key</span>
-              <Input
-                placeholder="county-assets/turkana/logo.png"
-                value={branding.logoS3Key}
-                onChange={(event) => setBranding((current) => ({ ...current, logoS3Key: event.target.value }))}
-                disabled={isLoading}
-              />
-            </label>
+            <div className="space-y-2 text-sm md:col-span-2">
+              <span className="font-medium text-foreground/90">County Logo</span>
+              <div className="flex items-center gap-3">
+                {branding.logoUrl ? (
+                  <img
+                    src={branding.logoUrl}
+                    alt="County logo preview"
+                    className="h-12 w-12 rounded-md border border-border object-contain"
+                  />
+                ) : branding.logoS3Key ? (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-muted text-xs text-muted-foreground">
+                    Logo
+                  </div>
+                ) : null}
+                <label className="inline-flex cursor-pointer items-center gap-2">
+                  <Input
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    onChange={handleLogoUpload}
+                    disabled={isLoading || isUploadingLogo}
+                    className="hidden"
+                  />
+                  <span className="inline-flex items-center rounded-md border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-accent">
+                    {isUploadingLogo ? "Uploading..." : branding.logoS3Key ? "Replace Logo" : "Upload Logo"}
+                  </span>
+                </label>
+              </div>
+              <p className="text-xs text-muted-foreground">Supported formats: PNG, JPEG. Max 5 MB.</p>
+            </div>
 
             <div className="space-y-2 text-sm md:col-span-2">
               <span className="font-medium text-foreground/90">Primary Colour</span>

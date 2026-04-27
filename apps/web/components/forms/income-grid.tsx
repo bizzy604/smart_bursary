@@ -1,6 +1,28 @@
 ﻿"use client";
 
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const OCCUPATION_VALUES = [
+	'Farmer',
+	'Teacher',
+	'Doctor',
+	'Nurse',
+	'Engineer',
+	'Accountant',
+	'Lawyer',
+	'Business',
+	'Trader',
+	'Driver',
+	'Security',
+	'Domestic Worker',
+	'Civil Servant',
+	'Self-Employed',
+	'Unemployed',
+	'Retired',
+	'Student',
+	'Other',
+] as const;
 
 export interface IncomeGridValue {
 	fatherOccupation: string;
@@ -27,11 +49,21 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 		<div className="grid gap-3 md:grid-cols-2">
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Father Occupation</span>
-				<Input
-					placeholder="e.g. Farmer"
+				<Select
 					value={value.fatherOccupation}
-					onChange={(event) => patch("fatherOccupation", event.target.value)}
-				/>
+					onValueChange={(val) => patch("fatherOccupation", val)}
+				>
+					<SelectTrigger>
+						<SelectValue placeholder="Select occupation" />
+					</SelectTrigger>
+					<SelectContent>
+						{OCCUPATION_VALUES.map((occupation) => (
+							<SelectItem key={occupation} value={occupation}>
+								{occupation}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</label>
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Father Monthly Income (KES)</span>
@@ -45,11 +77,21 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Mother Occupation</span>
-				<Input
-					placeholder="e.g. Trader"
+				<Select
 					value={value.motherOccupation}
-					onChange={(event) => patch("motherOccupation", event.target.value)}
-				/>
+					onValueChange={(val) => patch("motherOccupation", val)}
+				>
+					<SelectTrigger>
+						<SelectValue placeholder="Select occupation" />
+					</SelectTrigger>
+					<SelectContent>
+						{OCCUPATION_VALUES.map((occupation) => (
+							<SelectItem key={occupation} value={occupation}>
+								{occupation}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</label>
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Mother Monthly Income (KES)</span>
@@ -63,11 +105,21 @@ export function IncomeGrid({ value, onChange }: IncomeGridProps) {
 
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Guardian Occupation</span>
-				<Input
-					placeholder="Leave blank if not applicable"
+				<Select
 					value={value.guardianOccupation}
-					onChange={(event) => patch("guardianOccupation", event.target.value)}
-				/>
+					onValueChange={(val) => patch("guardianOccupation", val)}
+				>
+					<SelectTrigger>
+						<SelectValue placeholder="Select occupation" />
+					</SelectTrigger>
+					<SelectContent>
+						{OCCUPATION_VALUES.map((occupation) => (
+							<SelectItem key={occupation} value={occupation}>
+								{occupation}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
 			</label>
 			<label className="space-y-1 text-sm text-foreground/90">
 				<span className="font-medium">Guardian Monthly Income (KES)</span>

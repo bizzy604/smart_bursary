@@ -4,7 +4,17 @@
  * Used by: SectionService when persisting application section data.
  */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsString, MaxLength, IsOptional } from 'class-validator';
+
+const YEAR_OF_STUDY_VALUES = [
+	'Year 1',
+	'Year 2',
+	'Year 3',
+	'Year 4',
+	'Year 5',
+	'Year 6',
+	'Final Year',
+] as const;
 
 export class SectionADto {
 	@ApiProperty({ example: 'Jane Akiru Ekiru' })
@@ -48,9 +58,25 @@ export class SectionADto {
 	@MaxLength(120)
 	course!: string;
 
-	@ApiProperty({ example: 'Year 2' })
+	@ApiProperty({ enum: YEAR_OF_STUDY_VALUES, example: 'Year 2' })
+	@IsIn(YEAR_OF_STUDY_VALUES)
 	@IsString()
 	@IsNotEmpty()
 	@MaxLength(40)
-	yearOfStudy!: string;
+	yearOfStudy!: (typeof YEAR_OF_STUDY_VALUES)[number];
+
+	@ApiProperty({ example: 'sub-county-id' })
+	@IsString()
+	@IsOptional()
+	subCountyId?: string;
+
+	@ApiProperty({ example: 'ward-id' })
+	@IsString()
+	@IsOptional()
+	wardId?: string;
+
+	@ApiProperty({ example: 'village-unit-id' })
+	@IsString()
+	@IsOptional()
+	villageUnitId?: string;
 }

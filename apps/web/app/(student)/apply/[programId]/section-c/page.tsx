@@ -4,13 +4,17 @@ import Link from "next/link";
 import type { Route } from "next";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FieldGroup } from "@/components/forms/field-group";
+import { Button } from "@/components/ui/button";
 import { FormSection } from "@/components/forms/form-section";
 import { type SiblingRow, SiblingTable } from "@/components/forms/sibling-table";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FieldGroup } from "@/components/forms/field-group";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
+import { mapProfileToSectionC } from "@/lib/profile-to-form-mapper";
 
 interface SectionCForm {
   familyStatus: string;
@@ -34,6 +38,26 @@ const defaultForm: SectionCForm = {
   siblings: [],
 };
 
+const GUARDIAN_RELATIONSHIP_VALUES = [
+	'Father',
+	'Mother',
+	'Uncle',
+	'Aunt',
+	'Grandparent',
+	'Brother',
+	'Sister',
+	'Relative',
+	'Guardian',
+	'Sponsor',
+] as const;
+
+const FAMILY_STATUS_VALUES = [
+	'BOTH_PARENTS_ALIVE',
+	'SINGLE_PARENT',
+	'ORPHAN',
+	'PERSON_WITH_DISABILITY',
+] as const;
+
 export default function ApplySectionCPage() {
   const params = useParams<{ programId: string }>();
   const router = useRouter();
@@ -41,6 +65,7 @@ export default function ApplySectionCPage() {
   const setSectionData = useApplicationWizardStore((state) => state.setSectionData);
   const setSectionComplete = useApplicationWizardStore((state) => state.setSectionComplete);
   const programState = useApplicationWizardStore((state) => state.programs[params.programId]);
+  const { profile, isLoading: profileLoading } = useStudentProfile();
   const didHydrate = useRef(false);
   const [form, setForm] = useState<SectionCForm>(defaultForm);
 
@@ -54,13 +79,33 @@ export default function ApplySectionCPage() {
     }
 
     const stored = programState.sectionData["section-c"] as Partial<SectionCForm>;
+    // Auto-fill from profile if available, stored data takes precedence
+    const profileData = profile ? mapProfileToSectionC(profile) : {};
     setForm({
       ...defaultForm,
+      ...profileData,
       ...stored,
       siblings: Array.isArray(stored.siblings) ? stored.siblings : [],
     });
     didHydrate.current = true;
-  }, [programState]);
+  }, [programState, profile]);
+
+  // If profile loads later, update the form with profile data
+  useEffect(() => {
+    if (!didHydrate.current || !profile || profileLoading) {
+      return;
+    }
+
+    const stored = programState?.sectionData["section-c"] as Partial<SectionCForm> || {};
+    const profileData = mapProfileToSectionC(profile);
+    setForm(prev => ({
+      ...defaultForm,
+      ...profileData,
+      ...stored,
+      ...prev,
+      siblings: Array.isArray(stored.siblings) ? stored.siblings : [],
+    }));
+  }, [profile, profileLoading, programState]);
 
   const isUnlocked = Boolean(programState?.completion["section-b"]);
   const isValid =
@@ -126,17 +171,21 @@ export default function ApplySectionCPage() {
         <div className="grid gap-3 md:grid-cols-2">
           <label className="space-y-1 text-sm text-foreground/90 md:col-span-2">
             <span className="font-medium">Family Status</span>
-            <select
+            <Select
               value={form.familyStatus}
-              onChange={(event) => setForm({ ...form, familyStatus: event.target.value })}
-              className="h-10 w-full rounded-md border border-border bg-background px-3 text-sm text-foreground shadow-xs transition-colors focus-visible:border-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/30"
+              onValueChange={(value) => setForm({ ...form, familyStatus: value })}
             >
-              <option value="">Select family status</option>
-              <option value="BOTH_PARENTS_ALIVE">Both Parents Alive</option>
-              <option value="SINGLE_PARENT">Single Parent</option>
-              <option value="ORPHAN">Orphan</option>
-              <option value="PERSON_WITH_DISABILITY">Person With Disability</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select family status" />
+              </SelectTrigger>
+              <SelectContent>
+                {FAMILY_STATUS_VALUES.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {status.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Guardian/Parent Name</span>
@@ -144,11 +193,21 @@ export default function ApplySectionCPage() {
           </label>
           <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Relationship</span>
-            <Input
+            <Select
               value={form.guardianRelationship}
-              onChange={(event) => setForm({ ...form, guardianRelationship: event.target.value })}
-              placeholder="e.g. Mother, Uncle"
-            />
+              onValueChange={(value) => setForm({ ...form, guardianRelationship: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select relationship" />
+              </SelectTrigger>
+              <SelectContent>
+                {GUARDIAN_RELATIONSHIP_VALUES.map((relationship) => (
+                  <SelectItem key={relationship} value={relationship}>
+                    {relationship}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
           <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Phone Number</span>

@@ -56,6 +56,8 @@ async function handle(request: Request, context: { params: Promise<{ id: string 
 			reference: payload.pdfPayload.reference,
 			generatedAt: payload.pdfPayload.generatedAt,
 			sections: payload.pdfPayload.sections,
+			logoDataUrl: payload.pdfPayload.logoDataUrl,
+			qrCodeDataUrl: payload.pdfPayload.qrCodeDataUrl,
 		});
 
 		return new NextResponse(html, {

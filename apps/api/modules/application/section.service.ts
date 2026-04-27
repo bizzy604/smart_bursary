@@ -115,10 +115,13 @@ export class SectionService {
 		});
 
 		if (validationErrors.length > 0) {
+			const flattenedErrors = this.flattenValidationErrors(validationErrors);
+			console.error(`Validation failed for ${sectionKey}:`, JSON.stringify(flattenedErrors, null, 2));
+			console.error(`Raw payload for ${sectionKey}:`, JSON.stringify(rawPayload, null, 2));
 			throw new BadRequestException({
 				code: 'VALIDATION_ERROR',
 				message: 'Section payload contains invalid or incomplete fields.',
-				details: this.flattenValidationErrors(validationErrors),
+				details: flattenedErrors,
 			});
 		}
 

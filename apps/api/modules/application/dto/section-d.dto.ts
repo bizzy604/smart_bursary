@@ -15,14 +15,37 @@ import {
 	MaxLength,
 	Min,
 	ValidateNested,
+	IsIn,
 } from 'class-validator';
 
+const OCCUPATION_VALUES = [
+	'Farmer',
+	'Teacher',
+	'Doctor',
+	'Nurse',
+	'Engineer',
+	'Accountant',
+	'Lawyer',
+	'Business',
+	'Trader',
+	'Driver',
+	'Security',
+	'Domestic Worker',
+	'Civil Servant',
+	'Self-Employed',
+	'Unemployed',
+	'Retired',
+	'Student',
+	'Other',
+] as const;
+
 export class SectionDIncomeDto {
-	@ApiPropertyOptional({ example: 'Farmer' })
+	@ApiPropertyOptional({ enum: OCCUPATION_VALUES, example: 'Farmer' })
 	@IsOptional()
+	@IsIn(OCCUPATION_VALUES)
 	@IsString()
 	@MaxLength(120)
-	fatherOccupation?: string;
+	fatherOccupation?: (typeof OCCUPATION_VALUES)[number];
 
 	@ApiPropertyOptional({ example: 15000 })
 	@IsOptional()
@@ -30,11 +53,12 @@ export class SectionDIncomeDto {
 	@Min(0)
 	fatherMonthlyIncomeKes?: number;
 
-	@ApiPropertyOptional({ example: 'Trader' })
+	@ApiPropertyOptional({ enum: OCCUPATION_VALUES, example: 'Trader' })
 	@IsOptional()
+	@IsIn(OCCUPATION_VALUES)
 	@IsString()
 	@MaxLength(120)
-	motherOccupation?: string;
+	motherOccupation?: (typeof OCCUPATION_VALUES)[number];
 
 	@ApiPropertyOptional({ example: 12000 })
 	@IsOptional()
@@ -42,11 +66,12 @@ export class SectionDIncomeDto {
 	@Min(0)
 	motherMonthlyIncomeKes?: number;
 
-	@ApiPropertyOptional({ example: 'Casual Labour' })
+	@ApiPropertyOptional({ enum: OCCUPATION_VALUES, example: 'Casual Labour' })
 	@IsOptional()
+	@IsIn(OCCUPATION_VALUES)
 	@IsString()
 	@MaxLength(120)
-	guardianOccupation?: string;
+	guardianOccupation?: (typeof OCCUPATION_VALUES)[number];
 
 	@ApiPropertyOptional({ example: 6000 })
 	@IsOptional()

@@ -74,6 +74,31 @@ export class DocumentController {
     );
   }
 
+  @Roles(UserRole.COUNTY_ADMIN)
+  @Post('county-logo')
+  @ApiOperation({ summary: 'Upload county logo for branding' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCountyLogo(
+    @County() countyId: string,
+    @UploadedFile() file: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file provided');
+    }
+
+    return this.documentService.uploadCountyLogo(countyId, file);
+  }
+
   @Get(':documentId')
   @Roles(UserRole.STUDENT, UserRole.WARD_ADMIN, UserRole.VILLAGE_ADMIN, UserRole.FINANCE_OFFICER, UserRole.COUNTY_ADMIN, UserRole.PLATFORM_OPERATOR)
   @ApiOperation({ summary: 'Get a document by id' })

@@ -7,6 +7,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma } from '@prisma/client';
 
 import { PrismaService } from '../../database/prisma.service';
+import { S3Service } from '../document/s3.service';
 import { resolveScoringWeights, scoringWeightsToRecord } from '../ai/scoring-weights.constants';
 import {
 	BrandingSettingsDto,
@@ -33,7 +34,10 @@ type SettingsObject = Record<string, unknown>;
 
 @Injectable()
 export class TenantService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly s3Service: S3Service,
+	) {}
 
 	async getBranding(countyId: string) {
 		const county = await this.prisma.county.findUnique({
@@ -54,9 +58,15 @@ export class TenantService {
 		}
 
 		const settings = this.asObject(county.settings);
+		const branding = this.toBranding(county, settings);
+
+		if (county.logoS3Key) {
+			const signed = await this.s3Service.getSignedDownloadUrl(county.logoS3Key);
+			branding.logoUrl = signed.url;
+		}
 
 		return {
-			data: this.toBranding(county, settings),
+			data: branding,
 		};
 	}
 
@@ -82,11 +92,17 @@ export class TenantService {
 		const settings = this.asObject(county.settings);
 		const formCustomization = this.resolveFormCustomization(settings, undefined);
 		const scoringWeights = scoringWeightsToRecord(resolveScoringWeights(settings.scoringWeights));
+		const branding = this.toBranding(county, settings);
+
+		if (county.logoS3Key) {
+			const signed = await this.s3Service.getSignedDownloadUrl(county.logoS3Key);
+			branding.logoUrl = signed.url;
+		}
 
 		return {
 			data: {
 				countyId: county.id,
-				branding: this.toBranding(county, settings),
+				branding,
 				formCustomization,
 				scoringWeights,
 				updatedAt: county.updatedAt.toISOString(),
@@ -238,6 +254,7 @@ export class TenantService {
 			primaryColor: county.primaryColor,
 			logoS3Key: county.logoS3Key ?? '',
 			logoText: this.resolveLogoText(settings, county.name),
+			logoUrl: '',
 		};
 	}
 

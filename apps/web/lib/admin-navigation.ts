@@ -38,7 +38,7 @@ const financeNavigationItems: AdminNavigationItem[] = [
 
 const countyAdminNavigationItems: AdminNavigationItem[] = [
 	{ href: "/county/dashboard", label: "Dashboard", icon: LayoutDashboard },
-	{ href: "/county/programs" as Route, label: "Program Management", icon: BadgeCheck },
+	{ href: "/county/programs" as Route, label: "Bursary Programs", icon: BadgeCheck },
 	{ href: "/county/locations", label: "Locations", icon: MapPin },
 	{ href: "/county/applications", label: "Applications", icon: ClipboardList },
 	{ href: "/county/review", label: "Review Queue", icon: FileSearch },

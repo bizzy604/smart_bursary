@@ -9,6 +9,7 @@ export interface ApplicationPdfPayload {
 	reference: string;
 	generatedAt: string;
 	sections: PreviewSection[];
+	logoUrl?: string;
 }
 
 export async function requestApplicationPdf(payload: ApplicationPdfPayload): Promise<Blob | null> {
@@ -16,6 +17,20 @@ export async function requestApplicationPdf(payload: ApplicationPdfPayload): Pro
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(payload),
+	});
+
+	if (!response.ok) {
+		return null;
+	}
+
+	return response.blob();
+}
+
+export async function requestApplicationPdfFromBackend(applicationId: string): Promise<Blob | null> {
+	const response = await fetch("/api/v1/applications/pdf", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ applicationId }),
 	});
 
 	if (!response.ok) {

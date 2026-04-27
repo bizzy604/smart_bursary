@@ -3,19 +3,17 @@
 import type { Route } from "next";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FieldGroup } from "@/components/forms/field-group";
+import { Button } from "@/components/ui/button";
 import { FormSection } from "@/components/forms/form-section";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FieldGroup } from "@/components/forms/field-group";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { useStudentProfile } from "@/hooks/use-student-profile";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
 import { useSubCounties, useWards, useVillageUnits } from "@/hooks/use-locations";
+import { mapProfileToSectionA } from "@/lib/profile-to-form-mapper";
 
 interface SectionAForm {
   fullName: string;
@@ -45,6 +43,16 @@ const defaultForm: SectionAForm = {
   villageUnitId: "",
 };
 
+const YEAR_OF_STUDY_VALUES = [
+	'Year 1',
+	'Year 2',
+	'Year 3',
+	'Year 4',
+	'Year 5',
+	'Year 6',
+	'Final Year',
+] as const;
+
 export default function ApplySectionAPage() {
   const params = useParams<{ programId: string }>();
   const router = useRouter();
@@ -52,6 +60,7 @@ export default function ApplySectionAPage() {
   const setSectionData = useApplicationWizardStore((state) => state.setSectionData);
   const setSectionComplete = useApplicationWizardStore((state) => state.setSectionComplete);
   const programState = useApplicationWizardStore((state) => state.programs[params.programId]);
+  const { profile, isLoading: profileLoading, error: profileError } = useStudentProfile();
   const didHydrate = useRef(false);
   const [form, setForm] = useState<SectionAForm>(defaultForm);
 
@@ -65,9 +74,22 @@ export default function ApplySectionAPage() {
     }
 
     const stored = programState.sectionData["section-a"] as Partial<SectionAForm>;
-    setForm({ ...defaultForm, ...stored });
+    // Auto-fill from profile if available, stored data takes precedence
+    const profileData = profile ? mapProfileToSectionA(profile) : {};
+    setForm({ ...defaultForm, ...profileData, ...stored });
     didHydrate.current = true;
-  }, [programState]);
+  }, [programState, profile]);
+
+  // If profile loads later, update the form with profile data
+  useEffect(() => {
+    if (!didHydrate.current || !profile || profileLoading) {
+      return;
+    }
+
+    const stored = programState?.sectionData["section-a"] as Partial<SectionAForm> || {};
+    const profileData = mapProfileToSectionA(profile);
+    setForm(prev => ({ ...defaultForm, ...profileData, ...stored, ...prev }));
+  }, [profile, profileLoading, programState]);
 
   const isValid =
     form.fullName.trim().length > 2 &&
@@ -166,11 +188,21 @@ export default function ApplySectionAPage() {
           </label>
           <label className="space-y-1 text-sm text-foreground/90">
             <span className="font-medium">Year of Study</span>
-            <Input
+            <Select
               value={form.yearOfStudy}
-              onChange={(event) => setForm({ ...form, yearOfStudy: event.target.value })}
-              placeholder="e.g. Year 2"
-            />
+              onValueChange={(value) => setForm({ ...form, yearOfStudy: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select year of study" />
+              </SelectTrigger>
+              <SelectContent>
+                {YEAR_OF_STUDY_VALUES.map((year) => (
+                  <SelectItem key={year} value={year}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
         </div>
       </FieldGroup>

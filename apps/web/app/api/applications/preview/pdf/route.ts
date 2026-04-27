@@ -1,7 +1,7 @@
+import QRCode from "qrcode";
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { renderApplicationPdf } from "@/lib/application-pdf";
 import { buildApplicationPreviewHtml } from "@/lib/application-preview";
 import type { PreviewSection } from "@/lib/application-preview";
 
@@ -21,6 +21,7 @@ type PreviewPdfPayload = {
 	reference?: string;
 	generatedAt?: string;
 	sections?: PreviewSection[];
+	logoUrl?: string;
 };
 
 export async function POST(request: Request) {
@@ -38,46 +39,46 @@ export async function POST(request: Request) {
 		);
 	}
 
-	const pdfPayload = {
+	// Generate QR code
+	const qrCodeDataUrl = await QRCode.toDataURL(
+		`REF:${body.reference}`,
+		{ width: 120, margin: 1, type: "image/png" },
+	);
+
+	// Fetch logo as data URL if provided
+	let logoDataUrl: string | undefined;
+	if (body.logoUrl) {
+		try {
+			const response = await fetch(body.logoUrl, { cache: "no-store" });
+			if (response.ok) {
+				const buffer = Buffer.from(await response.arrayBuffer());
+				const contentType = response.headers.get("content-type") || "image/png";
+				logoDataUrl = `data:${contentType};base64,${buffer.toString("base64")}`;
+			}
+		} catch {
+			// Logo fetch failed, continue without it
+		}
+	}
+
+	const html = buildApplicationPreviewHtml({
 		countyName: body.countyName ?? DEFAULT_COUNTY_NAME,
 		fundName: body.fundName ?? DEFAULT_FUND_NAME,
-		primaryColor: body.primaryColor ?? DEFAULT_PRIMARY_COLOR,
-		legalReference: body.legalReference ?? DEFAULT_LEGAL_REFERENCE,
 		programName: body.programName,
 		reference: body.reference,
 		generatedAt: body.generatedAt ?? new Date().toISOString(),
 		sections: body.sections,
-	};
+		logoDataUrl,
+		qrCodeDataUrl,
+	});
 
 	const safeReference = body.reference.replace(/[^A-Za-z0-9_-]/g, "_");
 
-	try {
-		const pdfBytes = await renderApplicationPdf(pdfPayload);
-
-		return new NextResponse(pdfBytes, {
-			status: 200,
-			headers: {
-				"Content-Type": "application/pdf",
-				"Content-Disposition": `attachment; filename=\"${safeReference}.pdf\"`,
-			},
-		});
-	} catch {
-		const html = buildApplicationPreviewHtml({
-			countyName: pdfPayload.countyName,
-			fundName: pdfPayload.fundName,
-			programName: pdfPayload.programName,
-			reference: pdfPayload.reference,
-			generatedAt: pdfPayload.generatedAt,
-			sections: pdfPayload.sections,
-		});
-
-		return new NextResponse(html, {
-			status: 200,
-			headers: {
-				"Content-Type": "text/html; charset=utf-8",
-				"Content-Disposition": `attachment; filename=\"${safeReference}.pdf\"`,
-				"X-PDF-Fallback": "true",
-			},
-		});
-	}
+	return new NextResponse(html, {
+		status: 200,
+		headers: {
+			"Content-Type": "text/html; charset=utf-8",
+			"Content-Disposition": `inline; filename="${safeReference}.html"`,
+			"X-PDF-Fallback": "true",
+		},
+	});
 }

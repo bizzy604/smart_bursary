@@ -42,6 +42,8 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
       reference: payload.pdfPayload.reference,
       generatedAt: payload.pdfPayload.generatedAt,
       sections: payload.pdfPayload.sections,
+      logoDataUrl: payload.pdfPayload.logoDataUrl,
+      qrCodeDataUrl: payload.pdfPayload.qrCodeDataUrl,
     });
 
     return new NextResponse(html, {

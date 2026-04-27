@@ -6,15 +6,14 @@
 
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../../database/database.module';
-import { QueueModule } from '../../queue/queue.module';
 import { DocumentController } from './document.controller';
 import { DocumentService } from './document.service';
 import { S3Service } from './s3.service';
 
 @Module({
-  imports: [DatabaseModule, QueueModule],
+  imports: [DatabaseModule],
   controllers: [DocumentController],
   providers: [DocumentService, S3Service],
-  exports: [DocumentService],
+  exports: [DocumentService, S3Service],
 })
 export class DocumentModule {}

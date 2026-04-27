@@ -51,6 +51,7 @@
 		"tailwind-merge": "^2.6.0",
 		"tailwindcss-animate": "^1.0.7",
 		"vaul": "^1.1.2",
+		"qrcode": "^1.5.4",
 		"write-excel-file": "^4.0.2",
 		"zod": "^3.24.2",
 		"zustand": "^5.0.3"
@@ -62,6 +63,7 @@
 		"@testing-library/react": "^16.3.2",
 		"@testing-library/user-event": "^14.6.1",
 		"@types/node": "^22.13.10",
+		"@types/qrcode": "^1.5.5",
 		"@types/react": "^18.3.18",
 		"@types/react-dom": "^18.3.5",
 		"autoprefixer": "^10.4.21",

@@ -6,6 +6,7 @@
  *                caller's role is not authorised to read tenant settings (e.g., students).
  * Used by: app/(student)/applications/[id]/pdf/route.ts and app/api/applications/[id]/pdf/route.ts.
  */
+import QRCode from "qrcode";
 import type { PreviewSection } from "@/lib/application-preview";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api/v1";
@@ -26,6 +27,8 @@ export type PdfPayload = {
 	reference: string;
 	generatedAt: string;
 	sections: PreviewSection[];
+	logoDataUrl?: string;
+	qrCodeDataUrl?: string;
 };
 
 export type PdfPayloadResult = {
@@ -107,6 +110,7 @@ type BrandingResponse = {
 	fundName?: string;
 	primaryColor?: string;
 	legalReference?: string;
+	logoUrl?: string;
 };
 
 function unwrap<T>(payload: unknown): T {
@@ -276,6 +280,14 @@ export async function getPdfPayloadByApplicationId(
 		buildSubmissionSection(application),
 	];
 
+	const logoDataUrl = branding.logoUrl
+		? await fetchLogoAsDataUrl(branding.logoUrl)
+		: undefined;
+	const qrCodeDataUrl = await QRCode.toDataURL(
+		`REF:${application.submissionReference ?? application.id}`,
+		{ width: 120, margin: 1, type: "image/png" },
+	);
+
 	return {
 		application: {
 			id: application.id,
@@ -293,6 +305,20 @@ export async function getPdfPayloadByApplicationId(
 			reference: application.submissionReference ?? application.id,
 			generatedAt: application.updatedAt ?? new Date().toISOString(),
 			sections,
+			logoDataUrl,
+			qrCodeDataUrl,
 		},
 	};
+}
+
+async function fetchLogoAsDataUrl(logoUrl: string): Promise<string | undefined> {
+	try {
+		const response = await fetch(logoUrl, { cache: "no-store" });
+		if (!response.ok) return undefined;
+		const buffer = Buffer.from(await response.arrayBuffer());
+		const contentType = response.headers.get("content-type") || "image/png";
+		return `data:${contentType};base64,${buffer.toString("base64")}`;
+	} catch {
+		return undefined;
+	}
 }

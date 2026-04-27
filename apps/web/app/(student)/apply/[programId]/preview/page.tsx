@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useApplication } from "@/hooks/use-application";
 import { useCounty } from "@/hooks/use-county";
 import { toPreviewSections } from "@/lib/application-preview";
-import { downloadApplicationPdf, requestApplicationPdf } from "@/lib/application-pdf-client";
+import { downloadApplicationPdf, requestApplicationPdf, requestApplicationPdfFromBackend } from "@/lib/application-pdf-client";
 import { formatCurrencyKes } from "@/lib/format";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
 
@@ -83,6 +83,25 @@ export default function PreviewAndSubmitPage() {
 	const existingApplication = getApplicationByProgramId(params.programId);
 	const isAlreadySubmitted = existingApplication?.status === "SUBMITTED";
 	const [previewGeneratedAt] = useState(() => existingApplication?.updatedAt ?? new Date().toISOString());
+	const [countyLogoUrl, setCountyLogoUrl] = useState<string | undefined>(undefined);
+
+	// Fetch county branding to get logo URL
+	useEffect(() => {
+		async function fetchBranding() {
+			try {
+				const response = await fetch("/api/v1/admin/settings/branding");
+				if (response.ok) {
+					const data = await response.json();
+					if (data.logoUrl) {
+						setCountyLogoUrl(data.logoUrl);
+					}
+				}
+			} catch {
+				// Branding fetch failed, continue without logo
+			}
+		}
+		void fetchBranding();
+	}, []);
 
 	const incompleteSections = useMemo(() => {
 		if (!programState) {
@@ -110,6 +129,7 @@ export default function PreviewAndSubmitPage() {
 	}, [programState]);
 
 	const reference = existingApplication?.reference ?? `TRK-${new Date().getFullYear()}-PREVIEW`;
+	const applicationId = existingApplication?.id;
 	const canSubmit = incompleteSections.length === 0 && agreedToDeclaration && !isAlreadySubmitted && !isSubmitting;
 
 	useEffect(() => {
@@ -117,7 +137,7 @@ export default function PreviewAndSubmitPage() {
 		let isCancelled = false;
 
 		async function loadPreviewPdf() {
-			if (!program || previewSections.length === 0) {
+			if (!applicationId || !program || previewSections.length === 0) {
 				setPreviewPdfUrl(null);
 				setIsPreviewLoading(false);
 				return;
@@ -125,16 +145,7 @@ export default function PreviewAndSubmitPage() {
 
 			setIsPreviewLoading(true);
 
-			const blob = await requestApplicationPdf({
-				countyName: county.name,
-				fundName: county.fundName,
-				primaryColor: county.primaryColor,
-				legalReference: county.legalReference,
-				programName: program.name,
-				reference,
-				generatedAt: previewGeneratedAt,
-				sections: previewSections,
-			});
+			const blob = await requestApplicationPdfFromBackend(applicationId);
 
 			if (isCancelled) {
 				return;
@@ -159,16 +170,7 @@ export default function PreviewAndSubmitPage() {
 				URL.revokeObjectURL(nextPreviewUrl);
 			}
 		};
-	}, [
-		county.fundName,
-		county.legalReference,
-		county.name,
-		county.primaryColor,
-		previewGeneratedAt,
-		previewSections,
-		program,
-		reference,
-	]);
+	}, [applicationId]);
 
 	if (!programState) {
 		return (
@@ -298,28 +300,36 @@ export default function PreviewAndSubmitPage() {
 								setIsDownloading(true);
 
 								try {
-									const blob = await requestApplicationPdf({
-										countyName: county.name,
-										fundName: county.fundName,
-										primaryColor: county.primaryColor,
-										legalReference: county.legalReference,
-										programName: program.name,
-										reference,
-										generatedAt: previewGeneratedAt,
-										sections: previewSections,
-									});
-
-									if (!blob) {
-										return;
+									let blob: Blob | null = null;
+									
+									if (applicationId) {
+										blob = await requestApplicationPdfFromBackend(applicationId);
+									} else {
+										blob = await requestApplicationPdf({
+											countyName: county.name,
+											fundName: county.fundName,
+											primaryColor: county.primaryColor,
+											legalReference: county.legalReference,
+											programName: program.name,
+											reference,
+											generatedAt: previewGeneratedAt,
+											sections: previewSections,
+											logoUrl: countyLogoUrl,
+										});
 									}
 
-									downloadApplicationPdf(blob, reference);
+									if (blob) {
+										downloadApplicationPdf(blob, reference);
+									}
+								} catch {
+									toast.error("Download failed", { description: "Failed to download PDF. Please try again." });
 								} finally {
 									setIsDownloading(false);
 								}
 							}}
+							disabled={isDownloading}
 						>
-							{isDownloading ? "Preparing PDF..." : "Download / Print PDF"}
+							{isDownloading ? "Downloading..." : "Download PDF"}
 						</Button>
 
 						<Button

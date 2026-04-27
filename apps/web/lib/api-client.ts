@@ -71,7 +71,7 @@ async function readJsonBody<T>(response: Response): Promise<T | null> {
 // loads or refreshes. If it isn't present (e.g. the page was opened in a tab
 // before the provider mounted), we wait briefly for it to appear before giving
 // up.
-async function waitForToken(): Promise<string | null> {
+export async function waitForToken(): Promise<string | null> {
 	const immediate = tokenStore.get();
 	if (immediate) {
 		return immediate;

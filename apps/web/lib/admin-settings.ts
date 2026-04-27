@@ -20,6 +20,7 @@ export interface BrandingSettings {
 	primaryColor: string;
 	logoText: string;
 	logoS3Key: string;
+	logoUrl?: string;
 }
 
 export interface FormCustomizationSettings {
