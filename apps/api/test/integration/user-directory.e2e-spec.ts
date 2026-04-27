@@ -3,7 +3,7 @@
  * Why important: Confirms county admins can manage their team and that role/scope rules are enforced.
  * Used by: PR-B1 acceptance.
  */
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserRole } from '@prisma/client';
@@ -27,6 +27,13 @@ describe('User directory (e2e)', () => {
 		const moduleFixture: TestingModule = await Test.createTestingModule({ imports: [AppModule] }).compile();
 		app = moduleFixture.createNestApplication();
 		app.setGlobalPrefix('api/v1');
+		app.useGlobalPipes(
+			new ValidationPipe({
+				transform: true,
+				whitelist: true,
+				forbidNonWhitelisted: true,
+			}),
+		);
 		await app.init();
 
 		prisma = moduleFixture.get(PrismaService);
@@ -156,13 +163,13 @@ describe('User directory (e2e)', () => {
 		const deactivated = await request(app.getHttpServer())
 			.post(`/api/v1/users/${createdUserId}/deactivate`)
 			.set('Authorization', `Bearer ${adminToken}`)
-			.expect(201);
+			.expect(200);
 		expect(deactivated.body.data.isActive).toBe(false);
 
 		const reactivated = await request(app.getHttpServer())
 			.post(`/api/v1/users/${createdUserId}/reactivate`)
 			.set('Authorization', `Bearer ${adminToken}`)
-			.expect(201);
+			.expect(200);
 		expect(reactivated.body.data.isActive).toBe(true);
 	});
 
