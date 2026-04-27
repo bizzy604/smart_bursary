@@ -26,6 +26,7 @@ interface ProgramWizardState {
 	sectionData: SectionDataMap;
 	completion: Record<SectionSlug, boolean>;
 	lastSavedAt: string | null;
+	applicationId: string | null;
 }
 
 interface ApplicationWizardState {
@@ -37,6 +38,7 @@ interface ApplicationWizardState {
 	getCompletedSections: (programId: string) => SectionSlug[];
 	isSectionUnlocked: (programId: string, section: SectionSlug) => boolean;
 	resetProgram: (programId: string) => void;
+	setApplicationId: (programId: string, applicationId: string) => void;
 }
 
 function getStorageKey(programId: string): string {
@@ -55,6 +57,7 @@ function createDefaultProgramState(): ProgramWizardState {
 		},
 		completion: defaultCompletion(),
 		lastSavedAt: null,
+		applicationId: null,
 	};
 }
 
@@ -92,6 +95,7 @@ function loadProgram(programId: string): ProgramWizardState | null {
 				...(parsed.completion ?? {}),
 			},
 			lastSavedAt: parsed.lastSavedAt ?? null,
+			applicationId: parsed.applicationId ?? null,
 		};
 	} catch {
 		return null;
@@ -174,6 +178,22 @@ export const useApplicationWizardStore = create<ApplicationWizardState>((set, ge
 	},
 	resetProgram: (programId) => {
 		const nextProgram = createDefaultProgramState();
+
+		set((state) => ({
+			programs: {
+				...state.programs,
+				[programId]: nextProgram,
+			},
+		}));
+
+		persistProgram(programId, nextProgram);
+	},
+	setApplicationId: (programId, applicationId) => {
+		const current = get().programs[programId] ?? createDefaultProgramState();
+		const nextProgram: ProgramWizardState = {
+			...current,
+			applicationId,
+		};
 
 		set((state) => ({
 			programs: {

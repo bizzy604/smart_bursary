@@ -108,12 +108,17 @@ export default function ApplySectionCPage() {
   }, [profile, profileLoading, programState]);
 
   const isUnlocked = Boolean(programState?.completion["section-b"]);
-  const isValid =
-    form.familyStatus.trim().length > 0 &&
-    form.guardianName.trim().length > 2 &&
-    form.guardianRelationship.trim().length > 1 &&
-    form.guardianPhone.trim().length >= 10 &&
-    Number(form.householdSize || 0) > 0;
+
+  const validationChecks = {
+    familyStatus: form.familyStatus.trim().length > 0,
+    guardianName: form.guardianName.trim().length > 2,
+    guardianRelationship: form.guardianRelationship.trim().length > 1,
+    guardianPhone: form.guardianPhone.trim().length >= 10,
+    householdSize: Number(form.householdSize || 0) > 0,
+  };
+  const isValid = Object.values(validationChecks).every(Boolean);
+
+  console.log('Section C validation:', validationChecks, 'isValid:', isValid);
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-c", isValid);

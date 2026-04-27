@@ -76,7 +76,14 @@ export default function ApplySectionDPage() {
     Number(form.income.motherMonthlyIncomeKes || 0) > 0 ||
     Number(form.income.guardianMonthlyIncomeKes || 0) > 0 ||
     Number(form.income.additionalIncomeKes || 0) > 0;
-  const isValid = hasIncomeEntry && form.hardshipNarrative.trim().length >= 30;
+
+  const validationChecks = {
+    hasIncomeEntry,
+    hardshipNarrative: form.hardshipNarrative.trim().length >= 30,
+  };
+  const isValid = Object.values(validationChecks).every(Boolean);
+
+  console.log('Section D validation:', validationChecks, 'isValid:', isValid);
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-d", isValid);

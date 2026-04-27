@@ -4,11 +4,12 @@
  * Used by: AuthController register endpoint.
  */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, MaxLength } from 'class-validator';
 
 export class RegisterDto {
 	@ApiProperty({ example: 'aisha.lokiru@example.com' })
 	@IsEmail()
+	@MaxLength(255, { message: 'Email must not exceed 255 characters' })
 	email!: string;
 
 	@ApiProperty({ example: 'SecurePass123!' })
@@ -28,5 +29,6 @@ export class RegisterDto {
 
 	@ApiProperty({ example: '+254712345678' })
 	@IsString()
+	@MaxLength(20, { message: 'Phone number must not exceed 20 characters' })
 	phone!: string;
 }

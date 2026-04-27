@@ -14,6 +14,7 @@ import { useStudentProfile } from "@/hooks/use-student-profile";
 import { useApplicationWizardStore } from "@/store/application-wizard-store";
 import { useSubCounties, useWards, useVillageUnits } from "@/hooks/use-locations";
 import { mapProfileToSectionA } from "@/lib/profile-to-form-mapper";
+import { applicationSectionASchema } from "@/lib/validators";
 
 interface SectionAForm {
   fullName: string;
@@ -91,16 +92,7 @@ export default function ApplySectionAPage() {
     setForm(prev => ({ ...defaultForm, ...profileData, ...stored, ...prev }));
   }, [profile, profileLoading, programState]);
 
-  const isValid =
-    form.fullName.trim().length > 2 &&
-    form.phone.trim().length >= 10 &&
-    form.email.includes("@") &&
-    form.institution.trim().length > 2 &&
-    form.admissionNumber.trim().length > 1 &&
-    form.course.trim().length > 1 &&
-    form.subCountyId.trim().length > 0 &&
-    form.wardId.trim().length > 0 &&
-    form.villageUnitId.trim().length > 0;
+  const isValid = applicationSectionASchema.safeParse(form).success;
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-a", isValid);

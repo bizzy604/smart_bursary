@@ -50,7 +50,14 @@ export default function ApplySectionFPage() {
   }, [programState]);
 
   const isUnlocked = Boolean(programState?.completion["section-e"]);
-  const isValid = form.documents.length >= 3;
+
+  const validationChecks = {
+    documentsCount: form.documents.length >= 3,
+    documentsLength: form.documents.length,
+  };
+  const isValid = Object.values(validationChecks).every(Boolean);
+
+  console.log('Section F validation:', validationChecks, 'isValid:', isValid);
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-f", isValid);

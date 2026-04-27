@@ -69,7 +69,17 @@ export default function ApplySectionBPage() {
   const priorBursaryValid =
     !form.priorBursaryReceived ||
     (form.priorBursarySource.trim().length > 2 && Number(form.priorBursaryAmountKes || 0) > 0);
-  const isValid = requested > 0 && balance > 0 && reasonReady && helbValid && priorBursaryValid;
+
+  const validationChecks = {
+    requested: requested > 0,
+    balance: balance > 0,
+    reasonReady,
+    helbValid,
+    priorBursaryValid,
+  };
+  const isValid = Object.values(validationChecks).every(Boolean);
+
+  console.log('Section B validation:', validationChecks, 'isValid:', isValid);
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-b", isValid);

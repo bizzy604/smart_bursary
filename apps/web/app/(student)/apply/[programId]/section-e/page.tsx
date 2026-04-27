@@ -60,12 +60,17 @@ export default function ApplySectionEPage() {
   const isUnlocked = Boolean(programState?.completion["section-d"]);
   const disclosuresValid = (!form.hasOtherBursary || form.otherBursaryDetails.trim().length > 3) &&
     (!form.hasDisabilityNeeds || form.disabilityDetails.trim().length > 3);
-  const isValid =
-    disclosuresValid &&
-    form.declarationName.trim().length > 2 &&
-    form.confirmTruth &&
-    form.authorizeVerification &&
-    form.acceptPrivacyPolicy;
+
+  const validationChecks = {
+    disclosuresValid,
+    declarationName: form.declarationName.trim().length > 2,
+    confirmTruth: form.confirmTruth,
+    authorizeVerification: form.authorizeVerification,
+    acceptPrivacyPolicy: form.acceptPrivacyPolicy,
+  };
+  const isValid = Object.values(validationChecks).every(Boolean);
+
+  console.log('Section E validation:', validationChecks, 'isValid:', isValid);
 
   useEffect(() => {
     setSectionComplete(params.programId, "section-e", isValid);

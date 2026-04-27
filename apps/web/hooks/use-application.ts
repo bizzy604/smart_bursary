@@ -11,12 +11,14 @@ import {
 	submitStudentApplication,
 } from "@/lib/student-api";
 import type { StudentApplicationSummary, StudentProgramSummary } from "@/lib/student-types";
+import { useApplicationWizardStore } from "@/store/application-wizard-store";
 
 export function useApplication() {
 	const [programs, setPrograms] = useState<StudentProgramSummary[]>([]);
 	const [applications, setApplications] = useState<StudentApplicationSummary[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const setApplicationId = useApplicationWizardStore((state) => state.setApplicationId);
 
 	const refresh = useCallback(async () => {
 		setIsLoading(true);
@@ -72,6 +74,7 @@ export function useApplication() {
 			if (!applicationId) {
 				const draft = await createApplicationDraft(payload.programId);
 				applicationId = draft.id;
+				setApplicationId(payload.programId, applicationId);
 			}
 
 			const sectionPayloads = buildApplicationSectionPayloads(payload.sectionData);
@@ -83,14 +86,18 @@ export function useApplication() {
 			await refresh();
 			return submitted;
 		},
-		[applications, refresh],
+		[applications, refresh, setApplicationId],
 	);
 
 	const getApplicationByProgramId = useCallback(
 		(programId: string): StudentApplicationSummary | null => {
-			return applications.find((application) => application.programId === programId) ?? null;
+			const application = applications.find((application) => application.programId === programId) ?? null;
+			if (application) {
+				setApplicationId(programId, application.id);
+			}
+			return application;
 		},
-		[applications],
+		[applications, setApplicationId],
 	);
 
 	const getProgramById = useCallback(

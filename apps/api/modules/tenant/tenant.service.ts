@@ -58,12 +58,7 @@ export class TenantService {
 		}
 
 		const settings = this.asObject(county.settings);
-		const branding = this.toBranding(county, settings);
-
-		if (county.logoS3Key) {
-			const signed = await this.s3Service.getSignedDownloadUrl(county.logoS3Key);
-			branding.logoUrl = signed.url;
-		}
+		const branding = await this.toBranding(county, settings);
 
 		return {
 			data: branding,
@@ -92,12 +87,7 @@ export class TenantService {
 		const settings = this.asObject(county.settings);
 		const formCustomization = this.resolveFormCustomization(settings, undefined);
 		const scoringWeights = scoringWeightsToRecord(resolveScoringWeights(settings.scoringWeights));
-		const branding = this.toBranding(county, settings);
-
-		if (county.logoS3Key) {
-			const signed = await this.s3Service.getSignedDownloadUrl(county.logoS3Key);
-			branding.logoUrl = signed.url;
-		}
+		const branding = await this.toBranding(county, settings);
 
 		return {
 			data: {
@@ -237,7 +227,7 @@ export class TenantService {
 		return initials || 'CT';
 	}
 
-	private toBranding(
+	private async toBranding(
 		county: {
 			name: string;
 			fundName: string | null;
@@ -247,6 +237,16 @@ export class TenantService {
 		},
 		settings: SettingsObject,
 	) {
+		let logoUrl = '';
+		if (county.logoS3Key) {
+			try {
+				const signed = await this.s3Service.getSignedDownloadUrl(county.logoS3Key);
+				logoUrl = signed.url;
+			} catch {
+				logoUrl = '';
+			}
+		}
+
 		return {
 			countyName: county.name,
 			fundName: county.fundName ?? `${county.name} Education Fund`,
@@ -254,7 +254,7 @@ export class TenantService {
 			primaryColor: county.primaryColor,
 			logoS3Key: county.logoS3Key ?? '',
 			logoText: this.resolveLogoText(settings, county.name),
-			logoUrl: '',
+			logoUrl,
 		};
 	}
 

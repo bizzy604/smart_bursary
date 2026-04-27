@@ -547,6 +547,28 @@ function normalizeSectionF(data: Record<string, unknown>): Record<string, unknow
   };
 }
 
+export async function uploadDocument(applicationId: string, docType: string, file: File): Promise<{ id: string; downloadUrl: string }> {
+  const formData = new FormData();
+  formData.append('applicationId', applicationId);
+  formData.append('docType', docType);
+  formData.append('file', file);
+
+  const token = getAccessToken();
+  const response = await fetch('/api/v1/documents/upload', {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload document');
+  }
+
+  return response.json();
+}
+
 export function buildApplicationSectionPayloads(
   sectionData: Record<string, unknown>,
 ): Array<{ sectionKey: SectionKey; data: Record<string, unknown> }> {
