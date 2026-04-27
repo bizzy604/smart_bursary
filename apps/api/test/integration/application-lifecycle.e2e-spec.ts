@@ -273,7 +273,7 @@ describe('Application Lifecycle (e2e)', () => {
 			.expect(403);
 	});
 
-	it('student soft-deletes a DRAFT application (hidden from my-applications)', async () => {
+	it('student deletes a DRAFT application (cascades sections + timeline, frees the program slot)', async () => {
 		const draft = await createDraftDirect(studentUserId, countyId, wardId);
 
 		const response = await request(app.getHttpServer())
@@ -290,11 +290,15 @@ describe('Application Lifecycle (e2e)', () => {
 			.expect(200);
 		expect(list.body.some((row: { id: string }) => row.id === draft.id)).toBe(false);
 
-		const persisted = await prisma.application.findUniqueOrThrow({
-			where: { id: draft.id },
-			select: { deletedAt: true },
+		// Hard-delete: the row is gone (so the @@unique([applicantId, programId])
+		// slot is freed and the student can re-apply to the same program).
+		const persisted = await prisma.application.findUnique({ where: { id: draft.id } });
+		expect(persisted).toBeNull();
+
+		const timeline = await prisma.applicationTimeline.findMany({
+			where: { applicationId: draft.id },
 		});
-		expect(persisted.deletedAt).not.toBeNull();
+		expect(timeline).toHaveLength(0);
 	});
 
 	it('student cannot delete a SUBMITTED application via delete-draft', async () => {
@@ -340,7 +344,7 @@ describe('Application Lifecycle (e2e)', () => {
 			.expect(404);
 	});
 
-	it('soft-deleted drafts are excluded from getApplication', async () => {
+	it('deleted drafts are excluded from getApplication', async () => {
 		const draft = await createDraftDirect(studentUserId, countyId, wardId);
 		await request(app.getHttpServer())
 			.delete(`/api/v1/applications/${draft.id}/draft`)
