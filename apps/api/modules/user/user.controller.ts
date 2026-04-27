@@ -8,6 +8,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
 	Param,
 	ParseUUIDPipe,
 	Patch,
@@ -74,6 +75,7 @@ export class UserController {
 	}
 
 	@Post(':id/deactivate')
+	@HttpCode(200)
 	@ApiOperation({ summary: 'Deactivate a user account (revokes login access).' })
 	@ApiParam({ name: 'id', description: 'User identifier' })
 	deactivateUser(
@@ -85,6 +87,7 @@ export class UserController {
 	}
 
 	@Post(':id/reactivate')
+	@HttpCode(200)
 	@ApiOperation({ summary: 'Reactivate a previously deactivated user account.' })
 	@ApiParam({ name: 'id', description: 'User identifier' })
 	reactivateUser(
