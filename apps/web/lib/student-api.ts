@@ -1,5 +1,6 @@
 import { apiRequestJson } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
+import { API_BASE_URL } from "@/lib/constants";
 import type {
   ApplicationStatus,
   SectionKey,
@@ -578,7 +579,7 @@ export async function uploadDocument(applicationId: string, docType: string, fil
   formData.append('file', file);
 
   const token = getAccessToken();
-  const response = await fetch('/api/v1/documents/upload', {
+  const response = await fetch(`${API_BASE_URL}/documents/upload`, {
     method: 'POST',
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
