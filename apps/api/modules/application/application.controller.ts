@@ -3,7 +3,7 @@
  * Why important: Provides controlled access to create/submit flows and workflow audit visibility.
  * Used by: Student application workflow and county review audit surfaces.
  */
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -122,5 +122,30 @@ export class ApplicationController {
 	) {
 		const applicantId = user['userId'] as string;
 		return this.applicationSubmissionService.submitApplication(countyId, applicantId, dto);
+	}
+
+	@Post(':id/withdraw')
+	@HttpCode(200)
+	@ApiOperation({ summary: 'Withdraw a submitted application' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	withdrawApplication(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		const applicantId = user['userId'] as string;
+		return this.applicationService.withdrawApplication(countyId, applicantId, applicationId);
+	}
+
+	@Delete(':id/draft')
+	@ApiOperation({ summary: 'Soft-delete a draft application' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	deleteDraftApplication(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		const applicantId = user['userId'] as string;
+		return this.applicationService.deleteDraftApplication(countyId, applicantId, applicationId);
 	}
 }

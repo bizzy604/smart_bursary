@@ -424,6 +424,22 @@ export async function submitStudentApplication(applicationId: string): Promise<S
   });
 }
 
+export async function withdrawStudentApplication(
+  applicationId: string,
+): Promise<{ id: string; status: string }> {
+  return requestJson<{ id: string; status: string }>(`/applications/${applicationId}/withdraw`, {
+    method: "POST",
+  });
+}
+
+export async function deleteStudentDraftApplication(
+  applicationId: string,
+): Promise<{ id: string; deleted: boolean }> {
+  return requestJson<{ id: string; deleted: boolean }>(`/applications/${applicationId}/draft`, {
+    method: "DELETE",
+  });
+}
+
 function asRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)

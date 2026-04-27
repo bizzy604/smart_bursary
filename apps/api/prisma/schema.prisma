@@ -377,6 +377,7 @@ model Application {
   allocatedAt               DateTime?            @map("allocated_at") @db.Timestamptz(6)
   createdAt                 DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt                 DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt                 DateTime?            @map("deleted_at") @db.Timestamptz(6)
 
   county                  County                   @relation(fields: [countyId], references: [id])
   applicant               User                     @relation("ApplicantApplications", fields: [applicantId], references: [id])
