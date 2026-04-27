@@ -80,11 +80,13 @@ type TimelineApiEnvelope = {
 type ProfileApiRow = {
   personal?: {
     fullName?: string | null;
+    nationalId?: string | null;
     homeWard?: string | null;
     phone?: string | null;
   };
   academic?: {
     institutionName?: string | null;
+    admissionNumber?: string | null;
     courseName?: string | null;
     yearFormClass?: string | null;
   };
@@ -139,11 +141,15 @@ function asApplicationStatus(value: string | undefined): ApplicationStatus {
     "DRAFT",
     "SUBMITTED",
     "WARD_REVIEW",
+    "WARD_DISTRIBUTION_PENDING",
+    "VILLAGE_ALLOCATION_PENDING",
+    "ALLOCATED",
     "COUNTY_REVIEW",
     "APPROVED",
     "REJECTED",
     "WAITLISTED",
     "DISBURSED",
+    "WITHDRAWN",
   ];
 
   return allowed.includes(normalized as ApplicationStatus)
@@ -336,6 +342,8 @@ export async function fetchStudentProfile(): Promise<StudentProfileSnapshot> {
 
   return {
     fullName: toOptionalText(profile.personal?.fullName) ?? "Not provided",
+    nationalId: toOptionalText(profile.personal?.nationalId) ?? "Not provided",
+    admissionNumber: toOptionalText(profile.academic?.admissionNumber) ?? "Not provided",
     email: toOptionalText(me.email) ?? "Not provided",
     phone: toOptionalText(profile.personal?.phone) ?? "Not provided",
     county: toOptionalText(me.countyId) ?? "Current county",
@@ -421,6 +429,22 @@ export async function submitStudentApplication(applicationId: string): Promise<S
   return requestJson<SubmitResponse>("/applications/submit", {
     method: "POST",
     body: JSON.stringify({ applicationId }),
+  });
+}
+
+export async function withdrawStudentApplication(
+  applicationId: string,
+): Promise<{ id: string; status: string }> {
+  return requestJson<{ id: string; status: string }>(`/applications/${applicationId}/withdraw`, {
+    method: "POST",
+  });
+}
+
+export async function deleteStudentDraftApplication(
+  applicationId: string,
+): Promise<{ id: string; deleted: boolean }> {
+  return requestJson<{ id: string; deleted: boolean }>(`/applications/${applicationId}/draft`, {
+    method: "DELETE",
   });
 }
 

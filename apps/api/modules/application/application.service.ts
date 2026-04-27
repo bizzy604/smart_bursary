@@ -69,6 +69,7 @@ export class ApplicationService {
 			where: {
 				applicantId,
 				programId: dto.programId,
+				deletedAt: null,
 			},
 		});
 
@@ -101,6 +102,7 @@ export class ApplicationService {
 			where: {
 				countyId,
 				applicantId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -129,6 +131,7 @@ export class ApplicationService {
 				id: applicationId,
 				countyId,
 				applicantId,
+				deletedAt: null,
 			},
 			select: {
 				id: true,
@@ -234,6 +237,7 @@ export class ApplicationService {
 				countyId,
 				applicantId,
 				status: 'DRAFT',
+				deletedAt: null,
 			},
 			select: {
 				id: true,

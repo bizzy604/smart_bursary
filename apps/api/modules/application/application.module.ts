@@ -13,6 +13,7 @@ import { QueueModule } from '../../queue/queue.module';
 import { DocumentModule } from '../document/document.module';
 import { ApplicationAuditService } from './application-audit.service';
 import { ApplicationAiScoringService } from './application-ai-scoring.service';
+import { ApplicationLifecycleService } from './application-lifecycle.service';
 import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationController } from './application.controller';
 import { ApplicationPdfController } from './application-pdf.controller';
@@ -25,6 +26,7 @@ import { SectionService } from './section.service';
 	controllers: [ApplicationController, ApplicationPdfController],
 	providers: [
 		ApplicationAuditService,
+		ApplicationLifecycleService,
 		ApplicationService,
 		ApplicationSubmissionService,
 		ApplicationAiScoringService,

@@ -2,11 +2,15 @@ export type ApplicationStatus =
   | "DRAFT"
   | "SUBMITTED"
   | "WARD_REVIEW"
+  | "WARD_DISTRIBUTION_PENDING"
+  | "VILLAGE_ALLOCATION_PENDING"
+  | "ALLOCATED"
   | "COUNTY_REVIEW"
   | "APPROVED"
   | "REJECTED"
   | "WAITLISTED"
-  | "DISBURSED";
+  | "DISBURSED"
+  | "WITHDRAWN";
 
 export type TimelineState = "complete" | "current" | "upcoming";
 
@@ -63,6 +67,8 @@ export interface TimelineEvent {
 
 export interface StudentProfileSnapshot {
   fullName: string;
+  nationalId: string;
+  admissionNumber: string;
   email: string;
   phone: string;
   county: string;

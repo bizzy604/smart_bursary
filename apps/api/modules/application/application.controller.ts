@@ -3,7 +3,7 @@
  * Why important: Provides controlled access to create/submit flows and workflow audit visibility.
  * Used by: Student application workflow and county review audit surfaces.
  */
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 
@@ -12,6 +12,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { ApplicationAuditService } from './application-audit.service';
+import { ApplicationLifecycleService } from './application-lifecycle.service';
 import { ApplicationSubmissionService } from './application-submission.service';
 import { ApplicationService } from './application.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
@@ -27,6 +28,7 @@ import { SectionService } from './section.service';
 export class ApplicationController {
 	constructor(
 		private readonly applicationAuditService: ApplicationAuditService,
+		private readonly applicationLifecycleService: ApplicationLifecycleService,
 		private readonly applicationService: ApplicationService,
 		private readonly applicationSubmissionService: ApplicationSubmissionService,
 		private readonly sectionService: SectionService,
@@ -122,5 +124,30 @@ export class ApplicationController {
 	) {
 		const applicantId = user['userId'] as string;
 		return this.applicationSubmissionService.submitApplication(countyId, applicantId, dto);
+	}
+
+	@Post(':id/withdraw')
+	@HttpCode(200)
+	@ApiOperation({ summary: 'Withdraw a submitted application' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	withdrawApplication(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		const applicantId = user['userId'] as string;
+		return this.applicationLifecycleService.withdrawApplication(countyId, applicantId, applicationId);
+	}
+
+	@Delete(':id/draft')
+	@ApiOperation({ summary: 'Soft-delete a draft application' })
+	@ApiParam({ name: 'id', description: 'Application identifier' })
+	deleteDraftApplication(
+		@County() countyId: string,
+		@CurrentUser() user: Record<string, unknown>,
+		@Param('id') applicationId: string,
+	) {
+		const applicantId = user['userId'] as string;
+		return this.applicationLifecycleService.deleteDraftApplication(countyId, applicantId, applicationId);
 	}
 }

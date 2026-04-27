@@ -23,17 +23,30 @@ export async function requestApplicationPdf(payload: ApplicationPdfPayload): Pro
 		return null;
 	}
 
+	const contentType = response.headers.get("content-type") ?? "";
+	if (!contentType.startsWith("application/pdf")) {
+		return null;
+	}
+
 	return response.blob();
 }
 
 export async function requestApplicationPdfFromBackend(applicationId: string): Promise<Blob | null> {
-	const response = await fetch("/api/v1/applications/pdf", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ applicationId }),
+	// Use the same-origin Next.js route that already authenticates against the
+	// session, fetches the real application + branding payload, and renders a
+	// proper PDF via @react-pdf/renderer.
+	const response = await fetch(`/api/applications/${applicationId}/pdf`, {
+		method: "GET",
 	});
 
 	if (!response.ok) {
+		return null;
+	}
+
+	const contentType = response.headers.get("content-type") ?? "";
+	if (!contentType.startsWith("application/pdf")) {
+		// The server may have fallen back to HTML; treat that as a failure so
+		// callers don't end up downloading HTML disguised as a PDF.
 		return null;
 	}
 

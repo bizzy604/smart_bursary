@@ -22,7 +22,29 @@ import {
 import { formatCurrencyKes, formatShortDate } from "@/lib/format";
 import type { StudentApplicationSummary } from "@/lib/student-types";
 
-export const studentApplicationColumns: ColumnDef<StudentApplicationSummary>[] = [
+export type StudentApplicationRowAction = "withdraw" | "delete-draft";
+
+export interface BuildStudentApplicationColumnsOptions {
+	onAction?: (
+		application: StudentApplicationSummary,
+		action: StudentApplicationRowAction,
+	) => void;
+}
+
+const WITHDRAWABLE_STATUSES: ReadonlyArray<StudentApplicationSummary["status"]> = [
+	"SUBMITTED",
+	"WARD_REVIEW",
+	"WARD_DISTRIBUTION_PENDING",
+	"VILLAGE_ALLOCATION_PENDING",
+	"COUNTY_REVIEW",
+	"WAITLISTED",
+];
+
+export function buildStudentApplicationColumns(
+	options: BuildStudentApplicationColumnsOptions = {},
+): ColumnDef<StudentApplicationSummary>[] {
+	const { onAction } = options;
+	return [
 	{
 		accessorKey: "reference",
 		header: ({ column }) => (
@@ -101,6 +123,8 @@ export const studentApplicationColumns: ColumnDef<StudentApplicationSummary>[] =
 		header: () => <span className="sr-only">Actions</span>,
 		cell: ({ row }) => {
 			const application = row.original;
+			const canWithdraw = WITHDRAWABLE_STATUSES.includes(application.status);
+			const canDeleteDraft = application.status === "DRAFT";
 			return (
 				<div className="flex items-center justify-end gap-2">
 					{application.status === "DRAFT" ? (
@@ -132,6 +156,27 @@ export const studentApplicationColumns: ColumnDef<StudentApplicationSummary>[] =
 							>
 								Copy reference
 							</DropdownMenuItem>
+							{onAction && canWithdraw ? (
+								<>
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										onClick={() => onAction(application, "withdraw")}
+									>
+										Withdraw application
+									</DropdownMenuItem>
+								</>
+							) : null}
+							{onAction && canDeleteDraft ? (
+								<>
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										className="text-destructive focus:text-destructive"
+										onClick={() => onAction(application, "delete-draft")}
+									>
+										Delete draft
+									</DropdownMenuItem>
+								</>
+							) : null}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</div>
@@ -139,15 +184,22 @@ export const studentApplicationColumns: ColumnDef<StudentApplicationSummary>[] =
 		},
 	},
 ];
+}
+
+export const studentApplicationColumns = buildStudentApplicationColumns();
 
 export const studentApplicationStatusOptions = [
 	{ label: "Draft", value: "DRAFT" },
 	{ label: "Submitted", value: "SUBMITTED" },
 	{ label: "Ward Review", value: "WARD_REVIEW" },
+	{ label: "Ward Distribution", value: "WARD_DISTRIBUTION_PENDING" },
+	{ label: "Village Allocation", value: "VILLAGE_ALLOCATION_PENDING" },
+	{ label: "Allocated", value: "ALLOCATED" },
 	{ label: "County Review", value: "COUNTY_REVIEW" },
 	{ label: "Approved", value: "APPROVED" },
 	{ label: "Rejected", value: "REJECTED" },
 	{ label: "Waitlisted", value: "WAITLISTED" },
 	{ label: "Disbursed", value: "DISBURSED" },
+	{ label: "Withdrawn", value: "WITHDRAWN" },
 ];
 
