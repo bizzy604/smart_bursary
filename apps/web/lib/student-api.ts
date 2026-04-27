@@ -141,11 +141,15 @@ function asApplicationStatus(value: string | undefined): ApplicationStatus {
     "DRAFT",
     "SUBMITTED",
     "WARD_REVIEW",
+    "WARD_DISTRIBUTION_PENDING",
+    "VILLAGE_ALLOCATION_PENDING",
+    "ALLOCATED",
     "COUNTY_REVIEW",
     "APPROVED",
     "REJECTED",
     "WAITLISTED",
     "DISBURSED",
+    "WITHDRAWN",
   ];
 
   return allowed.includes(normalized as ApplicationStatus)
