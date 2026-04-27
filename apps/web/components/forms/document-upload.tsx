@@ -13,6 +13,14 @@ export type DocumentType =
 	| "result-slip"
 	| "guardian-id-copy";
 
+const DOCUMENT_TYPE_API_MAP: Record<DocumentType, string> = {
+	"id-copy": "NATIONAL_ID",
+	"school-fee-structure": "FEE_STRUCTURE",
+	"admission-letter": "ADMISSION_LETTER",
+	"result-slip": "RESULT_SLIP",
+	"guardian-id-copy": "GUARDIAN_ID_COPY",
+};
+
 export interface UploadedDocument {
 	type: DocumentType;
 	label: string;
@@ -72,7 +80,7 @@ export function DocumentUpload({ value, onChange }: DocumentUploadProps) {
 		setUploading((prev) => new Set(prev).add(type));
 
 		try {
-			const result = await uploadDocument(existingApplicationId, type.toUpperCase(), file);
+			const result = await uploadDocument(existingApplicationId, DOCUMENT_TYPE_API_MAP[type], file);
 			
 			const existing = value.find((item) => item.type === type);
 
